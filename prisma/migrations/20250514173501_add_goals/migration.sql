@@ -1,0 +1,13 @@
+-- CreateTable
+CREATE TABLE "Goal" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "matchId" TEXT NOT NULL,
+    "playerId" TEXT NOT NULL,
+    "teamId" TEXT NOT NULL,
+    "isOwnGoal" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL,
+    CONSTRAINT "Goal_matchId_fkey" FOREIGN KEY ("matchId") REFERENCES "Match" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "Goal_playerId_fkey" FOREIGN KEY ("playerId") REFERENCES "Player" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "Goal_teamId_fkey" FOREIGN KEY ("teamId") REFERENCES "Team" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
