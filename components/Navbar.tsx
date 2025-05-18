@@ -32,13 +32,8 @@ export default function Navbar() {
             // Menu pour administrateur
             <>
               <li>
-                <Link href="/admin" className="hover:text-cyan-400 transition">
-                  Tableau de bord
-                </Link>
-              </li>
-              <li>
                 <Link href="/admin/tirage" className="hover:text-cyan-400 transition">
-                  Derby
+                  Tirage
                 </Link>
               </li>
               <li>
@@ -93,7 +88,6 @@ export default function Navbar() {
         <div className="hidden lg:flex items-center space-x-4">
           {session?.user ? (
             <div className="flex items-center space-x-4">
-              <span className="text-white font-medium">Bonjour, {session.user.name}</span>
               <Link 
                 href="/admin" 
                 className="btn btn-sm btn-cyan hover:bg-cyan-600 transition"
@@ -113,7 +107,7 @@ export default function Navbar() {
                 Se connecter
               </Link>
               <Link href="/auth/sign-in" className="btn btn-sm btn-cyan hover:bg-cyan-600 transition">
-                S'inscrire
+                S&apos;inscrire
               </Link>
             </>
           )}
@@ -214,7 +208,7 @@ export default function Navbar() {
                 </li>
                 <li>
                   <Link href="/auth/sign-in" onClick={() => setIsMenuOpen(false)} className="block btn btn-cyan text-center p-4">
-                    S'inscrire
+                    S&apos;inscrire
                   </Link>
                 </li>
                 </div>
