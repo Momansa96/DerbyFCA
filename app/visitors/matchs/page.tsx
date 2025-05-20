@@ -3,6 +3,12 @@ import { useState, useEffect, useMemo } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import { motion } from "framer-motion";
+import {
+  Handshake,
+  Flame,
+  Theater,
+  X,
+} from "lucide-react";
 
 // Types
 type Match = {
@@ -14,10 +20,23 @@ type Match = {
 };
 
 // Utils
-const formatDate = (dateStr: string) => new Date(dateStr).toISOString().split("T")[0];
+const formatDate = (dateStr: string) =>
+  new Date(dateStr).toISOString().split("T")[0];
+
+const typeLabels = {
+  derby: "Derby",
+  friendly: "Match Amical",
+  exhibition: "Exhibition",
+};
+
+const typeIcons = {
+  derby: <Flame className="text-cyan-500" size={28} />,
+  friendly: <Handshake className="text-indigo-500" size={28} />,
+  exhibition: <Theater className="text-purple-500" size={28} />,
+};
 
 const NoMatchMessage = ({ message }: { message: string }) => (
-  <p className="italic text-white/70">{message}</p>
+  <p className="italic text-gray-500">{message}</p>
 );
 
 export default function MatchsPage() {
@@ -39,13 +58,6 @@ export default function MatchsPage() {
     setIsModalOpen(false);
   };
 
-
-  const typeColors = {
-    derby: "bg-cyan-500 text-black",
-    friendly: "bg-indigo-500 text-white",
-    exhibition: "bg-purple-500 text-white",
-  };
-
   useEffect(() => {
     const fetchMatches = async () => {
       try {
@@ -63,8 +75,14 @@ export default function MatchsPage() {
     fetchMatches();
   }, []);
 
-  const todayStr = useMemo(() => new Date().toISOString().split("T")[0], []);
-  const selectedStr = useMemo(() => date.toISOString().split("T")[0], [date]);
+  const todayStr = useMemo(
+    () => new Date().toISOString().split("T")[0],
+    []
+  );
+  const selectedStr = useMemo(
+    () => date.toISOString().split("T")[0],
+    [date]
+  );
 
   const todayMatches = useMemo(
     () => matches.filter((m) => formatDate(m.date) === todayStr),
@@ -89,62 +107,56 @@ export default function MatchsPage() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="relative overflow-hidden card bg-indigo-900/40 backdrop-blur-md border border-cyan-600 rounded-xl shadow-[0_0_15px_rgba(6,182,212,0.4)] hover:shadow-[0_0_25px_rgba(6,182,212,0.7)] transition-shadow duration-300"
+      className="relative overflow-hidden bg-white/70 backdrop-blur-md border border-cyan-200 rounded-xl shadow-[0_0_15px_rgba(6,182,212,0.15)] hover:shadow-[0_0_30px_rgba(6,182,212,0.25)] transition-shadow duration-300 hover:scale-105"
     >
       <div
-        className={`absolute top-0 left-0 w-full h-2 ${match.type === "derby"
+        className={`absolute top-0 left-0 w-full h-2 ${
+          match.type === "derby"
             ? "bg-cyan-400"
             : match.type === "friendly"
-              ? "bg-indigo-400"
-              : "bg-purple-400"
-          }`}
+            ? "bg-indigo-400"
+            : "bg-purple-400"
+        }`}
       />
-
-      <div className="card-body p-4 pt-6">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="card-title text-cyan-300 font-bold text-lg flex items-center gap-2">
-            {match.type === "derby"
-              ? "🔥 Derby"
-              : match.type === "friendly"
-                ? "🤝 Match Amical"
-                : "🎭 Exhibition"}
+      <div className="p-4 pt-6">
+        <div className="flex items-center gap-2 mb-2">
+          {typeIcons[match.type]}
+          <h3 className="font-bold text-cyan-700 text-lg">
+            {typeLabels[match.type]}
           </h3>
         </div>
-
-        <p className="flex items-center gap-2">
-          🗓 <strong>Date :</strong> {new Date(match.date).toLocaleDateString("fr-FR")}
+        <p className="flex items-center gap-2 text-gray-700">
+          🗓 <strong>Date :</strong>{" "}
+          {new Date(match.date).toLocaleDateString("fr-FR")}
         </p>
-        <p className="flex items-center gap-2">
+        <p className="flex items-center gap-2 text-gray-700">
           ⏰ <strong>Heure :</strong> {match.time}
         </p>
-        <p className="flex items-center gap-2">
+        <p className="flex items-center gap-2 text-gray-700">
           📍 <strong>Lieu :</strong> {match.location}
         </p>
-
         <div className="mt-4 text-right">
           <button
             onClick={() => openModal(match)}
-            className="px-4 py-2 text-sm font-semibold text-white bg-cyan-600 hover:bg-cyan-700 rounded-lg transition"
+            className="px-4 py-2 text-sm font-semibold text-white bg-cyan-500 hover:bg-cyan-600 rounded-lg transition"
             aria-label="Voir les détails du match"
             title="Détails du match"
           >
             Détails
           </button>
         </div>
-
       </div>
     </motion.div>
   );
 
-
   return (
-    <div className="space-y-8 px-4 md:px-0 max-w-5xl mx-auto text-white">
-      <h1 className="text-4xl font-extrabold text-cyan-400 drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]">
+    <div className="space-y-8 px-4 md:px-0 max-w-5xl mx-auto text-gray-800">
+      <h1 className="text-4xl font-extrabold text-cyan-600 drop-shadow-[0_0_10px_rgba(6,182,212,0.2)]">
         Calendrier des Matchs
       </h1>
 
       <button
-        className="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 transition rounded-md font-semibold text-white"
+        className="px-4 py-2 bg-cyan-500 hover:bg-cyan-600 transition rounded-md font-semibold text-white"
         onClick={() => setShowAllMatches((prev) => !prev)}
         aria-label="Afficher tous les matchs"
         title={showAllMatches ? "Filtrer par date" : "Voir tous les matchs"}
@@ -153,8 +165,8 @@ export default function MatchsPage() {
       </button>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-        <div className="card bg-indigo-900/40 backdrop-blur-md border border-cyan-600 rounded-2xl shadow-[0_0_20px_rgba(6,182,212,0.5)]">
-          <div className="card-body p-6">
+        <div className="bg-white/70 backdrop-blur-md border border-cyan-200 rounded-2xl shadow-[0_0_20px_rgba(6,182,212,0.1)]">
+          <div className="p-6">
             <Calendar
               onChange={(value) => {
                 if (value instanceof Date) setDate(value);
@@ -166,13 +178,16 @@ export default function MatchsPage() {
         </div>
 
         <div className="space-y-6">
-          {loading && <p className="text-cyan-300 animate-pulse">Chargement des matchs...</p>}
+          {loading && (
+            <p className="text-cyan-500 animate-pulse">Chargement des matchs...</p>
+          )}
           {error && <p className="text-red-500">{error}</p>}
 
           {!loading && showAllMatches === false && (
             <>
-              <h2 className="text-2xl font-semibold text-cyan-400">
-                Matchs du {date.toLocaleDateString("fr-FR", {
+              <h2 className="text-2xl font-semibold text-cyan-600">
+                Matchs du{" "}
+                {date.toLocaleDateString("fr-FR", {
                   weekday: "long",
                   year: "numeric",
                   month: "long",
@@ -189,21 +204,27 @@ export default function MatchsPage() {
 
           {!loading && showAllMatches && (
             <>
-              <h2 className="text-2xl font-semibold text-cyan-400">Matchs d'aujourd'hui</h2>
+              <h2 className="text-2xl font-semibold text-cyan-600">
+                Matchs d&apos;aujourd&apos;hui
+              </h2>
               {todayMatches.length === 0 ? (
                 <NoMatchMessage message="Aucun match aujourd'hui." />
               ) : (
                 todayMatches.map(renderMatchCard)
               )}
 
-              <h2 className="text-2xl font-semibold text-cyan-400 mt-6">Matchs à venir</h2>
+              <h2 className="text-2xl font-semibold text-cyan-600 mt-6">
+                Matchs à venir
+              </h2>
               {upcomingMatches.length === 0 ? (
                 <NoMatchMessage message="Aucun match à venir." />
               ) : (
                 upcomingMatches.map(renderMatchCard)
               )}
 
-              <h2 className="text-2xl font-semibold text-cyan-400 mt-6">Matchs passés</h2>
+              <h2 className="text-2xl font-semibold text-cyan-600 mt-6">
+                Matchs passés
+              </h2>
               {pastMatches.length === 0 ? (
                 <NoMatchMessage message="Aucun match passé." />
               ) : (
@@ -218,24 +239,24 @@ export default function MatchsPage() {
         .calendar-custom {
           background: transparent;
           border: none;
-          color: white;
+          color: #0e1726;
           font-family: 'Inter', sans-serif;
         }
         .calendar-custom button {
           background: transparent;
           border: none;
-          color: white;
+          color: #0e1726;
           padding: 0.5rem;
           border-radius: 0.375rem;
           transition: background-color 0.3s ease;
         }
         .calendar-custom button:hover {
-          background-color: rgba(6, 182, 212, 0.3);
+          background-color: rgba(6, 182, 212, 0.15);
           cursor: pointer;
         }
         .calendar-custom .react-calendar__tile--active {
           background: #06b6d4;
-          color: black;
+          color: white;
           border-radius: 0.5rem;
         }
         .calendar-custom .react-calendar__tile--now {
@@ -243,9 +264,10 @@ export default function MatchsPage() {
           border-radius: 0.5rem;
         }
       `}</style>
+
       {isModalOpen && selectedMatch && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
           role="dialog"
           aria-modal="true"
         >
@@ -253,29 +275,37 @@ export default function MatchsPage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="bg-indigo-950 text-white rounded-xl p-6 max-w-md w-full border border-cyan-600 shadow-lg relative"
+            className="bg-white text-gray-800 rounded-xl p-6 max-w-md w-full border border-cyan-200 shadow-lg relative"
           >
             <button
               onClick={closeModal}
-              className="absolute top-2 right-2 text-cyan-400 hover:text-cyan-200"
+              className="absolute top-2 right-2 text-cyan-500 hover:text-cyan-700 text-2xl"
               aria-label="Fermer le modal"
             >
-              ✖
+              <X size={28} />
             </button>
-            <h2 className="text-xl font-bold mb-4 text-cyan-300">
+            <h2 className="text-xl font-bold mb-4 text-cyan-600">
               Détails du Match
             </h2>
-            <p><strong>Type :</strong> {selectedMatch.type}</p>
-            <p><strong>Date :</strong> {new Date(selectedMatch.date).toLocaleDateString("fr-FR")}</p>
-            <p><strong>Heure :</strong> {selectedMatch.time}</p>
-            <p><strong>Lieu :</strong> {selectedMatch.location}</p>
+            <div className="flex items-center gap-2 mb-3">
+              {typeIcons[selectedMatch.type]}
+              <span className="font-semibold text-cyan-700">
+                {typeLabels[selectedMatch.type]}
+              </span>
+            </div>
+            <p>
+              <strong>Date :</strong>{" "}
+              {new Date(selectedMatch.date).toLocaleDateString("fr-FR")}
+            </p>
+            <p>
+              <strong>Heure :</strong> {selectedMatch.time}
+            </p>
+            <p>
+              <strong>Lieu :</strong> {selectedMatch.location}
+            </p>
           </motion.div>
         </div>
       )}
-
-
     </div>
-
   );
-
 }

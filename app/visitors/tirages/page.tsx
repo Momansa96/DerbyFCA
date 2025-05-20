@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { useState, useEffect } from "react";
 
@@ -60,8 +60,18 @@ export default function DerbysPage() {
     fetchDerbys();
   }, []);
 
-  if (loading) return <p className="text-center mt-10 text-gray-600">Chargement des derbys...</p>;
-  if (error) return <p className="text-center mt-10 text-red-600">Erreur : {error}</p>;
+  if (loading)
+    return (
+      <p className="text-center mt-10 text-gray-600 animate-pulse">
+        Chargement des derbys...
+      </p>
+    );
+  if (error)
+    return (
+      <p className="text-center mt-10 text-red-600 font-semibold">
+        Erreur : {error}
+      </p>
+    );
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-12">
@@ -69,30 +79,43 @@ export default function DerbysPage() {
         Historique des Derbys
       </h1>
 
-      {derbys.length === 0 && <p className="text-center text-gray-500">Aucun derby trouvé.</p>}
+      {derbys.length === 0 && (
+        <p className="text-center text-gray-500">Aucun derby trouvé.</p>
+      )}
 
       <div className="space-y-12">
         {derbys.map((derby) => (
-          <article key={derby.id} className="border border-indigo-300 rounded-2xl p-8 shadow-lg bg-white">
+          <article
+            key={derby.id}
+            className="border border-indigo-300 rounded-2xl p-8 shadow-lg bg-white"
+          >
             <h2 className="text-3xl font-bold text-indigo-800 mb-6 text-center">
               Derby : {derby.team1.name} vs {derby.team2.name}
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-8">
               <section>
-                <h3 className="text-xl font-semibold text-indigo-600 mb-3">Composition de l'{derby.team1.name}</h3>
+                <h3 className="text-xl font-semibold text-indigo-600 mb-3">
+                  Composition de l&apos;{derby.team1.name}
+                </h3>
                 <ul className="list-disc list-inside max-h-48 overflow-y-auto px-2 text-gray-700">
                   {derby.team1.players.map((player) => (
-                    <li key={player.id} className="truncate">{player.fullName}</li>
+                    <li key={player.id} className="truncate">
+                      {player.fullName}
+                    </li>
                   ))}
                 </ul>
               </section>
 
               <section>
-                <h3 className="text-xl font-semibold text-indigo-600 mb-3">Composition de l'{derby.team2.name}</h3>
+                <h3 className="text-xl font-semibold text-indigo-600 mb-3">
+                  Composition de l&apos;{derby.team2.name}
+                </h3>
                 <ul className="list-disc list-inside max-h-48 overflow-y-auto px-2 text-gray-700">
                   {derby.team2.players.map((player) => (
-                    <li key={player.id} className="truncate">{player.fullName}</li>
+                    <li key={player.id} className="truncate">
+                      {player.fullName}
+                    </li>
                   ))}
                 </ul>
               </section>
@@ -123,7 +146,10 @@ export default function DerbysPage() {
                         <h4 className="font-semibold text-indigo-700 mb-2">Buteurs :</h4>
                         <ul className="list-disc list-inside text-indigo-800 text-sm space-y-1">
                           {match.goals.map((goal) => (
-                            <li key={goal.id} className={goal.isOwnGoal ? "italic text-red-600" : ""}>
+                            <li
+                              key={goal.id}
+                              className={goal.isOwnGoal ? "italic text-red-600" : ""}
+                            >
                               {goal.player.fullName} {goal.isOwnGoal && "(CSC)"}
                             </li>
                           ))}
