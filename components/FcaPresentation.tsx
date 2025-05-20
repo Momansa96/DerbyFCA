@@ -101,7 +101,7 @@ export default function FcaPresentation() {
       {/* ADN du club */}
       <div className="mt-10 p-6 rounded-2xl bg-gradient-to-r from-cyan-50/70 to-indigo-50/70 shadow-md border border-cyan-100">
         <h3 className="text-xl sm:text-2xl font-bold mb-2 flex items-center gap-2 text-indigo-700">
-          🎉 L’ADN du Club
+          🧬 L’ADN du Club
         </h3>
         <p className="text-gray-700 text-base sm:text-lg">
           Le FCA, c’est une communauté multigénérationnelle et multifacette, unie par la passion du ballon rond et la joie d’être ensemble.

@@ -10,7 +10,8 @@ import {
   Handshake,
   Volleyball,
   Globe,
-  Calendar, Trophy, HeartHandshake
+  Calendar, Trophy, HeartHandshake,
+  Download
 } from "lucide-react";
 
 const values = [
@@ -20,7 +21,7 @@ const values = [
   { label: "Inclusion", Icon: Globe, color: "from-pink-400 to-cyan-600" },
 ];
 
-    const newsItems = [
+const newsItems = [
   {
     date: "12 mai 2025",
     title: "Victoire 3-1 lors du dernier derby mensuel",
@@ -42,7 +43,7 @@ const values = [
       "Un moment chargé d’émotion et de respect. Les générations se sont croisées autour de notre passion commune.",
     Icon: HeartHandshake,
   },
-]; 
+];
 
 const moments = [
   '/gallery/gal1.jpg',
@@ -197,149 +198,147 @@ export default function ClubPage() {
 
       {/* Engagements */}
       <section
-  id="engagement"
-  className="py-16 px-6 bg-gradient-to-br from-cyan-100 via-blue-50 to-cyan-200 text-gray-800"
->
-  <div className="grid md:grid-cols-2 gap-10 max-w-6xl mx-auto">
-    <div className="bg-white/60 p-8 rounded-3xl border border-cyan-300 shadow-lg backdrop-blur-md space-y-6">
-      <h3 className="text-cyan-600 text-3xl font-semibold drop-shadow-sm">
-        ⚖️ Règles des Derbies
-      </h3>
+        id="engagement"
+        className="py-16 px-6 bg-gradient-to-br from-cyan-100 via-blue-50 to-cyan-200 text-gray-800"
+      >
+        <div className="grid md:grid-cols-2 gap-10 max-w-6xl mx-auto">
+          <div className="bg-white/60 p-8 rounded-3xl border border-cyan-300 shadow-lg backdrop-blur-md space-y-6">
+            <h3 className="text-cyan-600 text-3xl font-semibold drop-shadow-sm">
+              ⚖️ Règles des Derbies
+            </h3>
 
-      <p className="leading-relaxed text-base">
-        Les derbies du FCA ne sont pas de simples matchs : ce sont des moments
-        attendus avec passion, encadrés par des règles précises pour garantir
-        équilibre, respect et plaisir de jeu.
-      </p>
+            <p className="leading-relaxed text-base">
+              Les derbies du FCA ne sont pas de simples matchs : ce sont des moments
+              attendus avec passion, encadrés par des règles précises pour garantir
+              équilibre, respect et plaisir de jeu.
+            </p>
 
-      <ul className="list-disc list-inside space-y-3 marker:text-cyan-400 text-gray-700 text-base">
-        <li>
-          <strong>Équipes tirées au sort chaque mois :</strong> pour garantir
-          l’équité et renouveler les compositions, un tirage aléatoire est
-          effectué avant chaque session mensuelle.
-        </li>
-        <li>
-          <strong>Matchs de 2 x 30 minutes :</strong> deux mi-temps dynamiques
-          pour maximiser le temps de jeu tout en respectant le rythme de chacun.
-        </li>
-        <li>
-          <strong>Rotation obligatoire des gardiens :</strong> chaque joueur
-          doit passer dans les cages, garantissant l’équité et la polyvalence.
-        </li>
-        <li>
-          <strong>Auto-arbitrage :</strong> les décisions sont prises de manière
-          collective, dans un esprit de fair-play et de confiance mutuelle.
-        </li>
-        <li>
-          <strong>Respect et esprit sportif avant tout :</strong> les gestes
-          antisportifs ou les attitudes négatives n’ont pas leur place sur le
-          terrain.
-        </li>
-      </ul>
+            <ul className="list-disc list-inside space-y-3 marker:text-cyan-400 text-gray-700 text-base">
+              <li>
+                <strong>Équipes tirées au sort chaque mois :</strong> pour garantir
+                l’équité et renouveler les compositions, un tirage aléatoire est
+                effectué avant chaque session mensuelle.
+              </li>
+              <li>
+                <strong>Matchs de 2 x 45 minutes :</strong> deux mi-temps dynamiques
+                pour maximiser le temps de jeu tout en respectant le rythme de chacun.
+              </li>
 
-      <p className="text-cyan-500 italic text-sm">
-        💬 Un doute sur une règle ? Le comité sportif du club reste à disposition pour tout éclaircissement.
-      </p>
-    </div>
+              <li>
+                <strong>Respect et esprit sportif avant tout :</strong> les gestes
+                antisportifs ou les attitudes négatives n’ont pas leur place sur le
+                terrain.
+              </li>
+            </ul>
 
-    <div className="bg-white/60 p-8 rounded-3xl border border-cyan-300 shadow-lg backdrop-blur-md space-y-6">
-      <h3 className="text-cyan-600 text-3xl font-semibold drop-shadow-sm">
-        📋 Règlement Intérieur
-      </h3>
+            <p className="text-cyan-500 italic text-sm">
+              💬 Un doute sur une règle ? Le comité sportif du club reste à disposition pour tout éclaircissement.
+            </p>
+            <button className="mt-4 px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition duration-300" >
+              <a href="/documents/reglement.pdf" download className="flex items-center gap-2">
+                Telecharger le règlement
+                <Download className="w-4 h-4" />
+              </a>
+            </button>
+          </div>
 
-      <p className="leading-relaxed text-base">
-        Afin de garantir une atmosphère conviviale, respectueuse et équitable au sein du club, chaque membre s&apos;engage à respecter le règlement suivant :
-      </p>
+          <div className="bg-white/60 p-8 rounded-3xl border border-cyan-300 shadow-lg backdrop-blur-md space-y-6">
+            <h3 className="text-cyan-600 text-3xl font-semibold drop-shadow-sm">
+              📋 Règlement Intérieur
+            </h3>
 
-      <ol className="list-decimal list-inside space-y-3 marker:text-cyan-400 text-gray-700 text-base">
-        <li>
-          <strong>Cotisation annuelle obligatoire :</strong> elle permet
-          d&apos;assurer les frais de gestion, l&apos;entretien du matériel et
-          l&apos;organisation des événements.
-        </li>
-        <li>
-          <strong>Présence régulière aux entraînements :</strong> chaque joueur
-          est invité à participer activement aux séances pour garantir la
-          cohésion du groupe et la progression collective.
-        </li>
-        <li>
-          <strong>Respect du matériel et des infrastructures :</strong> chacun
-          est responsable de l&apos;usage du matériel et veille à laisser les
-          lieux en bon état.
-        </li>
-        <li>
-          <strong>Communication via les canaux officiels :</strong> les annonces,
-          convocations ou changements d&apos;horaires sont diffusés via le groupe
-          WhatsApp et le tableau d&apos;affichage numérique.
-        </li>
-        <li>
-          <strong>Implication dans la vie du club :</strong> chaque membre est
-          encouragé à participer aux actions bénévoles, événements internes et
-          aux décisions collectives.
-        </li>
-      </ol>
+            <p className="leading-relaxed text-base">
+              Afin de garantir une atmosphère conviviale, respectueuse et équitable au sein du club, chaque membre s&apos;engage à respecter le règlement suivant :
+            </p>
 
-      <p className="text-cyan-500 italic text-sm mt-2">
-        ⚠️ Le non-respect répété de ces règles peut entraîner une exclusion temporaire ou définitive.
-      </p>
-    </div>
-  </div>
-</section>
+            <ol className="list-decimal list-inside space-y-3 marker:text-cyan-400 text-gray-700 text-base">
+              <li>
+                <strong>Cotisation annuelle obligatoire :</strong> elle permet
+                d&apos;assurer les frais de gestion, l&apos;entretien du matériel et
+                l&apos;organisation des événements.
+              </li>
+              <li>
+                <strong>Présence régulière aux entraînements :</strong> chaque joueur
+                est invité à participer activement aux séances pour garantir la
+                cohésion du groupe et la progression collective.
+              </li>
+              <li>
+                <strong>Respect du matériel et des infrastructures :</strong> chacun
+                est responsable de l&apos;usage du matériel et veille à laisser les
+                lieux en bon état.
+              </li>
+              <li>
+                <strong>Communication via les canaux officiels :</strong> les annonces,
+                convocations ou changements d&apos;horaires sont diffusés via le groupe
+                WhatsApp.
+              </li>
+              <li>
+                <strong>Respect des horaires :</strong> la ponctualité est essentielle
+                pour le bon déroulement des entraînements et matchs.
+              </li>
+            </ol>
+
+            <p className="text-cyan-500 italic text-sm mt-2">
+              ⚠️ Le non-respect répété de ces règles peut entraîner une exclusion temporaire ou définitive.
+            </p>
+          </div>
+        </div>
+      </section>
 
 
       {/* Valeurs */}
       <section className="max-w-6xl mx-auto py-20 px-6 bg-gradient-to-b from-cyan-100 via-white to-cyan-50 rounded-3xl shadow-2xl backdrop-blur-md text-gray-800">
-      <header className="text-center mb-16">
-        <h2 className="text-cyan-600 text-4xl font-extrabold tracking-wide drop-shadow-sm">
-          💎 Nos Valeurs Fondamentales
-        </h2>
-        <p className="max-w-3xl mx-auto text-gray-700 text-lg mt-4 font-medium">
-          Le FCA est plus qu’un club, c’est une famille unie autour de principes forts. Voici les piliers qui guident chacun de nos entraînements, de nos matchs et de nos moments partagés.
-        </p>
-      </header>
+        <header className="text-center mb-16">
+          <h2 className="text-cyan-600 text-4xl font-extrabold tracking-wide drop-shadow-sm">
+            💎 Nos Valeurs Fondamentales
+          </h2>
+          <p className="max-w-3xl mx-auto text-gray-700 text-lg mt-4 font-medium">
+            Le FCA est plus qu’un club, c’est une famille unie autour de principes forts. Voici les piliers qui guident chacun de nos matchs et de nos moments partagés.
+          </p>
+        </header>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
-        {values.map(({ label, Icon, color }, i) => (
-          <article
-            key={i}
-            className={`flex flex-col justify-center items-center p-6 bg-gradient-to-br ${color} rounded-xl shadow-lg text-white text-center select-none transition-transform duration-300 hover:scale-105 hover:shadow-cyan-400/50`}
-            role="listitem"
-            tabIndex={0}
-          >
-            <Icon className="text-6xl mb-4" aria-hidden="true" />
-            <p className="font-semibold text-lg leading-snug">{label}</p>
-          </article>
-        ))}
-      </div>
-    </section>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
+          {values.map(({ label, Icon, color }, i) => (
+            <article
+              key={i}
+              className={`flex flex-col justify-center items-center p-6 bg-gradient-to-br ${color} rounded-xl shadow-lg text-white text-center select-none transition-transform duration-300 hover:scale-105 hover:shadow-cyan-400/50`}
+              role="listitem"
+              tabIndex={0}
+            >
+              <Icon className="text-6xl mb-4" aria-hidden="true" />
+              <p className="font-semibold text-lg leading-snug">{label}</p>
+            </article>
+          ))}
+        </div>
+      </section>
 
 
-   
+
 
       {/* Actualités */}
       <section className="py-20 bg-gradient-to-b from-black via-indigo-900 to-black px-6 text-white">
-      <h2 className="text-cyan-300 text-4xl font-extrabold text-center mb-12 tracking-wide drop-shadow-[0_0_6px_rgba(6,182,212,0.6)]">
-        📰 Dernières nouvelles du club
-      </h2>
+        <h2 className="text-cyan-300 text-4xl font-extrabold text-center mb-12 tracking-wide drop-shadow-[0_0_6px_rgba(6,182,212,0.6)]">
+          📰 Dernières nouvelles du club
+        </h2>
 
-      <div className="max-w-4xl mx-auto space-y-8">
-        {newsItems.map(({ date, title, description, Icon }, i) => (
-          <article
-            key={i}
-            className="bg-indigo-950/70 p-6 rounded-xl border border-cyan-700 shadow hover:shadow-cyan-500/40 transition duration-300 flex flex-col md:flex-row gap-4 items-start"
-          >
-            <div className="flex-shrink-0 text-cyan-400">
-              <Icon size={48} strokeWidth={1.5} aria-hidden="true" />
-            </div>
-            <div className="flex-1">
-              <p className="text-cyan-400 text-sm font-semibold mb-1">{date}</p>
-              <h3 className="text-xl font-bold text-white mb-2">{title}</h3>
-              <p className="text-white/80 text-sm leading-relaxed">{description}</p>
-            </div>
-          </article>
-        ))}
-      </div>
-    </section>
+        <div className="max-w-4xl mx-auto space-y-8">
+          {newsItems.map(({ date, title, description, Icon }, i) => (
+            <article
+              key={i}
+              className="bg-indigo-950/70 p-6 rounded-xl border border-cyan-700 shadow hover:shadow-cyan-500/40 transition duration-300 flex flex-col md:flex-row gap-4 items-start"
+            >
+              <div className="flex-shrink-0 text-cyan-400">
+                <Icon size={48} strokeWidth={1.5} aria-hidden="true" />
+              </div>
+              <div className="flex-1">
+                <p className="text-cyan-400 text-sm font-semibold mb-1">{date}</p>
+                <h3 className="text-xl font-bold text-white mb-2">{title}</h3>
+                <p className="text-white/80 text-sm leading-relaxed">{description}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
 
     </main>
   )

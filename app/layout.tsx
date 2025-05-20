@@ -9,6 +9,11 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'FCA Derby Manager',
   description: 'Gestion des tirages et activités sportives du FCA',
+  icons: {
+    icon: '/images/default.jpeg',
+    shortcut: '/favicon.ico',
+    apple: '/images/default.jpeg',
+  },
 };
 
 export default function RootLayout({
