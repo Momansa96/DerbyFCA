@@ -21,8 +21,12 @@ export async function PUT(
 
     // Vérifier que tous les joueurs et équipes existent
     if (goals && goals.length > 0) {
-      const playerIds = Array.from(new Set(goals.map((goal: any) => goal.playerId))) as string[];
-      const teamIds = Array.from(new Set(goals.map((goal: any) => goal.teamId))) as string[];
+      const playerIds = Array.from(
+        new Set(goals.map((goal: any) => goal.playerId))
+      ) as string[];
+      const teamIds = Array.from(
+        new Set(goals.map((goal: any) => goal.teamId))
+      ) as string[];
 
       const existingPlayers = await prisma.player.findMany({
         where: { id: { in: playerIds } },
@@ -103,29 +107,46 @@ export async function PUT(
 
     // Si tous les matchs sont terminés, calculer le vainqueur du derby
     if (allMatchesCompleted) {
-      const team1Wins = allMatches.filter(
-        (match) => match.winnerId === existingMatch.team1Id
+      // Récupérer les IDs des équipes du derby
+      const derby = await prisma.derby.findUnique({
+        where: { id: existingMatch.derbyId },
+        include: { team1: true, team2: true },
+      });
+      if (!derby) {
+        return NextResponse.json(
+          { error: "Derby non trouvé" },
+          { status: 404 }
+        );
+      }
+      const aiglesId = derby.team1.id;
+      const lionsId = derby.team2.id;
+
+      // Compter les victoires par équipe
+      const aiglesWins = allMatches.filter(
+        (match) => match.winnerId === aiglesId
       ).length;
-      const team2Wins = allMatches.filter(
-        (match) => match.winnerId === existingMatch.team2Id
+      const lionsWins = allMatches.filter(
+        (match) => match.winnerId === lionsId
       ).length;
 
       let winnerId: string | null = null;
 
-      if (team1Wins > team2Wins) {
-        winnerId = existingMatch.team1Id;
-      } else if (team2Wins > team1Wins) {
-        winnerId = existingMatch.team2Id;
+      if (aiglesWins > lionsWins) {
+        winnerId = aiglesId;
+      } else if (lionsWins > aiglesWins) {
+        winnerId = lionsId;
       } else {
-        // Égalité de victoires, départage par différence de buts
-        let team1Goals = 0;
-        let team2Goals = 0;
+        // Égalité, départage par différence de buts
+        let aiglesGoals = 0;
+        let lionsGoals = 0;
         for (const match of allMatches) {
-          team1Goals += match.score1 ?? 0;
-          team2Goals += match.score2 ?? 0;
+          if (match.team1Id === aiglesId) aiglesGoals += match.score1 ?? 0;
+          if (match.team2Id === aiglesId) aiglesGoals += match.score2 ?? 0;
+          if (match.team1Id === lionsId) lionsGoals += match.score1 ?? 0;
+          if (match.team2Id === lionsId) lionsGoals += match.score2 ?? 0;
         }
-        if (team1Goals > team2Goals) winnerId = existingMatch.team1Id;
-        else if (team2Goals > team1Goals) winnerId = existingMatch.team2Id;
+        if (aiglesGoals > lionsGoals) winnerId = aiglesId;
+        else if (lionsGoals > aiglesGoals) winnerId = lionsId;
         // Sinon, toujours égalité (winnerId = null)
       }
 
