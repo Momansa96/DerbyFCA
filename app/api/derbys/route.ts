@@ -95,7 +95,13 @@ export async function POST(req: NextRequest) {
 // GET /api/derbys
 export async function GET(req: NextRequest) {
   try {
+    const { searchParams } = new URL(req.url);
+    const skip = parseInt(searchParams.get("skip") || "0", 10);
+    const take = parseInt(searchParams.get("take") || "10", 10);
+
     const derbys = await prisma.derby.findMany({
+      skip,
+      take,
       include: {
         matches: {
           include: {
@@ -121,7 +127,11 @@ export async function GET(req: NextRequest) {
         createdAt: "desc",
       },
     });
-    return NextResponse.json(derbys);
+
+    // Pour connaître le nombre total de derbys (utile pour la pagination)
+    const total = await prisma.derby.count();
+
+    return NextResponse.json({ derbys, total });
   } catch (error) {
     console.error("Erreur lors de la récupération des derbys:", error);
     return NextResponse.json(

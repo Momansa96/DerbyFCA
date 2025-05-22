@@ -54,32 +54,39 @@ export default function AdminDerbysPage() {
     const [scores, setScores] = useState<{ [key: string]: { team1: number; team2: number } }>({});
     const [goals, setGoals] = useState<{ [key: string]: Goal[] }>({});
     const [editingGoals, setEditingGoals] = useState<string | null>(null);
+    const [page, setPage] = useState(1);
+    const [pageSize] = useState(1); 
+    const [total, setTotal] = useState(0);
 
-    useEffect(() => {
-        fetchDerbys();
-    }, []);
-
+    
     const fetchDerbys = async () => {
+        setLoading(true);
         try {
-            const response = await fetch('/api/derbys');
+            const response = await fetch(`/api/derbys?skip=${(page - 1) * pageSize}&take=${pageSize}`);
             if (!response.ok) {
                 throw new Error('Erreur lors de la récupération des derbys');
             }
             const data = await response.json();
-            setDerbys(data);
+            setDerbys(data.derbys); // data.derbys car l'API retourne { derbys, total }
+            setTotal(data.total);   // total pour gérer le nombre de pages
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Une erreur est survenue');
         } finally {
             setLoading(false);
         }
     };
+    useEffect(() => {
+        fetchDerbys();
+    }, []);
+
+
 
     const getMatchStatus = (match: Match) => {
         if (match.status === 'PENDING') return 'En attente';
         if (match.status === 'IN_PROGRESS') return 'En cours';
         if (match.status === 'COMPLETED') {
-            if (match.winnerId === match.team1Id) return 'Victoire Équipe 1';
-            if (match.winnerId === match.team2Id) return 'Victoire Équipe 2';
+            if (match.winnerId === match.team1Id) return 'Victoire Aigles';
+            if (match.winnerId === match.team2Id) return 'Victoire Lions';
             return 'Match nul';
         }
         return 'Statut inconnu';
@@ -201,8 +208,8 @@ export default function AdminDerbysPage() {
 
     return (
         <div className="container mx-auto px-4 py-8 max-w-7xl">
-            <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
-                <h1 className="text-2xl sm:text-3xl font-bold">Derbys</h1>
+            <div className="flex flex-col sm:flex-row justify-between items-start mb-8 gap-4">
+                <h1 className="text-3xl text-left sm:text-3xl font-bold">Recapitulatif Derbys</h1>
                 <Link
                     href="/admin/tirage"
                     className="w-full sm:w-auto bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-center"
@@ -213,7 +220,25 @@ export default function AdminDerbysPage() {
 
             <div className="space-y-8">
                 {derbys.map((derby) => (
-                    <div key={derby.id} className="bg-white rounded-lg shadow-lg p-4 sm:p-6 transition-all hover:shadow-xl">
+                    <div key={derby.id} className="bg-white rounded-lg  shadow-lg p-4 sm:p-6 transition-all hover:shadow-xl">
+                        <div className="flex justify-center gap-2 mt-6 mb-6">
+                            <button
+                                className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+                                onClick={() => setPage(p => Math.max(1, p - 1))}
+                                disabled={page === 1}
+                            >
+                                Précédent
+                            </button>
+                            <span className="px-4 py-2">{page} / {Math.ceil(total / pageSize)}</span>
+                            <button
+                                className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+                                onClick={() => setPage(p => p + 1)}
+                                disabled={page * pageSize >= total}
+                            >
+                                Suivant
+                            </button>
+                        </div>
+
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                             <div>
                                 <h2 className="text-xl font-bold">
@@ -225,14 +250,14 @@ export default function AdminDerbysPage() {
                             </div>
                             {derby.winnerId && (
                                 <div className="text-green-600 font-semibold bg-green-50 px-4 py-2 rounded-full">
-                                    Vainqueur: {derby.winnerId === derby.team1.id ? 'Équipe 1' : 'Équipe 2'}
+                                    Vainqueur: {derby.winnerId === derby.team1.id ? 'Aigles' : 'Lions'}
                                 </div>
                             )}
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
                             <div className="bg-blue-50 rounded-lg p-4">
-                                <h3 className="text-lg font-semibold mb-4 text-blue-600">Équipe 1</h3>
+                                <h3 className="text-lg font-semibold mb-4 text-blue-600">Aigles</h3>
                                 <ul className="space-y-2">
                                     {derby.team1.players.map((player) => (
                                         <li key={player.id} className="flex items-center space-x-2 bg-white p-2 rounded-lg shadow-sm hover:shadow-md transition-shadow">
@@ -249,7 +274,7 @@ export default function AdminDerbysPage() {
                                 </ul>
                             </div>
                             <div className="bg-pink-50 rounded-lg p-4">
-                                <h3 className="text-lg font-semibold mb-4 text-pink-600">Équipe 2</h3>
+                                <h3 className="text-lg font-semibold mb-4 text-pink-600">Lions</h3>
                                 <ul className="space-y-2">
                                     {derby.team2.players.map((player) => (
                                         <li key={player.id} className="flex items-center space-x-2 bg-white p-2 rounded-lg shadow-sm hover:shadow-md transition-shadow">
@@ -281,7 +306,7 @@ export default function AdminDerbysPage() {
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
                                         <div className="bg-white/10 rounded-lg p-4">
-                                            <h5 className="text-lg font-semibold mb-2">Équipe 1</h5>
+                                            <h5 className="text-lg font-semibold mb-2">Aigles</h5>
                                             <div className="space-y-2">
                                                 {derby.team1.players.map(player => (
                                                     <div key={player.id} className="flex items-center space-x-2">
@@ -299,7 +324,7 @@ export default function AdminDerbysPage() {
                                         </div>
 
                                         <div className="bg-white/10 rounded-lg p-4">
-                                            <h5 className="text-lg font-semibold mb-2">Équipe 2</h5>
+                                            <h5 className="text-lg font-semibold mb-2">Lions</h5>
                                             <div className="space-y-2">
                                                 {derby.team2.players.map(player => (
                                                     <div key={player.id} className="flex items-center space-x-2">
@@ -337,7 +362,7 @@ export default function AdminDerbysPage() {
                                         <div className="mt-6 text-center">
                                             <div className="text-sm text-white/80 mb-1">Vainqueur du Derby</div>
                                             <div className="text-2xl font-bold animate-bounce">
-                                                {derby.winnerId === derby.team1.id ? 'Équipe 1' : 'Équipe 2'}
+                                                {derby.winnerId === derby.team1.id ? 'Aigles' : 'Lions'}
                                             </div>
                                         </div>
                                     )}
@@ -357,7 +382,7 @@ export default function AdminDerbysPage() {
                                             <div className="space-y-4">
                                                 <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0 sm:space-x-4">
                                                     <div className="text-center">
-                                                        <div className="font-medium">Équipe 1</div>
+                                                        <div className="font-medium">Aigles</div>
                                                         <input
                                                             type="number"
                                                             min="0"
@@ -368,7 +393,7 @@ export default function AdminDerbysPage() {
                                                     </div>
                                                     <div className="text-gray-400">vs</div>
                                                     <div className="text-center">
-                                                        <div className="font-medium">Équipe 2</div>
+                                                        <div className="font-medium">Lions</div>
                                                         <input
                                                             type="number"
                                                             min="0"
@@ -391,7 +416,7 @@ export default function AdminDerbysPage() {
                                                         <div className="mt-4 space-y-4">
                                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                                 <div className="space-y-2">
-                                                                    <h4 className="font-medium text-blue-600">Équipe 1</h4>
+                                                                    <h4 className="font-medium text-blue-600">Aigles</h4>
                                                                     <div className="flex gap-2">
                                                                         <select
                                                                             className="flex-1 border rounded p-2"
@@ -406,14 +431,14 @@ export default function AdminDerbysPage() {
                                                                             }}
                                                                         >
                                                                             <option value="">Ajouter un buteur</option>
-                                                                            <optgroup label="Équipe 1">
+                                                                            <optgroup label="Aigles">
                                                                                 {derby.team1.players.map(player => (
                                                                                     <option key={player.id} value={`${player.id}-false`}>
                                                                                         {player.fullName}
                                                                                     </option>
                                                                                 ))}
                                                                             </optgroup>
-                                                                            <optgroup label="Équipe 2 (CSC)">
+                                                                            <optgroup label="Lions (CSC)">
                                                                                 {derby.team2.players.map(player => (
                                                                                     <option key={player.id} value={`${player.id}-true`}>
                                                                                         {player.fullName} (CSC)
@@ -445,7 +470,7 @@ export default function AdminDerbysPage() {
                                                                 </div>
 
                                                                 <div className="space-y-2">
-                                                                    <h4 className="font-medium text-pink-600">Équipe 2</h4>
+                                                                    <h4 className="font-medium text-pink-600">Lions</h4>
                                                                     <div className="flex gap-2">
                                                                         <select
                                                                             className="flex-1 border rounded p-2"
@@ -460,14 +485,14 @@ export default function AdminDerbysPage() {
                                                                             }}
                                                                         >
                                                                             <option value="">Ajouter un buteur</option>
-                                                                            <optgroup label="Équipe 2">
+                                                                            <optgroup label="Lions">
                                                                                 {derby.team2.players.map(player => (
                                                                                     <option key={player.id} value={`${player.id}-false`}>
                                                                                         {player.fullName}
                                                                                     </option>
                                                                                 ))}
                                                                             </optgroup>
-                                                                            <optgroup label="Équipe 1 (CSC)">
+                                                                            <optgroup label="Aigles (CSC)">
                                                                                 {derby.team1.players.map(player => (
                                                                                     <option key={player.id} value={`${player.id}-true`}>
                                                                                         {player.fullName} (CSC)
@@ -513,12 +538,12 @@ export default function AdminDerbysPage() {
                                             <div className="space-y-4">
                                                 <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
                                                     <div className="text-center">
-                                                        <div className="font-medium">Équipe 1</div>
+                                                        <div className="font-medium">Aigles</div>
                                                         <div className="text-2xl font-bold">{match.score1 ?? '-'}</div>
                                                     </div>
                                                     <div className="text-gray-400">vs</div>
                                                     <div className="text-center">
-                                                        <div className="font-medium">Équipe 2</div>
+                                                        <div className="font-medium">Lions</div>
                                                         <div className="text-2xl font-bold">{match.score2 ?? '-'}</div>
                                                     </div>
                                                 </div>

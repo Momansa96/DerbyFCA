@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 
 interface Player {
   id: string;
@@ -64,8 +65,8 @@ export default function AdminTiragesPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (selectedPlayers.length < 4) {
-      setError("Veuillez sélectionner au moins 4 joueurs");
+    if (selectedPlayers.length < 10) {
+      setError("Veuillez sélectionner au moins 10 joueurs");
       return;
     }
     setError(null);
@@ -146,7 +147,7 @@ export default function AdminTiragesPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Créer un Nouveau Tirage</h1>
+      <h1 className="text-3xl font-bold mb-8">Lancer un Nouveau Tirage</h1>
 
       {teams.length === 0 ? (
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -174,7 +175,9 @@ export default function AdminTiragesPage() {
                     onChange={() => togglePlayer(player.id)}
                   />
                   <div className="flex-shrink-0">
-                    <img
+                    <Image
+                      width={48}
+                      height={48}
                       src={player.profilePhoto || '/images/avatar-default.png'}
                       alt={player.fullName}
                       className="w-12 h-12 rounded-full object-cover border-2 border-white"
@@ -183,7 +186,7 @@ export default function AdminTiragesPage() {
                   <div className="flex-grow">
                     <div className="font-medium text-gray-900 text-lg">{player.fullName}</div>
                     {player.alias && (
-                      <div className="text-sm text-gray-500">"{player.alias}"</div>
+                      <div className="text-sm text-gray-500">&quot;{player.alias}&quot;</div>
                     )}
                   </div>
                   <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedPlayers.includes(player.id)
@@ -202,12 +205,12 @@ export default function AdminTiragesPage() {
 
             <div className="mt-6 flex justify-between items-center">
               <div className="text-sm text-gray-600">
-                Minimum 4 joueurs requis
+                Minimum 10 joueurs requis
               </div>
               <button
                 type="submit"
-                disabled={selectedPlayers.length < 4 || isSubmitting}
-                className={`px-6 py-3 rounded-lg font-semibold text-white transition-colors ${selectedPlayers.length < 4
+                disabled={selectedPlayers.length < 10 || isSubmitting}
+                className={`px-6 py-3 rounded-lg font-semibold text-white transition-colors ${selectedPlayers.length < 10
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-blue-600 hover:bg-blue-700"
                   }`}
@@ -231,7 +234,9 @@ export default function AdminTiragesPage() {
                       key={player.id}
                       className="flex items-center space-x-3 p-2 bg-gray-50 rounded"
                     >
-                      <img
+                      <Image
+                        width={40}
+                        height={40}
                         src={player.profilePhoto || '/images/avatar-default.png'}
                         alt={player.fullName}
                         className="w-10 h-10 rounded-full object-cover"
@@ -263,11 +268,13 @@ export default function AdminTiragesPage() {
         <div className="mt-8">
           <div className="flex justify-center space-x-8">
             <div className="bg-white rounded-lg shadow-lg p-6 w-96">
-              <h3 className="text-xl font-bold mb-4 text-blue-600">Équipe 1</h3>
+              <h3 className="text-xl font-bold mb-4 text-blue-600">Aigles</h3>
               <ul className="space-y-2">
                 {team1.map((player) => (
                   <li key={player.id} className="flex items-center space-x-2">
-                    <img
+                    <Image
+                      width={32}
+                      height={32}
                       src={player.profilePhoto || '/images/avatar-default.png'}
                       alt={player.fullName}
                       className="w-8 h-8 rounded-full"
@@ -278,11 +285,13 @@ export default function AdminTiragesPage() {
               </ul>
             </div>
             <div className="bg-white rounded-lg shadow-lg p-6 w-96">
-              <h3 className="text-xl font-bold mb-4 text-pink-600">Équipe 2</h3>
+              <h3 className="text-xl font-bold mb-4 text-pink-600">Lions</h3>
               <ul className="space-y-2">
                 {team2.map((player) => (
                   <li key={player.id} className="flex items-center space-x-2">
-                    <img
+                    <Image
+                      width={32}
+                      height={32}
                       src={player.profilePhoto || '/images/avatar-default.png'}
                       alt={player.fullName}
                       className="w-8 h-8 rounded-full"
