@@ -21,8 +21,8 @@ export async function PUT(
 
     // Vérifier que tous les joueurs et équipes existent
     if (goals && goals.length > 0) {
-      const playerIds = [...new Set(goals.map((goal: any) => goal.playerId))];
-      const teamIds = [...new Set(goals.map((goal: any) => goal.teamId))];
+      const playerIds = Array.from(new Set(goals.map((goal: any) => goal.playerId))) as string[];
+      const teamIds = Array.from(new Set(goals.map((goal: any) => goal.teamId))) as string[];
 
       const existingPlayers = await prisma.player.findMany({
         where: { id: { in: playerIds } },
@@ -101,7 +101,7 @@ export async function PUT(
       (match) => match.status === "COMPLETED"
     );
 
-    // Si tous les matchs sont terminés, mettre à jour le statut du derby
+    // Si tous les matchs sont terminés, calculer le vainqueur du derby
     if (allMatchesCompleted) {
       const team1Wins = allMatches.filter(
         (match) => match.winnerId === existingMatch.team1Id
@@ -110,16 +110,30 @@ export async function PUT(
         (match) => match.winnerId === existingMatch.team2Id
       ).length;
 
+      let winnerId: string | null = null;
+
+      if (team1Wins > team2Wins) {
+        winnerId = existingMatch.team1Id;
+      } else if (team2Wins > team1Wins) {
+        winnerId = existingMatch.team2Id;
+      } else {
+        // Égalité de victoires, départage par différence de buts
+        let team1Goals = 0;
+        let team2Goals = 0;
+        for (const match of allMatches) {
+          team1Goals += match.score1 ?? 0;
+          team2Goals += match.score2 ?? 0;
+        }
+        if (team1Goals > team2Goals) winnerId = existingMatch.team1Id;
+        else if (team2Goals > team1Goals) winnerId = existingMatch.team2Id;
+        // Sinon, toujours égalité (winnerId = null)
+      }
+
       await prisma.derby.update({
         where: { id: existingMatch.derbyId },
         data: {
           status: "COMPLETED",
-          winnerId:
-            team1Wins > team2Wins
-              ? existingMatch.team1Id
-              : team2Wins > team1Wins
-              ? existingMatch.team2Id
-              : null,
+          winnerId,
         },
       });
     }

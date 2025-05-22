@@ -77,7 +77,7 @@ export default function AdminDerbysPage() {
     };
     useEffect(() => {
         fetchDerbys();
-    }, []);
+    }, [page]);
 
 
 
