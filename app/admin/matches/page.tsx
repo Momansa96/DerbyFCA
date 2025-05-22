@@ -73,7 +73,7 @@ export default function AdminMatchsPage() {
         transition={{ duration: 0.8 }}
         className="w-full max-w-3xl p-8 rounded-2xl backdrop-blur-md bg-white/5 border border-white/10 shadow-xl"
       >
-        <h1 className="text-4xl font-bold text-center mb-8 tracking-wider flex justify-center items-center gap-2">
+        <h1 className="text-3xl font-bold text-center mb-8 tracking-wider flex justify-center items-center gap-2">
           <Sparkles className="text-cyan-400 animate-pulse" /> Programmer un Match
         </h1>
 

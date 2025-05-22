@@ -1,82 +1,68 @@
 "use client";
 
-import { useSession, signIn } from "next-auth/react";
+import { useSession, signIn, signOut } from "next-auth/react";
 import { useEffect } from "react";
 import Link from 'next/link';
+import { UserCircleIcon, ArrowRightCircleIcon, UsersIcon, SquareXIcon, CalendarDaysIcon } from "lucide-react";
+import CarteDernierDerby from "@/components/dashboard/CarteDernierDerby";
+import CarteGestionJoueurs from "@/components/dashboard/CarteGestionJoueur";
+import CarteProchainMatch from "@/components/dashboard/CarteProchainMatch";
 
 export default function AdminPage() {
   const { data: session, status } = useSession();
 
   useEffect(() => {
     if (status === "unauthenticated") {
-      signIn(); 
+      signIn();
     }
   }, [status]);
 
   if (status === "loading") {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-2xl font-bold text-gray-900">Chargement...</p>
+      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-gray-100 to-gray-300">
+        <p className="text-2xl font-bold text-gray-900 animate-pulse">Chargement...</p>
       </div>
     );
   }
 
   if (!session) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <p>Vous n'êtes pas autorisé à accéder à cette page.</p>
+      <div className="flex items-center justify-center h-screen bg-gray-100">
+        <p>Vous n&apos;êtes pas autorisé à accéder à cette page.</p>
       </div>
     );
   }
 
-
   return (
-    <div className="space-y-10 px-4  md:px-0 max-w-5xl mx-auto text-gray-900">
-      <h1 className="text-4xl font-bold mb-8 mt-16 border-b-2 border-gray-300 pb-2">
-        Tableau de bord
-      </h1>
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200">
+      {/* Header */}
+      <header className="flex items-center justify-between py-6 px-6 md:px-12 bg-white/80 shadow-sm sticky top-0 z-10 backdrop-blur">
+        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <SquareXIcon className="h-7 w-7 text-blue-600" />
+          Tableau de bord
+        </h1>
+        
+      </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {/* Nouveau Tirage */}
-        <Link href="/admin/tirage" className="card bg-white shadow-md rounded-lg border border-gray-200 hover:shadow-lg transition-shadow cursor-pointer no-underline">
-          <div className="card-body p-6">
-            <h2 className="card-title text-xl font-semibold mb-2 text-gray-800">
-              Nouveau Tirage
-            </h2>
-            <p className="text-gray-600 mb-4">
-              Créer un nouveau tirage d&apos;équipes
-            </p>
-            {/* Exemple d’indicateur */}
-            <p className="text-sm text-gray-500">Dernier tirage : 10 mai 2025</p>
-          </div>
-        </Link>
+      {/* Cartes */}
+      <main className="space-y-10 px-4 md:px-0 max-w-5xl mx-auto text-gray-900">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+          {/* Nouveau Tirage */}
+          <Link href="/admin/tirage" className="group card bg-white shadow-lg rounded-xl border border-gray-200 hover:shadow-2xl transition-all cursor-pointer no-underline hover:-translate-y-1">
+            <CarteDernierDerby />
+          </Link>
 
-        {/* Gestion des Joueurs */}
-        <Link href="/admin/joueurs" className="card bg-white shadow-md rounded-lg border border-gray-200 hover:shadow-lg transition-shadow cursor-pointer no-underline">
-          <div className="card-body p-6">
-            <h2 className="card-title text-xl font-semibold mb-2 text-gray-800">
-              Gestion des Joueurs
-            </h2>
-            <p className="text-gray-600 mb-4">
-              Ajouter ou modifier les joueurs
-            </p>
-            {/* Exemple d’indicateur */}
-            <p className="text-sm text-gray-500">Total joueurs : 28</p>
-          </div>
-        </Link>
+          {/* Gestion des Joueurs */}
+          <Link href="/admin/joueurs" className="group card bg-white shadow-lg rounded-xl border border-gray-200 hover:shadow-2xl transition-all cursor-pointer no-underline hover:-translate-y-1">
+            <CarteGestionJoueurs />
+          </Link>
 
-        {/* Matchs */}
-        <Link href="/admin/matches" className="card bg-white shadow-md rounded-lg border border-gray-200 hover:shadow-lg transition-shadow cursor-pointer no-underline">
-          <div className="card-body p-6">
-            <h2 className="card-title text-xl font-semibold mb-2 text-gray-800">
-              Matchs
-            </h2>
-            <p className="text-gray-600 mb-4">Programmer des matchs</p>
-            {/* Exemple d’indicateur */}
-            <p className="text-sm text-gray-500">Prochain match : 15 mai 2025</p>
-          </div>
-        </Link>
-      </div>
+          {/* Matchs */}
+          <Link href="/admin/matches" className="group card bg-white shadow-lg rounded-xl border border-gray-200 hover:shadow-2xl transition-all cursor-pointer no-underline hover:-translate-y-1">
+            <CarteProchainMatch />
+          </Link>
+        </div>
+      </main>
     </div>
   );
 }
