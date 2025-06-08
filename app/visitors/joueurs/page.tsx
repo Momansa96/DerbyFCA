@@ -59,8 +59,8 @@ export default function JoueursPage() {
   };
 
   return (
-    <div className="space-y-8 px-4 md:px-0 max-w-7xl mx-auto">
-      <h1 className="text-4xl font-extrabold text-cyan-600 drop-shadow-[0_0_10px_rgba(6,182,212,0.2)] mb-8">
+    <div className="space-y-4 px-4 md:px-0 max-w-7xl mx-auto">
+      <h1 className="text-3xl mt-4 font-extrabold text-cyan-600 drop-shadow-[0_0_10px_rgba(6,182,212,0.2)] mb-8">
         Effectif du FCA
       </h1>
 

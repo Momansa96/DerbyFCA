@@ -4,9 +4,9 @@ export default function FcaPresentation() {
       {/* Effet glassmorphism en arrière-plan */}
       <div className="absolute inset-0 -z-10 bg-gradient-to-br from-cyan-200/60 via-white/80 to-indigo-100/60 backdrop-blur-xl rounded-3xl shadow-2xl" />
       
-      <h2 className="text-3xl sm:text-4xl font-extrabold mb-8 text-cyan-700 flex items-center gap-2 drop-shadow-lg">
+      <h2 className="text-2xl sm:text-4xl font-extrabold mb-8 text-cyan-700 flex items-center gap-2 drop-shadow-lg">
         <span role="img" aria-label="bouclier">🛡️</span>
-        FCA – Une Fraternité Avant Tout, un Club à Part
+        Une Fraternité Avant Tout, un Club à Part
       </h2>
       <p className="mb-8 text-lg sm:text-xl text-gray-700 font-medium">
         Le FCA n’est pas qu’un simple club de football. C’est une famille, une confrérie, une fusion de talents, de personnalités et d’histoires.

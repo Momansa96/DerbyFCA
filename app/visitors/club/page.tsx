@@ -26,19 +26,19 @@ const newsItems = [
     date: "12 mai 2025",
     title: "Victoire 3-1 lors du dernier derby mensuel",
     description:
-      "Une performance collective remarquable avec un doublé de Youssouf et une défense solide. Bravo à tous les joueurs présents !",
+      "Une performance collective remarquable avec un doublé de 'Ari le Kid' et une défense solide. Bravo à tous les joueurs présents !",
     Icon: Trophy,
   },
   {
     date: "5 mai 2025",
-    title: "Entraînement découverte pour nouveaux membres",
+    title: "Entraînement pour le match de gala a venir",
     description:
-      "Une belle ambiance, des visages nouveaux, et déjà une belle énergie sur le terrain. Bienvenue aux nouveaux !",
+      "Une belle ambiance, de nouvelles strategies, et déjà une belle énergie sur le terrain. On est fin pret !",
     Icon: Users,
   },
   {
     date: "28 avril 2025",
-    title: "Match hommage avec les anciens du club",
+    title: "Match hommage avec les anciens du club tombes",
     description:
       "Un moment chargé d’émotion et de respect. Les générations se sont croisées autour de notre passion commune.",
     Icon: HeartHandshake,
@@ -56,7 +56,7 @@ const moments = [
 
 export default function ClubPage() {
   return (
-    <main className="space-y-24">
+    <main className="space-y-4">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-indigo-900 via-black to-indigo-950 text-white py-20 px-6 text-center flex flex-col items-center">
         {/* Effet glassmorphism en overlay */}
@@ -92,7 +92,7 @@ export default function ClubPage() {
         {/* Halo lumineux derrière le titre */}
         <div className="absolute left-1/2 top-8 -translate-x-1/2 w-56 h-20 bg-cyan-400/20 blur-2xl rounded-full -z-10" />
 
-        <h2 className="text-center text-3xl sm:text-4xl font-extrabold text-cyan-300 drop-shadow-[0_0_12px_rgba(34,211,238,0.7)] mb-10 tracking-wide">
+        <h2 className="text-center text-2xl sm:text-4xl font-extrabold text-cyan-300 drop-shadow-[0_0_12px_rgba(34,211,238,0.7)] mb-10 tracking-wide">
           📸 Moments du Club
         </h2>
 
@@ -175,12 +175,12 @@ export default function ClubPage() {
 
           {/* Texte */}
           <div className="max-w-xl space-y-8 text-gray-800">
-            <h2 className="text-cyan-700 text-4xl font-extrabold flex items-center gap-3 drop-shadow-md">
-              <span className="text-5xl">🏟️</span> Notre Histoire
+            <h2 className="text-cyan-700 text-3xl font-extrabold flex items-center gap-3 drop-shadow-md">
+              <span className="text-3xl">🏟️</span> Notre Histoire
             </h2>
 
             <p className="text-lg leading-relaxed">
-              Fondé en 2010, le <span className="font-semibold text-cyan-600">Football Club Amical (FCA)</span> est né de la passion d’un groupe d’amis partageant les mêmes valeurs : <em>amitié</em>, <em>fair-play</em> et <em>amour du football</em>. Depuis ses débuts modestes, le club est devenu une véritable référence locale du football amateur, rassemblant chaque semaine des passionnés de tous horizons.
+              Fondé en 2010, le <span className="font-semibold text-cyan-600">Football Club de Atrokpocodji (FCA)</span> est né de la passion d’un groupe d’amis partageant les mêmes valeurs : <em>amitié</em>, <em>fair-play</em> et <em>amour du football</em>. Depuis ses débuts modestes, le club est devenu une véritable référence locale du football amateur, rassemblant chaque semaine des passionnés de tous horizons.
             </p>
 
             <p className="text-lg leading-relaxed">
@@ -202,9 +202,9 @@ export default function ClubPage() {
         className="py-16 px-6 bg-gradient-to-br from-cyan-100 via-blue-50 to-cyan-200 text-gray-800"
       >
         <div className="grid md:grid-cols-2 gap-10 max-w-6xl mx-auto">
-          <div className="bg-white/60 p-8 rounded-3xl border border-cyan-300 shadow-lg backdrop-blur-md space-y-6">
-            <h3 className="text-cyan-600 text-3xl font-semibold drop-shadow-sm">
-              ⚖️ Règles des Derbies
+          <div className="bg-white/60 p-4 rounded-3xl border border-cyan-300 shadow-lg backdrop-blur-md space-y-6">
+            <h3 className="text-cyan-600 text-2xl font-semibold drop-shadow-sm">
+              ⚽ Règles des Derbies
             </h3>
 
             <p className="leading-relaxed text-base">
@@ -232,7 +232,7 @@ export default function ClubPage() {
             </ul>
 
             <p className="text-cyan-500 italic text-sm">
-              💬 Un doute sur une règle ? Le comité sportif du club reste à disposition pour tout éclaircissement.
+              &quot;Un doute sur une règle ? Vous pouvez telecharger la version numerique du reglement pour plus de deatails.&quot;
             </p>
             <button className="mt-4 px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition duration-300" >
               <a href="/documents/reglement.pdf" download className="flex items-center gap-2">
@@ -242,9 +242,9 @@ export default function ClubPage() {
             </button>
           </div>
 
-          <div className="bg-white/60 p-8 rounded-3xl border border-cyan-300 shadow-lg backdrop-blur-md space-y-6">
-            <h3 className="text-cyan-600 text-3xl font-semibold drop-shadow-sm">
-              📋 Règlement Intérieur
+          <div className="bg-white/60 p-4 rounded-3xl border border-cyan-300 shadow-lg backdrop-blur-md space-y-6">
+            <h3 className="text-cyan-600 text-2xl font-semibold drop-shadow-sm">
+              ⚖️  Règlement Intérieur
             </h3>
 
             <p className="leading-relaxed text-base">
@@ -287,12 +287,12 @@ export default function ClubPage() {
 
 
       {/* Valeurs */}
-      <section className="max-w-6xl mx-auto py-20 px-6 bg-gradient-to-b from-cyan-100 via-white to-cyan-50 rounded-3xl shadow-2xl backdrop-blur-md text-gray-800">
+      <section className="max-w-6xl  py-10 px-6 bg-gradient-to-b from-cyan-100 via-white to-cyan-50 rounded-3xl shadow-2xl backdrop-blur-md text-gray-800">
         <header className="text-center mb-16">
-          <h2 className="text-cyan-600 text-4xl font-extrabold tracking-wide drop-shadow-sm">
-            💎 Nos Valeurs Fondamentales
+          <h2 className="text-cyan-600 text-3xl font-extrabold tracking-wide drop-shadow-sm">
+            💎 Nos Valeurs 
           </h2>
-          <p className="max-w-3xl mx-auto text-gray-700 text-lg mt-4 font-medium">
+          <p className="max-w-3xl mx-auto text-gray-700 text-lg mt-4 capitalize font-medium">
             Le FCA est plus qu’un club, c’est une famille unie autour de principes forts. Voici les piliers qui guident chacun de nos matchs et de nos moments partagés.
           </p>
         </header>
@@ -317,8 +317,8 @@ export default function ClubPage() {
 
       {/* Actualités */}
       <section className="py-20 bg-gradient-to-b from-black via-indigo-900 to-black px-6 text-white">
-        <h2 className="text-cyan-300 text-4xl font-extrabold text-center mb-12 tracking-wide drop-shadow-[0_0_6px_rgba(6,182,212,0.6)]">
-          📰 Dernières nouvelles du club
+        <h2 className="text-cyan-300 text-2xl font-extrabold text-center mb-12 tracking-wide drop-shadow-[0_0_6px_rgba(6,182,212,0.6)]">
+          📰 Actualites du club
         </h2>
 
         <div className="max-w-4xl mx-auto space-y-8">
