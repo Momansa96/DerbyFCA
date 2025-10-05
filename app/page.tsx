@@ -20,6 +20,12 @@ export default function Home() {
 
           <div className="mt-10 flex flex-col sm:flex-row gap-6 justify-center">
             <a
+              href="visitors/adhesion"
+              className="btn btn-success w-full sm:w-auto shadow-lg hover:shadow-green-500/80 transition-shadow duration-300 font-bold animate-pulse"
+            >
+              ⚽ Rejoindre le FCA
+            </a>
+            <a
               href="visitors/tirages"
               className="btn btn-accent w-full sm:w-auto shadow-lg hover:shadow-cyan-500/80 transition-shadow duration-300"
             >

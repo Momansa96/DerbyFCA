@@ -71,7 +71,14 @@ export default function ClubPage() {
         <p className="text-lg sm:text-xl text-white/80 max-w-2xl mx-auto mb-8 font-medium">
           « Unis par la passion, guidés par la Fraternite. »
         </p>
-        <div className="mt-2">
+        <div className="mt-2 flex flex-col sm:flex-row gap-4 justify-center">
+          <a
+            href="/visitors/adhesion"
+            className="inline-block px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-white font-bold rounded-2xl shadow-lg hover:shadow-green-400/40 transition-all duration-300 ring-2 ring-green-300/30 hover:ring-green-400/60 focus:outline-none focus:ring-4 focus:ring-green-400/60 animate-pulse"
+            style={{ backdropFilter: "blur(2px)" }}
+          >
+            ⚽ Rejoindre le FCA
+          </a>
           <a
             href="#histoire"
             className="inline-block px-8 py-3 bg-cyan-500/90 hover:bg-cyan-400/90 text-white font-semibold rounded-2xl shadow-lg hover:shadow-cyan-400/40 transition-all duration-300 ring-2 ring-cyan-300/30 hover:ring-cyan-400/60 focus:outline-none focus:ring-4 focus:ring-cyan-400/60"

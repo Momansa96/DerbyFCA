@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -10,6 +10,7 @@ import UserDropdown from "./UserDropdownMenu";
 export default function Navbar() {
   const { data: session } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [newApplicationsCount, setNewApplicationsCount] = useState(0);
   const router = useRouter();
 
   const handleLogout = () => {
@@ -18,11 +19,34 @@ export default function Navbar() {
     router.push("/");
   };
 
+  // Fetch count of new applications (admin only)
+  useEffect(() => {
+    if (!session?.user) return;
+
+    const fetchCount = async () => {
+      try {
+        const res = await fetch("/api/applications/count");
+        if (res.ok) {
+          const data = await res.json();
+          setNewApplicationsCount(data.count || 0);
+        }
+      } catch (error) {
+        console.error("Erreur fetch count:", error);
+      }
+    };
+
+    fetchCount();
+    // Refresh count every 30 seconds
+    const interval = setInterval(fetchCount, 30000);
+    return () => clearInterval(interval);
+  }, [session]);
+
   // Organisation des liens selon le rôle
   const adminLinks = [
     { name: "Tirage", href: "/admin/tirage" },
     { name: "Matches", href: "/admin/matches" },
     { name: "Joueurs", href: "/admin/joueurs" },
+    { name: "Adhésions", href: "/admin/adhesions", badge: newApplicationsCount },
     { name: "Statistiques", href: "/admin/statistiques" },
   ];
 
@@ -66,6 +90,12 @@ export default function Navbar() {
                 {/* Lien avec soulignement animé */}
                 <span className="relative z-10 group-hover:text-cyan-400 transition-colors duration-200">
                   {item.name}
+                  {/* Badge notification */}
+                  {'badge' in item && item.badge && item.badge > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+                      {item.badge}
+                    </span>
+                  )}
                 </span>
 
                 {/* Ligne animée dessous */}
@@ -133,9 +163,14 @@ export default function Navbar() {
                     <Link
                       href={item.href}
                       onClick={() => setIsMenuOpen(false)}
-                      className="block hover:text-cyan-400 transition"
+                      className="block hover:text-cyan-400 transition relative"
                     >
                       {item.name}
+                      {'badge' in item && item.badge && item.badge > 0 && (
+                        <span className="inline-block ml-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+                          {item.badge}
+                        </span>
+                      )}
                     </Link>
                   </li>
                 ))}
@@ -166,14 +201,14 @@ export default function Navbar() {
                 ))}
                 <div className="flex w-full space-x-4 mt-6">
                   <Link
-                    href="/auth/sign-up"
+                    href="/auth/sign-in"
                     onClick={() => setIsMenuOpen(false)}
                     className="btn btn-outline bg-cyan-400 btn-cyan"
                   >
                     Se connecter
                   </Link>
                   <Link
-                    href="/auth/sign-in"
+                    href="/auth/sign-up"
                     onClick={() => setIsMenuOpen(false)}
                     className="btn btn-cyan"
                   >

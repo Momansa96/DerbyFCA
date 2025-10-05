@@ -106,3 +106,51 @@ model FriendlyMatch {
   opponent  String   // Nom de l'équipe adverse
   createdAt DateTime @default(now())
 }
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String   // LOGIN_SUCCESS, LOGIN_FAILED, REGISTER_SUCCESS, etc.
+  userId    String?  // ID de l'utilisateur (si applicable)
+  email     String?  // Email utilisé pour la tentative
+  ip        String?  // Adresse IP du client
+  userAgent String?  // User-Agent du navigateur
+  details   String?  // Détails supplémentaires (JSON)
+  createdAt DateTime @default(now())
+
+  @@index([action])
+  @@index([userId])
+  @@index([email])
+  @@index([createdAt])
+}
+
+model MembershipApplication {
+  id            String   @id @default(uuid())
+
+  // Informations personnelles
+  lastName      String
+  firstName     String
+  email         String
+  whatsapp      String   // Numéro WhatsApp actif
+  profession    String
+
+  // Football
+  motivation    String   @db.Text // Texte libre
+  availability  String   // "AVAILABLE", "NOT_AVAILABLE", "SOMETIMES"
+
+  // Consentement
+  acceptedTerms Boolean  @default(false)
+  acceptedAt    DateTime?
+
+  // Suivi simple
+  isViewed      Boolean  @default(false)  // Pour le badge "nouvelles"
+  viewedAt      DateTime?
+  viewedBy      String?  // ID de l'admin qui a consulté
+
+  // Dates
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([isViewed])
+  @@index([createdAt])
+  @@index([email])
+}
