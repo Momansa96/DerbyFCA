@@ -25,6 +25,7 @@ export default function JoueursPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [playerToDelete, setPlayerToDelete] = useState<Player | null>(null);
@@ -234,6 +235,52 @@ export default function JoueursPage() {
         </button>
       </div>
 
+      {/* Barre de recherche */}
+      {players.length > 0 && (
+        <div className="mb-4 bg-white rounded-lg shadow p-4">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Rechercher un joueur (nom ou alias)..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            />
+            <svg
+              className="absolute left-3 top-2.5 h-5 w-5 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
+          {searchQuery && (
+            <p className="mt-2 text-sm text-gray-500">
+              {players.filter(p =>
+                p.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                (p.alias && p.alias.toLowerCase().includes(searchQuery.toLowerCase()))
+              ).length} résultat(s) trouvé(s)
+            </p>
+          )}
+        </div>
+      )}
+
       {/* Tableau des joueurs */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         {loading ? (
@@ -298,7 +345,16 @@ export default function JoueursPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {players.map((player) => (
+                {players
+                  .filter(player => {
+                    if (!searchQuery) return true;
+                    const query = searchQuery.toLowerCase();
+                    return (
+                      player.fullName.toLowerCase().includes(query) ||
+                      (player.alias && player.alias.toLowerCase().includes(query))
+                    );
+                  })
+                  .map((player) => (
                   <tr key={player.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">

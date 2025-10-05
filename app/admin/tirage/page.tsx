@@ -84,6 +84,28 @@ export default function AdminTiragesPage() {
     setIsShuffling(false);
   };
 
+  const handleReshuffle = async () => {
+    // Refaire le tirage avec les mêmes joueurs sélectionnés
+    setError(null);
+    setIsShuffling(true);
+
+    // Réinitialiser les équipes temporairement
+    setTeam1([]);
+    setTeam2([]);
+
+    // Attendre 5 secondes (animation)
+    await new Promise(resolve => setTimeout(resolve, 5000));
+
+    // Mélanger à nouveau les joueurs
+    const selectedPlayersData = players.filter(player => selectedPlayers.includes(player.id));
+    const shuffled = [...selectedPlayersData].sort(() => Math.random() - 0.5);
+    const half = Math.ceil(shuffled.length / 2);
+    setTeam1(shuffled.slice(0, half));
+    setTeam2(shuffled.slice(half));
+
+    setIsShuffling(false);
+  };
+
   const handleValidate = async () => {
     try {
       setIsValidating(true);
@@ -302,12 +324,25 @@ export default function AdminTiragesPage() {
               </ul>
             </div>
           </div>
-          <div className="mt-8 flex justify-center">
+          <div className="mt-8 flex justify-center gap-4">
+            <button
+              onClick={handleReshuffle}
+              disabled={isValidating}
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Refaire le tirage
+            </button>
             <button
               onClick={handleValidate}
               disabled={isValidating}
-              className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors disabled:opacity-50"
+              className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center gap-2"
             >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+              </svg>
               {isValidating ? 'Validation en cours...' : 'Valider le tirage'}
             </button>
           </div>

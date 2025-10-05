@@ -55,10 +55,14 @@ export default function AdminDerbysPage() {
     const [goals, setGoals] = useState<{ [key: string]: Goal[] }>({});
     const [editingGoals, setEditingGoals] = useState<string | null>(null);
     const [page, setPage] = useState(1);
-    const [pageSize] = useState(1); 
+    const [pageSize] = useState(1);
     const [total, setTotal] = useState(0);
 
-    
+    // Filtres
+    const [statusFilter, setStatusFilter] = useState<string>("ALL"); // ALL, PENDING, COMPLETED
+    const [dateFilter, setDateFilter] = useState<string>("ALL"); // ALL, 1M, 3M, 6M
+
+
     const fetchDerbys = async () => {
         setLoading(true);
         try {
@@ -67,8 +71,27 @@ export default function AdminDerbysPage() {
                 throw new Error('Erreur lors de la récupération des derbys');
             }
             const data = await response.json();
-            setDerbys(data.derbys); // data.derbys car l'API retourne { derbys, total }
-            setTotal(data.total);   // total pour gérer le nombre de pages
+
+            // Filtrer côté client (l'API ne supporte pas encore les filtres)
+            let filteredDerbys = data.derbys;
+
+            // Filtre par statut
+            if (statusFilter !== "ALL") {
+                filteredDerbys = filteredDerbys.filter((derby: Derby) => derby.status === statusFilter);
+            }
+
+            // Filtre par date
+            if (dateFilter !== "ALL") {
+                const now = new Date();
+                const monthsAgo = dateFilter === "1M" ? 1 : dateFilter === "3M" ? 3 : 6;
+                const cutoffDate = new Date(now.setMonth(now.getMonth() - monthsAgo));
+                filteredDerbys = filteredDerbys.filter((derby: Derby) =>
+                    new Date(derby.createdAt) >= cutoffDate
+                );
+            }
+
+            setDerbys(filteredDerbys);
+            setTotal(data.total);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Une erreur est survenue');
         } finally {
@@ -77,16 +100,20 @@ export default function AdminDerbysPage() {
     };
     useEffect(() => {
         fetchDerbys();
-    }, [page]);
+    }, [page, statusFilter, dateFilter]);
 
 
 
-    const getMatchStatus = (match: Match) => {
+    const getMatchStatus = (match: Match, derby: Derby) => {
         if (match.status === 'PENDING') return 'En attente';
         if (match.status === 'IN_PROGRESS') return 'En cours';
         if (match.status === 'COMPLETED') {
-            if (match.winnerId === match.team1Id) return 'Victoire Aigles';
-            if (match.winnerId === match.team2Id) return 'Victoire Lions';
+            // Identifier Aigles et Lions par leur nom
+            const aiglesId = derby.team1.name === 'Aigles' ? derby.team1.id : derby.team2.id;
+            const lionsId = derby.team1.name === 'Lions' ? derby.team1.id : derby.team2.id;
+
+            if (match.winnerId === aiglesId) return 'Victoire Aigles';
+            if (match.winnerId === lionsId) return 'Victoire Lions';
             return 'Match nul';
         }
         return 'Statut inconnu';
@@ -218,8 +245,97 @@ export default function AdminDerbysPage() {
                 </Link>
             </div>
 
+            {/* Barre de filtres */}
+            <div className="bg-white rounded-lg shadow p-4 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Filtre par statut */}
+                    <div>
+                        <label htmlFor="statusFilter" className="block text-sm font-semibold mb-2 text-gray-700">
+                            📊 Filtrer par statut
+                        </label>
+                        <select
+                            id="statusFilter"
+                            value={statusFilter}
+                            onChange={(e) => {
+                                setStatusFilter(e.target.value);
+                                setPage(1); // Reset à la page 1
+                            }}
+                            className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                            <option value="ALL">Tous les derbys</option>
+                            <option value="PENDING">En attente</option>
+                            <option value="COMPLETED">Terminés</option>
+                        </select>
+                    </div>
+
+                    {/* Filtre par date */}
+                    <div>
+                        <label htmlFor="dateFilter" className="block text-sm font-semibold mb-2 text-gray-700">
+                            📅 Filtrer par période
+                        </label>
+                        <select
+                            id="dateFilter"
+                            value={dateFilter}
+                            onChange={(e) => {
+                                setDateFilter(e.target.value);
+                                setPage(1); // Reset à la page 1
+                            }}
+                            className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                            <option value="ALL">Toutes les périodes</option>
+                            <option value="1M">Dernier mois</option>
+                            <option value="3M">3 derniers mois</option>
+                            <option value="6M">6 derniers mois</option>
+                        </select>
+                    </div>
+                </div>
+
+                {/* Indicateur filtres actifs */}
+                {(statusFilter !== "ALL" || dateFilter !== "ALL") && (
+                    <div className="mt-4 flex items-center gap-2 text-sm text-gray-600">
+                        <span className="font-semibold">Filtres actifs:</span>
+                        {statusFilter !== "ALL" && (
+                            <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
+                                {statusFilter === "PENDING" ? "En attente" : "Terminés"}
+                            </span>
+                        )}
+                        {dateFilter !== "ALL" && (
+                            <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full">
+                                {dateFilter === "1M" ? "Dernier mois" : dateFilter === "3M" ? "3 mois" : "6 mois"}
+                            </span>
+                        )}
+                        <button
+                            onClick={() => {
+                                setStatusFilter("ALL");
+                                setDateFilter("ALL");
+                                setPage(1);
+                            }}
+                            className="ml-2 text-red-600 hover:text-red-700 font-semibold"
+                        >
+                            ✕ Réinitialiser
+                        </button>
+                    </div>
+                )}
+            </div>
+
             <div className="space-y-8">
-                {derbys.map((derby) => (
+                {derbys.length === 0 ? (
+                    <div className="bg-white rounded-lg shadow-lg p-12 text-center">
+                        <p className="text-gray-500 text-lg">
+                            Aucun derby trouvé avec les filtres sélectionnés
+                        </p>
+                        <button
+                            onClick={() => {
+                                setStatusFilter("ALL");
+                                setDateFilter("ALL");
+                                setPage(1);
+                            }}
+                            className="mt-4 text-blue-600 hover:text-blue-700 font-semibold"
+                        >
+                            Réinitialiser les filtres
+                        </button>
+                    </div>
+                ) : derbys.map((derby) => (
                     <div key={derby.id} className="bg-white rounded-lg  shadow-lg p-4 sm:p-6 transition-all hover:shadow-xl">
                         <div className="flex justify-center gap-2 mt-6 mb-6">
                             <button
@@ -250,7 +366,7 @@ export default function AdminDerbysPage() {
                             </div>
                             {derby.winnerId && (
                                 <div className="text-green-600 font-semibold bg-green-50 px-4 py-2 rounded-full">
-                                    Vainqueur: {derby.winnerId === derby.team1.id ? 'Aigles' : 'Lions'}
+                                    Vainqueur: {derby.winnerId === (derby.team1.name === 'Aigles' ? derby.team1.id : derby.team2.id) ? 'Aigles' : 'Lions'}
                                 </div>
                             )}
                         </div>
@@ -343,26 +459,36 @@ export default function AdminDerbysPage() {
                                     </div>
 
                                     <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
-                                        {derby.matches.map((match, index) => (
-                                            <div key={match.id} className="bg-white/10 rounded-lg p-3 hover:bg-white/20 transition-colors">
-                                                <div className="text-sm text-white/80 mb-1">Match {index + 1}</div>
-                                                <div className="flex justify-between items-center">
-                                                    <span className="font-bold">{match.score1}</span>
-                                                    <span className="text-white/60">-</span>
-                                                    <span className="font-bold">{match.score2}</span>
+                                        {derby.matches.map((match, index) => {
+                                            // Identifier Aigles et Lions
+                                            const aiglesId = derby.team1.name === 'Aigles' ? derby.team1.id : derby.team2.id;
+                                            const lionsId = derby.team1.name === 'Lions' ? derby.team1.id : derby.team2.id;
+
+                                            // Déterminer les scores selon l'ordre réel
+                                            const aiglesScore = match.team1Id === aiglesId ? match.score1 : match.score2;
+                                            const lionsScore = match.team1Id === lionsId ? match.score1 : match.score2;
+
+                                            return (
+                                                <div key={match.id} className="bg-white/10 rounded-lg p-3 hover:bg-white/20 transition-colors">
+                                                    <div className="text-sm text-white/80 mb-1">Match {index + 1}</div>
+                                                    <div className="flex justify-between items-center">
+                                                        <span className="font-bold">{aiglesScore}</span>
+                                                        <span className="text-white/60">-</span>
+                                                        <span className="font-bold">{lionsScore}</span>
+                                                    </div>
+                                                    <div className="text-xs text-white/60 mt-1">
+                                                        {new Date(match.date).toLocaleDateString()}
+                                                    </div>
                                                 </div>
-                                                <div className="text-xs text-white/60 mt-1">
-                                                    {new Date(match.date).toLocaleDateString()}
-                                                </div>
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
 
                                     {derby.winnerId && (
                                         <div className="mt-6 text-center">
                                             <div className="text-sm text-white/80 mb-1">Vainqueur du Derby</div>
                                             <div className="text-2xl font-bold animate-bounce">
-                                                {derby.winnerId === derby.team1.id ? 'Aigles' : 'Lions'}
+                                                {derby.winnerId === (derby.team1.name === 'Aigles' ? derby.team1.id : derby.team2.id) ? 'Aigles' : 'Lions'}
                                             </div>
                                         </div>
                                     )}
@@ -376,7 +502,7 @@ export default function AdminDerbysPage() {
                                             <span className="font-medium">
                                                 {new Date(match.date).toLocaleDateString()}
                                             </span>
-                                            <span className="text-sm text-gray-600">{getMatchStatus(match)}</span>
+                                            <span className="text-sm text-gray-600">{getMatchStatus(match, derby)}</span>
                                         </div>
                                         {editingMatch === match.id ? (
                                             <div className="space-y-4">
@@ -537,15 +663,29 @@ export default function AdminDerbysPage() {
                                         ) : (
                                             <div className="space-y-4">
                                                 <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-                                                    <div className="text-center">
-                                                        <div className="font-medium">Aigles</div>
-                                                        <div className="text-2xl font-bold">{match.score1 ?? '-'}</div>
-                                                    </div>
-                                                    <div className="text-gray-400">vs</div>
-                                                    <div className="text-center">
-                                                        <div className="font-medium">Lions</div>
-                                                        <div className="text-2xl font-bold">{match.score2 ?? '-'}</div>
-                                                    </div>
+                                                    {(() => {
+                                                        // Identifier Aigles et Lions
+                                                        const aiglesId = derby.team1.name === 'Aigles' ? derby.team1.id : derby.team2.id;
+                                                        const lionsId = derby.team1.name === 'Lions' ? derby.team1.id : derby.team2.id;
+
+                                                        // Déterminer les scores selon l'ordre réel
+                                                        const aiglesScore = match.team1Id === aiglesId ? match.score1 : match.score2;
+                                                        const lionsScore = match.team1Id === lionsId ? match.score1 : match.score2;
+
+                                                        return (
+                                                            <>
+                                                                <div className="text-center">
+                                                                    <div className="font-medium">Aigles</div>
+                                                                    <div className="text-2xl font-bold">{aiglesScore ?? '-'}</div>
+                                                                </div>
+                                                                <div className="text-gray-400">vs</div>
+                                                                <div className="text-center">
+                                                                    <div className="font-medium">Lions</div>
+                                                                    <div className="text-2xl font-bold">{lionsScore ?? '-'}</div>
+                                                                </div>
+                                                            </>
+                                                        );
+                                                    })()}
                                                 </div>
 
                                                 {match.goals && match.goals.length > 0 && (

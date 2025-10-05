@@ -6,15 +6,52 @@ export async function GET() {
     // Total derbys
     const totalDerbys = await prisma.derby.count();
 
-    // Derbys gagnés (exemple : on considère que winnerId non null = gagné)
-    const derbysGagnes = await prisma.derby.count({
-      where: {
-        winnerId: { not: null },
+    // Derbys terminés vs en cours
+    const derbysCompletes = await prisma.derby.count({
+      where: { status: "COMPLETED" },
+    });
+
+    const derbysEnCours = await prisma.derby.count({
+      where: { status: "PENDING" },
+    });
+
+    // Récupérer tous les derbys terminés avec leurs équipes
+    const derbys = await prisma.derby.findMany({
+      where: { status: "COMPLETED" },
+      include: {
+        team1: true,
+        team2: true
       },
     });
 
-    const derbysPerdus = totalDerbys - derbysGagnes;
-    const pourcentageVictoire = totalDerbys > 0 ? (derbysGagnes / totalDerbys) * 100 : 0;
+    // Compter les victoires par équipe
+    let victoiresAigles = 0;
+    let victoiresLions = 0;
+    let matchsNuls = 0;
+
+    for (const derby of derbys) {
+      // Identifier les équipes par leur nom, pas leur position
+      const aiglesId = derby.team1.name === "Aigles" ? derby.team1.id : derby.team2.id;
+      const lionsId = derby.team1.name === "Lions" ? derby.team1.id : derby.team2.id;
+
+      if (derby.winnerId === aiglesId) {
+        victoiresAigles++;
+      } else if (derby.winnerId === lionsId) {
+        victoiresLions++;
+      } else {
+        // winnerId est null = match nul
+        matchsNuls++;
+      }
+    }
+
+    // Calculer les pourcentages (sur derbys terminés)
+    const pourcentageAigles = derbysCompletes > 0
+      ? (victoiresAigles / derbysCompletes) * 100
+      : 0;
+
+    const pourcentageLions = derbysCompletes > 0
+      ? (victoiresLions / derbysCompletes) * 100
+      : 0;
 
     // Joueurs total et actifs (status = "ACTIF")
     const totalJoueurs = await prisma.player.count();
@@ -80,9 +117,13 @@ export async function GET() {
     return NextResponse.json({
       derbys: {
         total: totalDerbys,
-        gagnes: derbysGagnes,
-        perdus: derbysPerdus,
-        pourcentage: +pourcentageVictoire.toFixed(1),
+        completes: derbysCompletes,
+        enCours: derbysEnCours,
+        victoiresAigles,
+        victoiresLions,
+        nuls: matchsNuls,
+        pourcentageAigles: +pourcentageAigles.toFixed(1),
+        pourcentageLions: +pourcentageLions.toFixed(1),
       },
       joueurs: {
         total: totalJoueurs,

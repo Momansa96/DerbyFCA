@@ -118,8 +118,9 @@ export async function PUT(
           { status: 404 }
         );
       }
-      const aiglesId = derby.team1.id;
-      const lionsId = derby.team2.id;
+      // Identifier les équipes par leur nom, pas leur position
+      const aiglesId = derby.team1.name === "Aigles" ? derby.team1.id : derby.team2.id;
+      const lionsId = derby.team1.name === "Lions" ? derby.team1.id : derby.team2.id;
 
       // Compter les victoires par équipe
       const aiglesWins = allMatches.filter(
@@ -131,24 +132,58 @@ export async function PUT(
 
       let winnerId: string | null = null;
 
+      console.log("=== CALCUL VAINQUEUR DERBY ===");
+      console.log("Aigles ID:", aiglesId);
+      console.log("Lions ID:", lionsId);
+      console.log("Victoires Aigles:", aiglesWins);
+      console.log("Victoires Lions:", lionsWins);
+
       if (aiglesWins > lionsWins) {
         winnerId = aiglesId;
+        console.log("→ Vainqueur par victoires: AIGLES");
       } else if (lionsWins > aiglesWins) {
         winnerId = lionsId;
+        console.log("→ Vainqueur par victoires: LIONS");
       } else {
-        // Égalité, départage par différence de buts
+        // Égalité de victoires, départage par différence de buts
+        console.log("→ Égalité de victoires, départage par buts...");
         let aiglesGoals = 0;
         let lionsGoals = 0;
+
         for (const match of allMatches) {
-          if (match.team1Id === aiglesId) aiglesGoals += match.score1 ?? 0;
-          if (match.team2Id === aiglesId) aiglesGoals += match.score2 ?? 0;
-          if (match.team1Id === lionsId) lionsGoals += match.score1 ?? 0;
-          if (match.team2Id === lionsId) lionsGoals += match.score2 ?? 0;
+          console.log(`Match: score1=${match.score1}, score2=${match.score2}, team1Id=${match.team1Id}, winnerId=${match.winnerId}`);
+
+          // Déterminer qui est qui dans ce match spécifique
+          if (match.team1Id === aiglesId) {
+            // Aigles sont team1 dans ce match
+            aiglesGoals += match.score1 ?? 0;
+            lionsGoals += match.score2 ?? 0;
+            console.log(`  → Aigles +${match.score1 ?? 0}, Lions +${match.score2 ?? 0}`);
+          } else if (match.team1Id === lionsId) {
+            // Lions sont team1 dans ce match (équipes inversées)
+            lionsGoals += match.score1 ?? 0;
+            aiglesGoals += match.score2 ?? 0;
+            console.log(`  → Lions +${match.score1 ?? 0}, Aigles +${match.score2 ?? 0} (inversé)`);
+          }
         }
-        if (aiglesGoals > lionsGoals) winnerId = aiglesId;
-        else if (lionsGoals > aiglesGoals) winnerId = lionsId;
-        // Sinon, toujours égalité (winnerId = null)
+
+        console.log("Total buts Aigles:", aiglesGoals);
+        console.log("Total buts Lions:", lionsGoals);
+
+        if (aiglesGoals > lionsGoals) {
+          winnerId = aiglesId;
+          console.log("→ Vainqueur par buts: AIGLES");
+        } else if (lionsGoals > aiglesGoals) {
+          winnerId = lionsId;
+          console.log("→ Vainqueur par buts: LIONS");
+        } else {
+          console.log("→ ÉGALITÉ PARFAITE (winnerId = null)");
+        }
+        // Sinon, toujours égalité parfaite (winnerId = null)
       }
+
+      console.log("WINNER ID FINAL:", winnerId);
+      console.log("==============================");
 
       await prisma.derby.update({
         where: { id: existingMatch.derbyId },

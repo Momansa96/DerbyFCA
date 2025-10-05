@@ -7,6 +7,8 @@ import { UserCircleIcon, ArrowRightCircleIcon, UsersIcon, SquareXIcon, CalendarD
 import CarteDernierDerby from "@/components/dashboard/CarteDernierDerby";
 import CarteGestionJoueurs from "@/components/dashboard/CarteGestionJoueur";
 import CarteProchainMatch from "@/components/dashboard/CarteProchainMatch";
+import CarteAdhesions from "@/components/dashboard/CarteAdhesions";
+import CarteStatistiques from "@/components/dashboard/CarteStatistiques";
 
 export default function AdminPage() {
   const { data: session, status } = useSession();
@@ -45,8 +47,8 @@ export default function AdminPage() {
       </header>
 
       {/* Cartes */}
-      <main className="space-y-10 px-4 md:px-0 max-w-5xl mx-auto text-gray-900">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+      <main className="space-y-10 px-4 md:px-0 max-w-6xl mx-auto text-gray-900">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
           {/* Nouveau Tirage */}
           <Link href="/admin/tirage" className="group card bg-white shadow-lg rounded-xl border border-gray-200 hover:shadow-2xl transition-all cursor-pointer no-underline hover:-translate-y-1">
             <CarteDernierDerby />
@@ -60,6 +62,16 @@ export default function AdminPage() {
           {/* Matchs */}
           <Link href="/admin/matches" className="group card bg-white shadow-lg rounded-xl border border-gray-200 hover:shadow-2xl transition-all cursor-pointer no-underline hover:-translate-y-1">
             <CarteProchainMatch />
+          </Link>
+
+          {/* Adhésions */}
+          <Link href="/admin/adhesions" className="group card bg-white shadow-lg rounded-xl border border-gray-200 hover:shadow-2xl transition-all cursor-pointer no-underline hover:-translate-y-1">
+            <CarteAdhesions />
+          </Link>
+
+          {/* Statistiques */}
+          <Link href="/admin/statistiques" className="group card bg-white shadow-lg rounded-xl border border-gray-200 hover:shadow-2xl transition-all cursor-pointer no-underline hover:-translate-y-1">
+            <CarteStatistiques />
           </Link>
         </div>
       </main>
