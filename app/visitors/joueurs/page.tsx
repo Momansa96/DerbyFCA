@@ -78,28 +78,25 @@ export default function JoueursPage() {
   const regularPlayers = players.filter(p => !p.bureauRole);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-cyan-50/30 to-indigo-50/20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <div className="min-h-screen bg-[#0A0E27] text-white pt-2">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         {/* Header */}
-        <div className="mb-8 sm:mb-12">
-          <div className="inline-flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/20 rounded-full px-4 py-2 mb-4">
-            <Award className="w-4 h-4 text-cyan-600" />
-            <span className="text-sm font-semibold text-cyan-700">Saison 2025</span>
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-1 h-6 bg-gradient-to-b from-cyan-400 to-indigo-500 rounded-full"></div>
+            <h1 className="text-2xl sm:text-3xl font-black text-white">Effectif du FCA</h1>
           </div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-indigo-600 mb-3">
-            Effectif du FCA
-          </h1>
-          <p className="text-gray-600 text-base sm:text-lg max-w-2xl">
+          <p className="text-gray-400 text-sm">
             Découvrez les joueurs qui font la fierté du Football Club Atrokpocodji
           </p>
-          <div className="mt-4 flex items-center gap-6 text-sm text-gray-500">
-            <span className="flex items-center gap-2">
+          <div className="mt-4 flex items-center gap-6 text-sm">
+            <span className="flex items-center gap-2 text-gray-400">
               <div className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse"></div>
               {players.length} joueurs actifs
             </span>
             {bureauMembers.length > 0 && (
-              <span className="flex items-center gap-2">
-                <Award size={14} className="text-indigo-500" />
+              <span className="flex items-center gap-2 text-gray-400">
+                <Award size={14} className="text-indigo-400" />
                 {bureauMembers.length} membres du bureau
               </span>
             )}
@@ -108,11 +105,11 @@ export default function JoueursPage() {
 
         {loading ? (
           <div className="flex flex-col justify-center items-center h-64 gap-4">
-            <div className="relative">
-              <div className="animate-spin rounded-full h-16 w-16 border-4 border-cyan-200"></div>
-              <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-cyan-600 absolute top-0 left-0"></div>
+            <div className="relative w-16 h-16">
+              <div className="absolute inset-0 border-4 border-cyan-500/20 rounded-full"></div>
+              <div className="absolute inset-0 border-4 border-t-cyan-500 rounded-full animate-spin"></div>
             </div>
-            <p className="text-gray-500 font-medium">Chargement des joueurs...</p>
+            <p className="text-gray-400 font-medium">Chargement des joueurs...</p>
           </div>
         ) : (
           <>
@@ -121,12 +118,12 @@ export default function JoueursPage() {
               <div className="mb-12 sm:mb-16">
                 <div className="mb-6 sm:mb-8">
                   <div className="flex items-center gap-3 mb-2">
-                    <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900">
+                    <h2 className="text-xl sm:text-2xl font-black text-white">
                       Bureau du Club
                     </h2>
-                    <div className="h-px flex-1 bg-gradient-to-r from-indigo-200 to-transparent"></div>
+                    <div className="h-px flex-1 bg-gradient-to-r from-indigo-500/30 to-transparent"></div>
                   </div>
-                  <p className="text-gray-600 text-sm sm:text-base">
+                  <p className="text-gray-400 text-sm">
                     Mandat en cours • Saison 2025
                   </p>
                 </div>
@@ -135,7 +132,7 @@ export default function JoueursPage() {
                   {bureauMembers.map((player, index) => (
                     <div
                       key={player.id}
-                      className="group relative bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-200 hover:border-indigo-400 rounded-2xl shadow-lg hover:shadow-2xl hover:shadow-indigo-500/20 transition-all duration-300 cursor-pointer overflow-hidden animate-fade-in"
+                      className="group relative bg-gradient-to-br from-gray-800/40 to-gray-900/20 border border-indigo-500/30 hover:border-indigo-400 rounded-2xl shadow-lg hover:shadow-2xl hover:shadow-indigo-500/20 transition-all duration-300 cursor-pointer overflow-hidden animate-fade-in"
                       style={{ animationDelay: `${index * 50}ms` }}
                       onClick={() => setSelectedPlayer(player)}
                     >
@@ -184,8 +181,8 @@ export default function JoueursPage() {
                         </div>
                       </div>
 
-                      <div className="p-4 sm:p-5 bg-white/50">
-                        <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 line-clamp-1 group-hover:text-indigo-600 transition-colors">
+                      <div className="p-4 sm:p-5 bg-gray-900/50">
+                        <h2 className="text-lg sm:text-xl font-bold text-white mb-1 line-clamp-1 group-hover:text-indigo-400 transition-colors">
                           {player.fullName}
                         </h2>
                         {player.alias && (
@@ -193,8 +190,8 @@ export default function JoueursPage() {
                             &quot;{player.alias}&quot;
                           </p>
                         )}
-                        <div className="flex items-center gap-3 pt-3 border-t border-indigo-100">
-                          <div className="flex items-center gap-1.5 text-gray-600">
+                        <div className="flex items-center gap-3 pt-3 border-t border-gray-700/50">
+                          <div className="flex items-center gap-1.5 text-gray-300">
                             <Target size={16} className="text-green-500" />
                             <span className="text-sm font-semibold">{player.goalsCount}</span>
                           </div>
@@ -212,12 +209,12 @@ export default function JoueursPage() {
             <div>
               <div className="mb-6 sm:mb-8">
                 <div className="flex items-center gap-3 mb-2">
-                  <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900">
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
                     Membres du Club
                   </h2>
-                  <div className="h-px flex-1 bg-gradient-to-r from-cyan-200 to-transparent"></div>
+                  <div className="h-px flex-1 bg-gradient-to-r from-cyan-500/30 to-transparent"></div>
                 </div>
-                <p className="text-gray-600 text-sm sm:text-base">
+                <p className="text-gray-400 text-sm sm:text-base">
                   {regularPlayers.length} joueur{regularPlayers.length > 1 ? 's' : ''} actif{regularPlayers.length > 1 ? 's' : ''}
                 </p>
               </div>
@@ -226,7 +223,7 @@ export default function JoueursPage() {
                 {regularPlayers.map((player, index) => (
               <div
                 key={player.id}
-                className="group relative bg-white/90 backdrop-blur-sm border-2 border-gray-100 hover:border-cyan-300 rounded-2xl shadow-lg hover:shadow-2xl hover:shadow-cyan-500/20 transition-all duration-300 cursor-pointer overflow-hidden animate-fade-in"
+                className="group relative bg-gradient-to-br from-gray-800/40 to-gray-900/20 border border-cyan-500/30 hover:border-cyan-300 rounded-2xl shadow-lg hover:shadow-2xl hover:shadow-cyan-500/20 transition-all duration-300 cursor-pointer overflow-hidden animate-fade-in"
                 style={{ animationDelay: `${index * 50}ms` }}
                 onClick={() => setSelectedPlayer(player)}
               >
@@ -278,8 +275,8 @@ export default function JoueursPage() {
                 </div>
 
                 {/* Infos joueur */}
-                <div className="p-4 sm:p-5">
-                  <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 line-clamp-1 group-hover:text-cyan-600 transition-colors">
+                <div className="p-4 sm:p-5 bg-gray-900/50">
+                  <h2 className="text-lg sm:text-xl font-bold text-white mb-1 line-clamp-1 group-hover:text-cyan-400 transition-colors">
                     {player.fullName}
                   </h2>
 
@@ -297,13 +294,13 @@ export default function JoueursPage() {
                   )}
 
                   {/* Stats rapides */}
-                  <div className="flex items-center gap-3 pt-3 border-t border-gray-100">
-                    <div className="flex items-center gap-1.5 text-gray-600">
+                  <div className="flex items-center gap-3 pt-3 border-t border-gray-700/50">
+                    <div className="flex items-center gap-1.5 text-gray-300">
                       <Target size={16} className="text-green-500" />
                       <span className="text-sm font-semibold">{player.goalsCount}</span>
                     </div>
                     {player.ownGoals > 0 && (
-                      <div className="flex items-center gap-1.5 text-gray-600">
+                      <div className="flex items-center gap-1.5 text-gray-300">
                         <TrendingUp size={16} className="text-red-500" />
                         <span className="text-sm font-semibold">{player.ownGoals}</span>
                       </div>
@@ -323,11 +320,11 @@ export default function JoueursPage() {
         {/* Empty state */}
         {!loading && players.length === 0 && (
           <div className="text-center py-16">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-800/50 rounded-full mb-4">
               <User size={32} className="text-gray-400" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Aucun joueur</h3>
-            <p className="text-gray-500">L&apos;effectif sera bientôt disponible</p>
+            <h3 className="text-xl font-bold text-white mb-2">Aucun joueur</h3>
+            <p className="text-gray-400">L&apos;effectif sera bientôt disponible</p>
           </div>
         )}
       </div>

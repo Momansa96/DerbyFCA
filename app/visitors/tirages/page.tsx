@@ -312,7 +312,7 @@ export default function DerbysPage() {
                                 {new Date(match.date).toLocaleDateString("fr-FR")}
                               </div>
                               <div className="text-xl font-black text-white">
-                                {match.score1 !== null && match.score2 !== null ? (
+                                {match.score1 !== null && match.score1 !== undefined && match.score2 !== null && match.score2 !== undefined ? (
                                   <>
                                     <span
                                       className={
