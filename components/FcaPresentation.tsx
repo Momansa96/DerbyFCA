@@ -1,17 +1,27 @@
+import { Users } from 'lucide-react';
+
 export default function FcaPresentation() {
   return (
-    <section className="relative max-w-5xl mx-auto p-2 sm:px-6 lg:px-8">
+    <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Effet glassmorphism en arrière-plan */}
-      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-cyan-200/60 via-white/80 to-indigo-100/60 backdrop-blur-xl rounded-3xl shadow-2xl" />
-      
-      <h2 className="text-2xl sm:text-4xl font-extrabold mb-8 text-cyan-700 flex items-center gap-2 drop-shadow-lg">
-        <span role="img" aria-label="bouclier">🛡️</span>
-        Une Fraternité Avant Tout, un Club à Part
-      </h2>
-      <p className="mb-8 text-lg sm:text-xl text-gray-700 font-medium">
-        Le FCA n’est pas qu’un simple club de football. C’est une famille, une confrérie, une fusion de talents, de personnalités et d’histoires.
-        Chaque membre y apporte sa touche, sa folie, son sérieux, son talent ou son humour. Ensemble, ils forment un collectif vivant, à la fois compétitif et fraternel.
-      </p>
+      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-cyan-100/40 via-white/70 to-indigo-100/40 backdrop-blur-2xl rounded-3xl shadow-2xl border border-cyan-100/50" />
+
+      {/* Header */}
+      <div className="text-center mb-12 sm:mb-16">
+        <div className="inline-flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/20 rounded-full px-4 py-2 mb-4">
+          <Users className="w-4 h-4 text-cyan-600" />
+          <span className="text-sm font-semibold text-cyan-700">Notre Équipe</span>
+        </div>
+
+        <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-indigo-600">
+          Une Fraternité Avant Tout
+        </h2>
+
+        <p className="text-base sm:text-lg md:text-xl text-gray-700 max-w-4xl mx-auto leading-relaxed">
+          Le FCA n'est pas qu'un simple club de football. C'est une <span className="font-bold text-cyan-600">famille, une confrérie</span>, une fusion de talents, de personnalités et d'histoires.
+          Chaque membre y apporte sa touche, sa folie, son sérieux, son talent ou son humour. Ensemble, ils forment un <span className="font-bold text-indigo-600">collectif vivant</span>, à la fois compétitif et fraternel.
+        </p>
+      </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Carte */}
@@ -99,16 +109,34 @@ export default function FcaPresentation() {
       </div>
 
       {/* ADN du club */}
-      <div className="mt-10 p-6 rounded-2xl bg-gradient-to-r from-cyan-50/70 to-indigo-50/70 shadow-md border border-cyan-100">
-        <h3 className="text-xl sm:text-2xl font-bold mb-2 flex items-center gap-2 text-indigo-700">
-          🧬 L’ADN du Club
-        </h3>
-        <p className="text-gray-700 text-base sm:text-lg">
-          Le FCA, c’est une communauté multigénérationnelle et multifacette, unie par la passion du ballon rond et la joie d’être ensemble.
-          Loin des grands stades, ce club est une bulle d’authenticité, où les vannes fusent, les liens se tissent et le jeu reste un plaisir avant tout.
-          <br /><br />
-          <span className="font-bold text-cyan-700">Des vannes, du talent, de l’amitié. Voilà le vrai trophée du FCA.</span>
-        </p>
+      <div className="mt-12 bg-gradient-to-r from-cyan-50 to-indigo-50 rounded-3xl p-8 sm:p-10 shadow-xl border-2 border-cyan-100">
+        <div className="flex items-start gap-4 mb-6">
+          <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-3xl shadow-lg">
+            🧬
+          </div>
+          <div>
+            <h3 className="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 mb-2">
+              L'ADN du Club
+            </h3>
+            <p className="text-gray-600 text-sm">Ce qui nous rend unique</p>
+          </div>
+        </div>
+
+        <div className="space-y-4 text-gray-700 text-base sm:text-lg leading-relaxed">
+          <p>
+            Le FCA, c'est une <span className="font-bold text-indigo-600">communauté multigénérationnelle et multifacette</span>, unie par la passion du ballon rond et la joie d'être ensemble.
+          </p>
+          <p>
+            Loin des grands stades, ce club est une <span className="font-bold text-cyan-600">bulle d'authenticité</span>, où les vannes fusent, les liens se tissent et le jeu reste un plaisir avant tout.
+          </p>
+
+          <div className="mt-6 pt-6 border-t border-indigo-200">
+            <p className="text-xl sm:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-indigo-600 text-center">
+              Des vannes, du talent, de l'amitié.<br />
+              Voilà le vrai trophée du FCA. 🏆
+            </p>
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -125,20 +153,37 @@ function Card({
   items: string[];
 }) {
   return (
-    <div className="group relative p-6 rounded-2xl bg-white/60 backdrop-blur-md shadow-lg border border-cyan-100 hover:scale-[1.03] hover:shadow-2xl transition-all duration-300">
-      <h3 className="text-lg sm:text-xl font-semibold mb-2 flex items-center gap-2 text-cyan-700">
-        <span className="text-2xl">{icon}</span>
-        {title}
-      </h3>
-      <ul className="list-disc list-inside text-gray-700 space-y-1">
-        {items.map((item, i) => (
-          <li
-            key={i}
-            className="transition-all duration-200 group-hover:translate-x-1"
-            dangerouslySetInnerHTML={{ __html: item }}
-          />
-        ))}
-      </ul>
+    <div className="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl border-2 border-gray-100 hover:border-cyan-300 transition-all duration-300 overflow-hidden">
+      {/* Overlay gradient au hover */}
+      <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/0 to-indigo-500/0 group-hover:from-cyan-500/5 group-hover:to-indigo-500/5 transition-all duration-300" />
+
+      <div className="relative p-6">
+        {/* Header avec icône */}
+        <div className="flex items-center gap-3 mb-4">
+          <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-indigo-600 flex items-center justify-center text-white text-2xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+            {icon}
+          </div>
+          <h3 className="text-lg sm:text-xl font-bold text-gray-900 group-hover:text-cyan-600 transition-colors">
+            {title}
+          </h3>
+        </div>
+
+        {/* Liste des joueurs */}
+        <ul className="space-y-2.5">
+          {items.map((item, i) => (
+            <li
+              key={i}
+              className="flex items-start gap-2 text-gray-700 transition-all duration-200 group-hover:translate-x-1"
+            >
+              <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-cyan-500 mt-2" />
+              <span
+                className="text-sm leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: item }}
+              />
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }

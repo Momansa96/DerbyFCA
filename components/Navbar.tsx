@@ -59,188 +59,233 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-blue-700  backdrop-blur-lg shadow-lg transition-all duration-300">
-      <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-        {/* Logo */}
-        <div className="flex items-center space-x-2">
-          <Image
-            src="/images/default.jpeg"
-            alt="Logo FCA"
-            width={54}
-            height={54}
-            className="object-contain rounded-full"
-          />
-          <Link
-            href="/"
-            className="text-2xl font-black text-cyan-400 tracking-widest drop-shadow-glass hover:text-cyan-300 transition"
-          >
-            FCA Derby Manager
+    <>
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-indigo-900/95 via-blue-900/95 to-indigo-900/95 backdrop-blur-xl shadow-2xl border-b border-cyan-500/20 transition-all duration-300">
+        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+          {/* Logo */}
+          <Link href="/" className="flex items-center space-x-3 group">
+            <div className="relative">
+              <Image
+                src="/images/default.jpeg"
+                alt="Logo FCA"
+                width={48}
+                height={48}
+                className="object-contain rounded-full ring-2 ring-cyan-400/50 group-hover:ring-cyan-400 transition-all duration-300 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 rounded-full bg-cyan-400/20 opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-300" />
+            </div>
+            <div className="hidden sm:block">
+              <div className="text-xl font-bold text-white group-hover:text-cyan-300 transition-colors">
+                FCA
+              </div>
+              <div className="text-xs text-cyan-400 font-medium -mt-1">
+                Derby Manager
+              </div>
+            </div>
           </Link>
-        </div>
 
+          {/* Menu desktop */}
+          <ul className="hidden lg:flex items-center space-x-2">
+            {(session?.user ? adminLinks : visitorLinks).map((item) => (
+              <li key={item.name}>
+                <Link
+                  href={item.href}
+                  className="relative px-4 py-2 group transition-all duration-200 rounded-lg hover:bg-white/10"
+                >
+                  <span className="relative z-10 text-sm font-semibold text-white group-hover:text-cyan-300 transition-colors duration-200">
+                    {item.name}
+                  </span>
 
-        {/* Menu desktop */}
-        <ul className="hidden lg:flex space-x-6 font-semibold text-white text-base">
-          {(session?.user ? adminLinks : visitorLinks).map((item) => (
-            <li key={item.name}>
-              <Link
-                href={item.href}
-                className="relative px-3 py-2 group transition duration-200"
-              >
-                {/* Lien avec soulignement animé */}
-                <span className="relative z-10 group-hover:text-cyan-400 transition-colors duration-200">
-                  {item.name}
                   {/* Badge notification */}
                   {'badge' in item && item.badge && item.badge > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+                    <span className="absolute -top-1 -right-1 bg-gradient-to-br from-red-500 to-red-600 text-white text-xs font-bold rounded-full min-w-[20px] h-5 px-1.5 flex items-center justify-center animate-pulse shadow-lg shadow-red-500/50">
                       {item.badge}
                     </span>
                   )}
-                </span>
 
-                {/* Ligne animée dessous */}
-                <span className="absolute left-1  bottom-1 w-0 h-0.5 bg-cyan-400 transition-all duration-300 group-hover:w-4/5 group-hover:left-1"></span>
+                  {/* Underline animation */}
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-cyan-400 to-indigo-400 group-hover:w-3/4 transition-all duration-300 rounded-full"></span>
+                </Link>
+              </li>
+            ))}
+          </ul>
 
-                {/* Effet de halo derrière le texte */}
-                <span className="absolute inset-0 rounded-md bg-cyan-400 opacity-0 group-hover:opacity-10 transition duration-300"></span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+          {/* Section Auth desktop */}
+          <div className="hidden lg:block">
+            <UserDropdown
+              isAuthenticated={!!session?.user}
+              onLogout={handleLogout}
+            />
+          </div>
 
-
-        {/* Section Auth desktop */}
-        <UserDropdown
-          isAuthenticated={!!session?.user}
-          onLogout={handleLogout}
-        />
-
-        {/* Hamburger mobile */}
-        <button
-          aria-label="Ouvrir le menu"
-          className="lg:hidden relative w-10 h-10 flex flex-col justify-center items-center group text-cyan-400"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-        >
-          <span
-            className={`block h-1 w-7 rounded bg-current transition-transform duration-300 ease-in-out origin-center ${isMenuOpen ? "rotate-45 translate-y-2" : ""
+          {/* Hamburger mobile */}
+          <button
+            aria-label={isMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
+            aria-expanded={isMenuOpen}
+            className="lg:hidden relative w-10 h-10 flex flex-col justify-center items-center group text-cyan-300 hover:text-cyan-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 rounded-lg"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            <span
+              className={`block h-0.5 w-6 rounded-full bg-current transition-all duration-300 ease-in-out ${
+                isMenuOpen ? "rotate-45 translate-y-1.5" : ""
               }`}
-          />
-          <span
-            className={`block h-1 w-7 rounded bg-current my-1 transition-opacity duration-300 ease-in-out ${isMenuOpen ? "opacity-0" : "opacity-100"
+            />
+            <span
+              className={`block h-0.5 w-6 rounded-full bg-current my-1.5 transition-all duration-300 ease-in-out ${
+                isMenuOpen ? "opacity-0 scale-0" : "opacity-100 scale-100"
               }`}
-          />
-          <span
-            className={`block h-1 w-7 rounded bg-current transition-transform duration-300 ease-in-out origin-center ${isMenuOpen ? "-rotate-45 -translate-y-2" : ""
+            />
+            <span
+              className={`block h-0.5 w-6 rounded-full bg-current transition-all duration-300 ease-in-out ${
+                isMenuOpen ? "-rotate-45 -translate-y-1.5" : ""
               }`}
-          />
-        </button>
-      </div>
+            />
+          </button>
+        </div>
+      </nav>
 
-      {/* Menu mobile animé */}
+      {/* Overlay backdrop mobile */}
       <div
-        className={`fixed inset-0 w-full h-full dark:bg-primary/80 rounded-md z-40 lg:hidden transition-transform duration-500 ease-in-out ${isMenuOpen ? "translate-x-0" : "translate-x-full"
-          }`}
+        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300 ${
+          isMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+        onClick={() => setIsMenuOpen(false)}
+        aria-hidden="true"
+      />
 
+      {/* Menu mobile drawer */}
+      <div
+        className={`fixed inset-y-0 right-0 w-80 max-w-[85vw] bg-gradient-to-b from-indigo-950/98 to-black/98 backdrop-blur-xl shadow-2xl z-50 lg:hidden transition-transform duration-300 ease-out border-l border-cyan-500/20 ${
+          isMenuOpen ? "translate-x-0" : "translate-x-full"
+        }`}
       >
-        <div className="flex flex-col h-full w-full dark:bg-primary/80 backdrop-blur-lg rounded-md shadow-lg ">
-          <ul className="flex flex-col mt-14 dark:bg-primary/80 space-y-6 p-6 text-xl  font-bold text-white">
+        <div className="flex flex-col h-full overflow-y-auto">
+          {/* Header drawer */}
+          <div className="flex items-center justify-between p-6 border-b border-cyan-500/20">
+            <div className="flex items-center gap-3">
+              <Image
+                src="/images/default.jpeg"
+                alt="Logo FCA"
+                width={40}
+                height={40}
+                className="rounded-full ring-2 ring-cyan-400/50"
+              />
+              <div>
+                <div className="text-white font-bold text-lg">FCA</div>
+                <div className="text-cyan-400 text-xs font-medium -mt-1">Derby Manager</div>
+              </div>
+            </div>
+            <button
+              aria-label="Fermer le menu"
+              className="text-cyan-400 hover:text-cyan-300 transition-colors p-2 hover:bg-white/10 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Menu items */}
+          <nav className="flex-1 px-4 py-6">
             {session?.user ? (
               <>
-                <li className="text-cyan-300 font-semibold mb-2">
-                  Bienvenue FCA !
-                </li>
-                <li>
-                  <Link
-                    href="/admin"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="block hover:text-cyan-400 transition"
-                  >
-                    Tableau de bord
-                  </Link>
-                </li>
-                {adminLinks.map((item) => (
-                  <li key={item.name}>
+                <div className="mb-6 px-3 py-2 bg-cyan-500/10 rounded-lg border border-cyan-500/20">
+                  <p className="text-cyan-300 font-semibold text-sm">👋 Bienvenue Admin</p>
+                </div>
+
+                <Link
+                  href="/admin"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex items-center gap-3 px-3 py-3 text-white hover:text-cyan-300 hover:bg-white/5 rounded-lg transition-all duration-200 group mb-2"
+                >
+                  <svg className="w-5 h-5 text-cyan-400 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                  </svg>
+                  <span className="font-semibold">Tableau de bord</span>
+                </Link>
+
+                <div className="space-y-1">
+                  {adminLinks.map((item) => (
                     <Link
+                      key={item.name}
                       href={item.href}
                       onClick={() => setIsMenuOpen(false)}
-                      className="block hover:text-cyan-400 transition relative"
+                      className="flex items-center justify-between px-3 py-3 text-white hover:text-cyan-300 hover:bg-white/5 rounded-lg transition-all duration-200 group"
                     >
-                      {item.name}
+                      <span className="font-semibold">{item.name}</span>
                       {'badge' in item && item.badge && item.badge > 0 && (
-                        <span className="inline-block ml-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+                        <span className="bg-gradient-to-br from-red-500 to-red-600 text-white text-xs font-bold rounded-full min-w-[24px] h-6 px-2 flex items-center justify-center shadow-lg">
                           {item.badge}
                         </span>
                       )}
                     </Link>
-                  </li>
-                ))}
-                <li>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left text-black btn btn-outline bg-slate-200 border-primary/80 mt-4"
-                  >
-                    Se déconnecter
-                  </button>
-                </li>
+                  ))}
+                </div>
+
+                <button
+                  onClick={handleLogout}
+                  className="w-full mt-6 px-4 py-3 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 group"
+                >
+                  <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  Se déconnecter
+                </button>
               </>
             ) : (
               <>
-                <li className="text-cyan-300 font-semibold mb-2">
-                  Bienvenue au FCA !
-                </li>
-                {visitorLinks.map((item) => (
-                  <li key={item.name}>
+                <div className="mb-6 px-3 py-2 bg-cyan-500/10 rounded-lg border border-cyan-500/20">
+                  <p className="text-cyan-300 font-semibold text-sm">👋 Bienvenue au FCA</p>
+                </div>
+
+                <div className="space-y-1 mb-6">
+                  {visitorLinks.map((item) => (
                     <Link
+                      key={item.name}
                       href={item.href}
                       onClick={() => setIsMenuOpen(false)}
-                      className="block hover:text-cyan-400 transition"
+                      className="flex items-center gap-3 px-3 py-3 text-white hover:text-cyan-300 hover:bg-white/5 rounded-lg transition-all duration-200 group font-semibold"
                     >
                       {item.name}
+                      <svg className="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
                     </Link>
-                  </li>
-                ))}
-                <div className="flex w-full space-x-4 mt-6">
+                  ))}
+                </div>
+
+                <div className="space-y-3 pt-6 border-t border-cyan-500/20">
                   <Link
                     href="/auth/sign-in"
                     onClick={() => setIsMenuOpen(false)}
-                    className="btn btn-outline bg-cyan-400 btn-cyan"
+                    className="w-full px-4 py-3 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/30"
                   >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                    </svg>
                     Se connecter
                   </Link>
                   <Link
                     href="/auth/sign-up"
                     onClick={() => setIsMenuOpen(false)}
-                    className="btn btn-cyan"
+                    className="w-full px-4 py-3 bg-white/10 hover:bg-white/20 border border-white/30 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
                   >
                     S&apos;inscrire
                   </Link>
                 </div>
               </>
             )}
-          </ul>
-          {/* Bouton de fermeture */}
-          <button
-            aria-label="Fermer le menu"
-            className="absolute top-6 right-6 text-cyan-400"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-8 w-8"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
+          </nav>
+
+          {/* Footer drawer */}
+          <div className="p-4 border-t border-cyan-500/20 bg-black/30">
+            <p className="text-xs text-gray-400 text-center">
+              © 2025 Football Club Atrokpocodji
+            </p>
+          </div>
         </div>
       </div>
-    </nav>
+    </>
   );
 }
