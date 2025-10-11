@@ -42,7 +42,7 @@ export default function Navbar() {
   }, [session]);
 
   // Organisation des liens selon le rôle
-  const adminLinks = [
+  const adminLinks: Array<{ name: string; href: string; badge?: number }> = [
     { name: "Tirage", href: "/admin/tirage" },
     { name: "Derbys", href: "/admin/derbys" },
     { name: "Matches", href: "/admin/matches" },
@@ -99,11 +99,11 @@ export default function Navbar() {
                   </span>
 
                   {/* Badge notification */}
-                  {'badge' in item && item.badge && item.badge > 0 && (
+                  {('badge' in item && typeof item.badge === 'number' && item.badge > 0) ? (
                     <span className="absolute -top-1 -right-1 bg-gradient-to-br from-red-500 to-red-600 text-white text-xs font-bold rounded-full min-w-[20px] h-5 px-1.5 flex items-center justify-center animate-pulse shadow-lg shadow-red-500/50">
                       {item.badge}
                     </span>
-                  )}
+                  ) : null}
 
                   {/* Underline animation */}
                   <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-cyan-400 to-indigo-400 group-hover:w-3/4 transition-all duration-300 rounded-full"></span>
@@ -216,7 +216,7 @@ export default function Navbar() {
                       className="flex items-center justify-between px-3 py-3 text-white hover:text-cyan-300 hover:bg-white/5 rounded-lg transition-all duration-200 group"
                     >
                       <span className="font-semibold">{item.name}</span>
-                      {'badge' in item && item.badge && item.badge > 0 && (
+                      {typeof item.badge === 'number' && item.badge > 0 && (
                         <span className="bg-gradient-to-br from-red-500 to-red-600 text-white text-xs font-bold rounded-full min-w-[24px] h-6 px-2 flex items-center justify-center shadow-lg">
                           {item.badge}
                         </span>

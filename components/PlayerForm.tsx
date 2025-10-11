@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-interface PlayerFormProps {
+type PlayerFormProps = {
   player?: {
     id: string;
     firstName: string;
@@ -13,7 +13,7 @@ interface PlayerFormProps {
     level: number;
   };
   onSubmit: (data: any) => Promise<void>;
-}
+};
 
 export default function PlayerForm({ player, onSubmit }: PlayerFormProps) {
   const router = useRouter();

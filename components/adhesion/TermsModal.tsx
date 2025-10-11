@@ -2,11 +2,11 @@
 
 import { useState, useRef, useEffect } from "react";
 
-interface TermsModalProps {
+type TermsModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onAccept: () => void;
-}
+};
 
 export default function TermsModal({ isOpen, onClose, onAccept }: TermsModalProps) {
   const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
