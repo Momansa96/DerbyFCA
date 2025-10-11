@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import toast, { Toaster } from "react-hot-toast";
-import { Sparkles, Calendar, Clock, MapPin, Users, Pencil, Trash2 } from "lucide-react";
+import { Sparkles, Calendar, Clock, MapPin, Users, Pencil, Trash2, Plus, Search, Filter, TrendingUp, Home, Plane, Trophy } from "lucide-react";
 
 const matchTypes = ["officiel", "amical"];
 
@@ -35,6 +35,9 @@ export default function AdminMatchsPage() {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterType, setFilterType] = useState<string>("all");
+  const [formModalOpen, setFormModalOpen] = useState(false);
 
   // Charger les matchs au montage
   useEffect(() => {
@@ -105,6 +108,7 @@ export default function AdminMatchsPage() {
         opponent: "",
       });
       setEditingMatch(null);
+      setFormModalOpen(false);
 
       // Recharger la liste
       fetchMatches();
@@ -178,333 +182,299 @@ export default function AdminMatchsPage() {
     });
   };
 
+  const stats = useMemo(() => {
+    const now = new Date();
+    const next7Days = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+    return {
+      total: matches.length,
+      upcoming: matches.filter(m => new Date(m.date) >= now && new Date(m.date) <= next7Days).length,
+      official: matches.filter(m => m.type === "officiel").length,
+      friendly: matches.filter(m => m.type === "amical").length,
+    };
+  }, [matches]);
+
+  const filteredMatches = useMemo(() => {
+    return matches
+      .filter(m => {
+        if (filterType !== "all" && m.type !== filterType) return false;
+        if (searchQuery && !m.opponent.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+        return true;
+      })
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }, [matches, filterType, searchQuery]);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-800 text-white p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-[#0A0E27] text-white pt-4 pb-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
-            <Calendar className="text-cyan-400" />
-            Gestion des Matchs
-          </h1>
-          <p className="text-gray-400">Programmez et gérez les matchs amicaux et officiels</p>
-        </motion.div>
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-1 h-6 bg-gradient-to-b from-cyan-400 to-indigo-500 rounded-full"></div>
+            <h1 className="text-2xl sm:text-3xl font-black text-white">Gestion des Matchs</h1>
+          </div>
+          <p className="text-gray-400 text-sm">Programmez et gérez les matchs amicaux et officiels</p>
+        </div>
 
-        {/* Liste des matchs */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="mb-12"
-        >
-          <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-            <Users className="text-cyan-400" />
-            Matchs programmés ({matches.length})
-          </h2>
-
-          {loading ? (
-            <div className="flex justify-center py-12">
-              <div className="loading loading-spinner loading-lg text-cyan-400"></div>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-gradient-to-br from-cyan-500/10 to-cyan-600/5 border border-cyan-500/30 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Calendar className="w-4 h-4 text-cyan-400" />
+              <span className="text-xs text-gray-400">Total</span>
             </div>
-          ) : matches.length === 0 ? (
-            <div className="bg-white/5 border border-white/10 rounded-xl p-12 text-center">
-              <Calendar className="mx-auto h-16 w-16 text-gray-500 mb-4" />
-              <p className="text-gray-400 text-lg">
-                Aucun match programmé pour le moment
-              </p>
-              <p className="text-gray-500 text-sm mt-2">
-                Utilisez le formulaire ci-dessous pour créer un nouveau match
-              </p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full bg-white/5 border border-white/10 rounded-xl overflow-hidden">
-                <thead className="bg-white/10">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-cyan-300">
-                      Type
-                    </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-cyan-300">
-                      Adversaire
-                    </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-cyan-300">
-                      Date & Heure
-                    </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-cyan-300">
-                      Lieu
-                    </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-cyan-300">
-                      Stade
-                    </th>
-                    <th className="px-6 py-3 text-right text-sm font-semibold text-cyan-300">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/10">
-                  {matches.map((match) => (
-                    <tr key={match.id} className="hover:bg-white/5 transition-colors">
-                      <td className="px-6 py-4">
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            match.type === "officiel"
-                              ? "bg-cyan-500/20 text-cyan-300"
-                              : "bg-purple-500/20 text-purple-300"
-                          }`}
-                        >
-                          {match.type === "officiel" ? "Officiel" : "Amical"}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 font-semibold">{match.opponent}</td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2 text-sm">
-                          <Calendar className="h-4 w-4 text-gray-400" />
-                          {formatDate(match.date)}
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-400 mt-1">
-                          <Clock className="h-4 w-4" />
-                          {match.time}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span
-                          className={`px-2 py-1 rounded text-xs ${
-                            match.place === "domicile"
-                              ? "bg-green-500/20 text-green-300"
-                              : "bg-orange-500/20 text-orange-300"
-                          }`}
-                        >
-                          {match.place === "domicile" ? "🏠 Domicile" : "✈️ Extérieur"}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2 text-sm text-gray-300">
-                          <MapPin className="h-4 w-4 text-gray-400" />
-                          {match.location}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => handleEdit(match)}
-                            className="p-2 hover:bg-cyan-500/20 rounded-lg transition-colors group"
-                            title="Modifier"
-                          >
-                            <Pencil className="h-4 w-4 text-gray-400 group-hover:text-cyan-400" />
-                          </button>
-                          <button
-                            onClick={() => confirmDelete(match)}
-                            className="p-2 hover:bg-red-500/20 rounded-lg transition-colors group"
-                            title="Supprimer"
-                          >
-                            <Trash2 className="h-4 w-4 text-gray-400 group-hover:text-red-400" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </motion.div>
+            <div className="text-2xl font-black text-white">{stats.total}</div>
+            <div className="text-xs text-gray-500 mt-1">Matchs programmés</div>
+          </motion.div>
 
-        {/* Formulaire */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="w-full max-w-3xl mx-auto p-8 rounded-2xl backdrop-blur-md bg-white/5 border border-white/10 shadow-xl"
-        >
-          <h2 className="text-3xl font-bold text-center mb-2 flex justify-center items-center gap-2">
-            <Sparkles className="text-cyan-400 animate-pulse" />
-            {editingMatch ? "Modifier le match" : "Programmer un nouveau match"}
-          </h2>
-          {editingMatch && (
-            <p className="text-center text-gray-400 mb-6">
-              Modification : {editingMatch.opponent} - {formatDate(editingMatch.date)}
-            </p>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-6 mt-8">
-            {/* Type de match */}
-            <div>
-              <label htmlFor="type" className="block font-semibold mb-2 text-cyan-300">
-                Type de match
-              </label>
-              <select
-                id="type"
-                name="type"
-                value={form.type}
-                onChange={handleChange}
-                className="w-full bg-black/30 text-white border border-cyan-500 p-3 rounded-lg backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-cyan-400"
-              >
-                {matchTypes.map((type) => (
-                  <option key={type} value={type}>
-                    {type === "officiel" ? "Match Officiel" : "Match Amical"}
-                  </option>
-                ))}
-              </select>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/30 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <TrendingUp className="w-4 h-4 text-green-400" />
+              <span className="text-xs text-gray-400">Prochains</span>
             </div>
+            <div className="text-2xl font-black text-white">{stats.upcoming}</div>
+            <div className="text-xs text-gray-500 mt-1">7 prochains jours</div>
+          </motion.div>
 
-            {/* Lieu du match */}
-            <div>
-              <label htmlFor="place" className="block font-semibold mb-2 text-cyan-300">
-                Lieu (Domicile / Extérieur)
-              </label>
-              <select
-                id="place"
-                name="place"
-                value={form.place}
-                onChange={handleChange}
-                className="w-full bg-black/30 text-white border border-cyan-500 p-3 rounded-lg backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-cyan-400"
-                required
-              >
-                <option value="">Sélectionnez un lieu</option>
-                <option value="domicile">Domicile</option>
-                <option value="extérieur">Extérieur</option>
-              </select>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-gradient-to-br from-indigo-500/10 to-indigo-600/5 border border-indigo-500/30 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Trophy className="w-4 h-4 text-indigo-400" />
+              <span className="text-xs text-gray-400">Officiels</span>
             </div>
+            <div className="text-2xl font-black text-white">{stats.official}</div>
+            <div className="text-xs text-gray-500 mt-1">Matchs officiels</div>
+          </motion.div>
 
-            {/* Équipe adverse */}
-            <div>
-              <label htmlFor="opponent" className="block font-semibold mb-2 text-cyan-300">
-                Équipe adverse
-              </label>
-              <input
-                type="text"
-                id="opponent"
-                name="opponent"
-                value={form.opponent}
-                onChange={handleChange}
-                placeholder="Nom du club adverse"
-                className="w-full bg-black/30 text-white border border-cyan-500 p-3 rounded-lg backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-cyan-400"
-                required
-              />
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/30 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Users className="w-4 h-4 text-purple-400" />
+              <span className="text-xs text-gray-400">Amicaux</span>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Date */}
-              <div>
-                <label htmlFor="date" className="block font-semibold mb-2 text-cyan-300">
-                  Date
-                </label>
-                <input
-                  type="date"
-                  id="date"
-                  name="date"
-                  value={form.date}
-                  onChange={handleChange}
-                  className="w-full bg-black/30 text-white border border-cyan-500 p-3 rounded-lg backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-cyan-400"
-                  required
-                />
-              </div>
-
-              {/* Heure */}
-              <div>
-                <label htmlFor="time" className="block font-semibold mb-2 text-cyan-300">
-                  Heure
-                </label>
-                <input
-                  type="time"
-                  id="time"
-                  name="time"
-                  value={form.time}
-                  onChange={handleChange}
-                  className="w-full bg-black/30 text-white border border-cyan-500 p-3 rounded-lg backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-cyan-400"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Nom du stade */}
-            <div>
-              <label htmlFor="location" className="block font-semibold mb-2 text-cyan-300">
-                Nom du stade ou lieu exact
-              </label>
-              <input
-                type="text"
-                id="location"
-                name="location"
-                value={form.location}
-                onChange={handleChange}
-                placeholder="Ex : Stade Municipal"
-                className="w-full bg-black/30 text-white border border-cyan-500 p-3 rounded-lg backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-cyan-400"
-                required
-              />
-            </div>
-
-            {/* Boutons */}
-            <div className="flex gap-4">
-              {editingMatch && (
-                <motion.button
-                  type="button"
-                  onClick={handleCancelEdit}
-                  whileTap={{ scale: 0.95 }}
-                  className="flex-1 bg-gray-600 hover:bg-gray-500 transition-colors text-white font-bold py-3 rounded-xl"
-                >
-                  Annuler
-                </motion.button>
-              )}
-              <motion.button
-                type="submit"
-                disabled={isSubmitting}
-                whileTap={{ scale: 0.95 }}
-                className="flex-1 bg-cyan-500 hover:bg-cyan-400 transition-colors text-black font-bold py-3 rounded-xl shadow-lg shadow-cyan-600/50"
-              >
-                {isSubmitting
-                  ? "Enregistrement..."
-                  : editingMatch
-                  ? "💾 Enregistrer les modifications"
-                  : "🚀 Programmer"}
-              </motion.button>
-            </div>
-          </form>
-        </motion.div>
-      </div>
-
-      {/* Modal de confirmation suppression */}
-      {deleteModalOpen && matchToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-gray-900 border border-red-500/50 rounded-xl p-6 max-w-md w-full"
-          >
-            <h3 className="text-xl font-bold text-red-400 mb-4">
-              Confirmer la suppression
-            </h3>
-            <p className="text-gray-300 mb-6">
-              Êtes-vous sûr de vouloir supprimer le match contre{" "}
-              <span className="font-bold text-white">{matchToDelete.opponent}</span> prévu
-              le {formatDate(matchToDelete.date)} ?
-            </p>
-            <div className="flex gap-4">
-              <button
-                onClick={() => {
-                  setDeleteModalOpen(false);
-                  setMatchToDelete(null);
-                }}
-                className="flex-1 bg-gray-600 hover:bg-gray-500 transition-colors text-white font-bold py-2 rounded-lg"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={handleDelete}
-                className="flex-1 bg-red-600 hover:bg-red-500 transition-colors text-white font-bold py-2 rounded-lg"
-              >
-                Supprimer
-              </button>
-            </div>
+            <div className="text-2xl font-black text-white">{stats.friendly}</div>
+            <div className="text-xs text-gray-500 mt-1">Matchs amicaux</div>
           </motion.div>
         </div>
-      )}
 
-      {/* Toast notifications */}
+        {/* Search & Filters */}
+        <div className="flex flex-col sm:flex-row gap-3 mb-6">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+            <input
+              type="text"
+              placeholder="Rechercher un adversaire..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 bg-gray-900/50 border border-gray-700/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50"
+            />
+          </div>
+          <div className="flex gap-2">
+            <button onClick={() => setFilterType("all")} className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${filterType === "all" ? "bg-cyan-500 text-black" : "bg-gray-800/50 text-gray-400 hover:bg-gray-800"}`}>
+              Tous
+            </button>
+            <button onClick={() => setFilterType("officiel")} className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${filterType === "officiel" ? "bg-indigo-500 text-white" : "bg-gray-800/50 text-gray-400 hover:bg-gray-800"}`}>
+              Officiels
+            </button>
+            <button onClick={() => setFilterType("amical")} className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${filterType === "amical" ? "bg-purple-500 text-white" : "bg-gray-800/50 text-gray-400 hover:bg-gray-800"}`}>
+              Amicaux
+            </button>
+          </div>
+        </div>
+
+        {/* Matches Cards */}
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <div className="relative w-16 h-16">
+              <div className="absolute inset-0 border-4 border-cyan-500/20 rounded-full"></div>
+              <div className="absolute inset-0 border-4 border-t-cyan-500 rounded-full animate-spin"></div>
+            </div>
+          </div>
+        ) : filteredMatches.length === 0 ? (
+          <div className="text-center py-16 bg-gradient-to-br from-gray-800/40 to-gray-900/20 border border-gray-700/50 rounded-2xl">
+            <Calendar className="mx-auto h-16 w-16 text-gray-600 mb-4" />
+            <h3 className="text-lg font-bold text-white mb-2">
+              {searchQuery || filterType !== "all" ? "Aucun résultat" : "Aucun match programmé"}
+            </h3>
+            <p className="text-gray-400 text-sm">
+              {searchQuery || filterType !== "all" ? "Essayez de modifier vos filtres" : "Cliquez sur le bouton + pour créer un match"}
+            </p>
+          </div>
+        ) : (
+          <div className="grid gap-4">
+            {filteredMatches.map((match, index) => (
+              <motion.div
+                key={match.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+                className="bg-gradient-to-br from-gray-800/40 to-gray-900/20 border border-gray-700/50 rounded-xl p-4 sm:p-5 hover:border-cyan-500/50 transition-all group"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                  {/* Left: Type & Place */}
+                  <div className="flex items-center gap-2 sm:w-32 flex-shrink-0">
+                    <span className={`px-2.5 py-1 rounded-lg text-xs font-bold ${match.type === "officiel" ? "bg-indigo-500/20 text-indigo-400 border border-indigo-500/30" : "bg-purple-500/20 text-purple-400 border border-purple-500/30"}`}>
+                      {match.type === "officiel" ? "Officiel" : "Amical"}
+                    </span>
+                    {match.place === "domicile" ? (
+                      <Home className="w-4 h-4 text-green-400" />
+                    ) : (
+                      <Plane className="w-4 h-4 text-orange-400" />
+                    )}
+                  </div>
+
+                  {/* Middle: Match Info */}
+                  <div className="flex-1">
+                    <h3 className="text-lg font-bold text-white mb-2 group-hover:text-cyan-400 transition-colors">
+                      vs {match.opponent}
+                    </h3>
+                    <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs text-gray-400">
+                      <div className="flex items-center gap-1.5">
+                        <Calendar className="w-3.5 h-3.5" />
+                        {formatDate(match.date)}
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5" />
+                        {match.time}
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5" />
+                        {match.location}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right: Actions */}
+                  <div className="flex items-center gap-2 sm:flex-shrink-0">
+                    <button
+                      onClick={() => handleEdit(match)}
+                      className="p-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 rounded-lg transition-all group/btn"
+                    >
+                      <Pencil className="w-4 h-4 text-cyan-400" />
+                    </button>
+                    <button
+                      onClick={() => confirmDelete(match)}
+                      className="p-2.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 rounded-lg transition-all group/btn"
+                    >
+                      <Trash2 className="w-4 h-4 text-red-400" />
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* FAB - Floating Action Button */}
+      <motion.button
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ delay: 0.5, type: "spring" }}
+        onClick={() => setFormModalOpen(true)}
+        className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-cyan-500 to-indigo-600 rounded-full shadow-lg shadow-cyan-500/50 flex items-center justify-center hover:scale-110 transition-transform z-40"
+      >
+        <Plus className="w-6 h-6 text-white" />
+      </motion.button>
+
+      {/* Form Modal */}
+      <AnimatePresence>
+        {(formModalOpen || editingMatch) && (
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm p-0 sm:p-4" onClick={() => { setFormModalOpen(false); handleCancelEdit(); }}>
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 25 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-gray-900 border-t sm:border border-cyan-500/30 rounded-t-3xl sm:rounded-2xl w-full sm:max-w-2xl max-h-[90vh] overflow-y-auto"
+            >
+              <div className="sticky top-0 bg-gray-900 border-b border-gray-800 p-4 sm:p-6 flex items-center justify-between">
+                <h2 className="text-xl font-black text-white flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-cyan-400" />
+                  {editingMatch ? "Modifier le match" : "Nouveau match"}
+                </h2>
+                <button onClick={() => { setFormModalOpen(false); handleCancelEdit(); }} className="p-2 hover:bg-gray-800 rounded-lg transition-colors">
+                  <span className="text-gray-400 text-2xl">×</span>
+                </button>
+              </div>
+
+              <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4">
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">Type</label>
+                    <select name="type" value={form.type} onChange={handleChange} className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50">
+                      <option value="officiel">Match Officiel</option>
+                      <option value="amical">Match Amical</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">Lieu</label>
+                    <select name="place" value={form.place} onChange={handleChange} required className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50">
+                      <option value="">Sélectionner</option>
+                      <option value="domicile">Domicile</option>
+                      <option value="extérieur">Extérieur</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">Adversaire</label>
+                  <input type="text" name="opponent" value={form.opponent} onChange={handleChange} placeholder="Nom du club" required className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50" />
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">Date</label>
+                    <input type="date" name="date" value={form.date} onChange={handleChange} required className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">Heure</label>
+                    <input type="time" name="time" value={form.time} onChange={handleChange} required className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">Stade</label>
+                  <input type="text" name="location" value={form.location} onChange={handleChange} placeholder="Ex: Stade Municipal" required className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50" />
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  {editingMatch && (
+                    <button type="button" onClick={handleCancelEdit} className="flex-1 py-3 bg-gray-700 hover:bg-gray-600 rounded-xl font-bold transition-colors">
+                      Annuler
+                    </button>
+                  )}
+                  <button type="submit" disabled={isSubmitting} className="flex-1 py-3 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 disabled:from-gray-700 disabled:to-gray-800 disabled:cursor-not-allowed rounded-xl font-bold transition-all shadow-lg shadow-cyan-500/20">
+                    {isSubmitting ? "En cours..." : (editingMatch ? "Enregistrer" : "Créer")}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete Modal */}
+      <AnimatePresence>
+        {deleteModalOpen && matchToDelete && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" onClick={() => { setDeleteModalOpen(false); setMatchToDelete(null); }}>
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} onClick={(e) => e.stopPropagation()} className="bg-gray-900 border border-red-500/50 rounded-2xl p-6 max-w-md w-full">
+              <h3 className="text-xl font-bold text-red-400 mb-4">Confirmer la suppression</h3>
+              <p className="text-gray-300 mb-6">
+                Supprimer le match contre <span className="font-bold text-white">{matchToDelete.opponent}</span> du {formatDate(matchToDelete.date)} ?
+              </p>
+              <div className="flex gap-3">
+                <button onClick={() => { setDeleteModalOpen(false); setMatchToDelete(null); }} className="flex-1 py-2.5 bg-gray-700 hover:bg-gray-600 rounded-lg font-bold transition-colors">
+                  Annuler
+                </button>
+                <button onClick={handleDelete} className="flex-1 py-2.5 bg-red-600 hover:bg-red-500 rounded-lg font-bold transition-colors">
+                  Supprimer
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       <Toaster position="top-right" />
     </div>
   );

@@ -44,9 +44,11 @@ export default function Navbar() {
   // Organisation des liens selon le rôle
   const adminLinks = [
     { name: "Tirage", href: "/admin/tirage" },
+    { name: "Derbys", href: "/admin/derbys" },
     { name: "Matches", href: "/admin/matches" },
     { name: "Joueurs", href: "/admin/joueurs" },
     { name: "Adhésions", href: "/admin/adhesions", badge: newApplicationsCount },
+    { name: "Utilisateurs", href: "/admin/users" },
     { name: "Statistiques", href: "/admin/statistiques" },
   ];
 

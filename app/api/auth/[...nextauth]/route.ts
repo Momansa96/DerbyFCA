@@ -68,6 +68,19 @@ export const authOptions = {
           return null;
         }
 
+        // Vérifier si le compte est révoqué
+        if (user.status === "REVOKED") {
+          await createAuditLog({
+            action: "LOGIN_FAILED",
+            userId: user.id,
+            email: credentials.email,
+            ip: identifier,
+            userAgent,
+            details: { reason: "account_revoked" },
+          });
+          throw new Error("Votre compte a été révoqué. Contactez un administrateur.");
+        }
+
         // Vérifie le mot de passe (ex : bcrypt)
         const isValid = await verifyPassword(credentials.password, user.passwordHash);
 
