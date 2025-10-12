@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Trouver la date la plus récente parmi les matchs
-    const lastMatchDate = lastDerby.matches.reduce((latest: Date, match) => {
+    const lastMatchDate = lastDerby.matches.reduce((latest: Date, match: any) => {
       const matchDate = new Date(match.date);
       return matchDate > latest ? matchDate : latest;
     }, new Date(0));
