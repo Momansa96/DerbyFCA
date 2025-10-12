@@ -77,23 +77,23 @@ export default function MatchsPage() {
     fetchMatches();
   }, []);
 
-  const now = new Date();
+  const now = useMemo(() => new Date(), []);
   const todayMatches = useMemo(
     () => matches.filter((m) => {
       const matchDate = new Date(m.date);
       return matchDate.toDateString() === now.toDateString();
     }),
-    [matches]
+    [matches, now]
   );
 
   const upcomingMatches = useMemo(
     () => matches.filter((m) => new Date(m.date) > now).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()),
-    [matches]
+    [matches, now]
   );
 
   const pastMatches = useMemo(
     () => matches.filter((m) => new Date(m.date) < now).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
-    [matches]
+    [matches, now]
   );
 
   const displayedMatches =

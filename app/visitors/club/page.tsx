@@ -24,7 +24,7 @@ import {
 
 const values = [
   {
-    label: "Esprit d'équipe",
+    label: "Esprit d&apos;équipe",
     Icon: Users,
     color: "from-cyan-500 to-blue-600",
     description: "La force du collectif avant tout"
@@ -56,7 +56,7 @@ const values = [
 ];
 
 const stats = [
-  { label: "Ans d'existence", value: "15+", Icon: Award, color: "cyan" },
+  { label: "Ans d&apos;existence", value: "15+", Icon: Award, color: "cyan" },
   { label: "Joueurs actifs", value: "30+", Icon: Users, color: "indigo" },
   { label: "Matchs organisés", value: "100+", Icon: Trophy, color: "green" },
   { label: "Derbys mensuels", value: "12/an", Icon: Calendar, color: "purple" },
@@ -132,7 +132,7 @@ export default function ClubPage() {
           </p>
 
           <p className="text-base sm:text-lg text-white/80 max-w-3xl mx-auto mb-10 leading-relaxed animate-fade-in" style={{ animationDelay: '0.3s' }}>
-            Plus qu'un club de football, une véritable communauté où règnent convivialité, esprit d'équipe et dépassement de soi. Rejoignez une famille de passionnés !
+            Plus qu&apos;un club de football, une véritable communauté où règnent convivialité, esprit d&apos;équipe et dépassement de soi. Rejoignez une famille de passionnés !
           </p>
 
           {/* CTAs */}
@@ -212,21 +212,21 @@ export default function ClubPage() {
 
                 <div className="space-y-4 text-gray-700">
                   <p className="text-lg leading-relaxed">
-                    Fondé en <span className="font-bold text-cyan-600">2010</span>, le Football Club Atrokpocodji (FCA) est né de la passion d'un groupe d'amis unis par les mêmes valeurs : <em className="text-cyan-600 font-semibold">amitié, fair-play et amour du football</em>.
+                    Fondé en <span className="font-bold text-cyan-600">2010</span>, le Football Club Atrokpocodji (FCA) est né de la passion d&apos;un groupe d&apos;amis unis par les mêmes valeurs : <em className="text-cyan-600 font-semibold">amitié, fair-play et amour du football</em>.
                   </p>
 
                   <p className="text-lg leading-relaxed">
-                    De ses débuts modestes à aujourd'hui, le club est devenu une <span className="font-semibold text-indigo-600">véritable référence locale</span> du football amateur, rassemblant chaque semaine des passionnés de tous horizons.
+                    De ses débuts modestes à aujourd&apos;hui, le club est devenu une <span className="font-semibold text-indigo-600">véritable référence locale</span> du football amateur, rassemblant chaque semaine des passionnés de tous horizons.
                   </p>
 
                   <div className="bg-gradient-to-r from-cyan-500/10 to-indigo-500/10 border-l-4 border-cyan-500 rounded-r-xl p-6 my-6">
                     <p className="text-cyan-700 font-bold text-xl italic">
-                      « Plus qu'un sport, une famille. »
+                      « Plus qu&apos;un sport, une famille. »
                     </p>
                   </div>
 
                   <p className="text-lg leading-relaxed">
-                    Animé par ses derbys mensuels, ses entraînements ouverts à tous, et ses engagements auprès de la communauté, le FCA incarne bien plus qu'un club : <span className="font-semibold text-cyan-600">c'est un lieu de partage, de cohésion sociale et de dépassement de soi</span>.
+                    Animé par ses derbys mensuels, ses entraînements ouverts à tous, et ses engagements auprès de la communauté, le FCA incarne bien plus qu&apos;un club : <span className="font-semibold text-cyan-600">c&apos;est un lieu de partage, de cohésion sociale et de dépassement de soi</span>.
                   </p>
                 </div>
 
@@ -325,7 +325,7 @@ export default function ClubPage() {
               Ce qui nous guide
             </h2>
             <p className="text-gray-600 text-lg max-w-3xl mx-auto">
-              Le FCA est plus qu'un club, c'est une famille unie autour de principes forts
+              Le FCA est plus qu&apos;un club, c&apos;est une famille unie autour de principes forts
             </p>
           </div>
 
@@ -380,7 +380,7 @@ export default function ClubPage() {
                 {[
                   { title: "Équipes tirées au sort", desc: "Un tirage aléatoire est effectué avant chaque session mensuelle" },
                   { title: "Matchs de 2 × 45 minutes", desc: "Deux mi-temps dynamiques pour maximiser le temps de jeu" },
-                  { title: "Respect et fair-play", desc: "Les attitudes négatives n'ont pas leur place sur le terrain" }
+                  { title: "Respect et fair-play", desc: "Les attitudes négatives n&apos;ont pas leur place sur le terrain" }
                 ].map((item, i) => (
                   <li key={i} className="flex gap-3">
                     <div className="flex-shrink-0 w-6 h-6 rounded-full bg-cyan-100 flex items-center justify-center text-cyan-600 font-bold text-sm mt-0.5">
@@ -414,7 +414,7 @@ export default function ClubPage() {
               </div>
 
               <p className="text-gray-700 leading-relaxed mb-6">
-                Pour garantir une atmosphère conviviale, respectueuse et équitable, chaque membre s'engage à respecter ces règles.
+                Pour garantir une atmosphère conviviale, respectueuse et équitable, chaque membre s&apos;engage à respecter ces règles.
               </p>
 
               <ol className="space-y-4 mb-6">

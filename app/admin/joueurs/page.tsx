@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import toast, { Toaster } from "react-hot-toast";
+import Image from "next/image";
 import { Plus, Search, Users, Trophy, UserCheck, Edit, Trash2, User, Mail, Phone, Calendar, Award, X } from "lucide-react";
 
 interface Player {
@@ -245,7 +246,7 @@ export default function JoueursPage() {
             <div className="w-1 h-6 bg-gradient-to-b from-cyan-400 to-indigo-500 rounded-full"></div>
             <h1 className="text-2xl sm:text-3xl font-black text-white">Gestion des Joueurs</h1>
           </div>
-          <p className="text-gray-400 text-sm">Gérez l'effectif du FCA</p>
+          <p className="text-gray-400 text-sm">Gérez l&apos;effectif du FCA</p>
         </div>
 
         {/* Stats Cards */}
@@ -403,10 +404,11 @@ export default function JoueursPage() {
               >
                 {/* Avatar + Info */}
                 <div className="relative h-48 bg-gray-900/50">
-                  <img
+                  <Image
                     src={player.profilePhoto || '/images/avatar-default.png'}
                     alt={player.fullName}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
                   />
                   {player.bureauRole && (
                     <div className="absolute top-3 left-3 bg-indigo-500/90 px-2 py-1 rounded-lg backdrop-blur-sm">
@@ -425,7 +427,7 @@ export default function JoueursPage() {
 
                 <div className="p-4">
                   <h3 className="text-lg font-bold text-white mb-1">{player.fullName}</h3>
-                  {player.alias && <p className="text-sm text-cyan-400 mb-2">"{player.alias}"</p>}
+                  {player.alias && <p className="text-sm text-cyan-400 mb-2">&quot;{player.alias}&quot;</p>}
 
                   <div className="flex items-center gap-4 text-xs text-gray-400 mb-3">
                     {player.preferredPosition && (
@@ -610,7 +612,7 @@ export default function JoueursPage() {
                       <div>
                         <label className="block text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
                           <Calendar className="w-4 h-4" />
-                          Date d'adhésion
+                          Date d&apos;adhésion
                         </label>
                         <input
                           type="date"
@@ -658,10 +660,12 @@ export default function JoueursPage() {
                     <div className="flex items-center gap-6">
                       <div className="flex-shrink-0">
                         {formData.profilePhoto ? (
-                          <img
+                          <Image
                             src={URL.createObjectURL(formData.profilePhoto)}
                             alt="Aperçu"
-                            className="h-24 w-24 rounded-full object-cover border-2 border-cyan-500"
+                            width={96}
+                            height={96}
+                            className="rounded-full object-cover border-2 border-cyan-500"
                           />
                         ) : (
                           <div className="h-24 w-24 rounded-full bg-gray-800 flex items-center justify-center border-2 border-gray-700">
@@ -682,7 +686,7 @@ export default function JoueursPage() {
                             hover:file:bg-cyan-500/20 file:transition-all file:cursor-pointer"
                         />
                         <p className="mt-2 text-xs text-gray-500">
-                          PNG, JPG, GIF jusqu'à 5MB
+                          PNG, JPG, GIF jusqu&apos;à 5MB
                         </p>
                       </div>
                     </div>

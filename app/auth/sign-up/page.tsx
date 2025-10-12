@@ -123,7 +123,7 @@ export default function RegisterPage() {
             Créer un compte
           </h1>
           <p className="text-gray-400 text-sm">
-            Rejoignez l'administration du FCA
+            Rejoignez l&apos;administration du FCA
           </p>
         </div>
 
@@ -330,7 +330,7 @@ export default function RegisterPage() {
           {/* Footer */}
           <div className="mt-6 pt-6 border-t border-gray-700/50">
             <p className="text-center text-xs text-gray-500">
-              En vous inscrivant, vous acceptez les conditions d'utilisation
+              En vous inscrivant, vous acceptez les conditions d&apos;utilisation
             </p>
           </div>
         </motion.div>

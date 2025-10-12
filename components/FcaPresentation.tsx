@@ -18,7 +18,7 @@ export default function FcaPresentation() {
         </h2>
 
         <p className="text-base sm:text-lg md:text-xl text-gray-700 max-w-4xl mx-auto leading-relaxed">
-          Le FCA n'est pas qu'un simple club de football. C'est une <span className="font-bold text-cyan-600">famille, une confrérie</span>, une fusion de talents, de personnalités et d'histoires.
+          Le FCA n&apos;est pas qu&apos;un simple club de football. C&apos;est une <span className="font-bold text-cyan-600">famille, une confrérie</span>, une fusion de talents, de personnalités et d&apos;histoires.
           Chaque membre y apporte sa touche, sa folie, son sérieux, son talent ou son humour. Ensemble, ils forment un <span className="font-bold text-indigo-600">collectif vivant</span>, à la fois compétitif et fraternel.
         </p>
       </div>
@@ -116,7 +116,7 @@ export default function FcaPresentation() {
           </div>
           <div>
             <h3 className="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 mb-2">
-              L'ADN du Club
+              L&apos;ADN du Club
             </h3>
             <p className="text-gray-600 text-sm">Ce qui nous rend unique</p>
           </div>
@@ -124,15 +124,15 @@ export default function FcaPresentation() {
 
         <div className="space-y-4 text-gray-700 text-base sm:text-lg leading-relaxed">
           <p>
-            Le FCA, c'est une <span className="font-bold text-indigo-600">communauté multigénérationnelle et multifacette</span>, unie par la passion du ballon rond et la joie d'être ensemble.
+            Le FCA, c&apos;est une <span className="font-bold text-indigo-600">communauté multigénérationnelle et multifacette</span>, unie par la passion du ballon rond et la joie d&apos;être ensemble.
           </p>
           <p>
-            Loin des grands stades, ce club est une <span className="font-bold text-cyan-600">bulle d'authenticité</span>, où les vannes fusent, les liens se tissent et le jeu reste un plaisir avant tout.
+            Loin des grands stades, ce club est une <span className="font-bold text-cyan-600">bulle d&apos;authenticité</span>, où les vannes fusent, les liens se tissent et le jeu reste un plaisir avant tout.
           </p>
 
           <div className="mt-6 pt-6 border-t border-indigo-200">
             <p className="text-xl sm:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-indigo-600 text-center">
-              Des vannes, du talent, de l'amitié.<br />
+              Des vannes, du talent, de l&apos;amitié.<br />
               Voilà le vrai trophée du FCA. 🏆
             </p>
           </div>

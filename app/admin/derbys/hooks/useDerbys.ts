@@ -36,6 +36,7 @@ export const useDerbys = () => {
 
     useEffect(() => {
         fetchDerbys();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page, statusFilter, dateFilter]);
 
     const resetFilters = () => {

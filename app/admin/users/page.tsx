@@ -280,11 +280,11 @@ export default function UsersManagementPage() {
                   <p className="text-gray-300 text-sm">
                     {confirmModal.action === "revoke" ? (
                       <>
-                        Êtes-vous sûr de vouloir révoquer l'accès de{" "}
+                        Êtes-vous sûr de vouloir révoquer l&apos;accès de{" "}
                         <span className="font-bold text-white">{confirmModal.user.fullName}</span> ?
                         <br />
                         <br />
-                        Cette personne ne pourra plus se connecter à l'administration.
+                        Cette personne ne pourra plus se connecter à l&apos;administration.
                       </>
                     ) : (
                       <>

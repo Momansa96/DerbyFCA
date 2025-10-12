@@ -85,7 +85,7 @@ export default function Home() {
           <div className="mt-12 pt-8 border-t border-white/20 grid grid-cols-3 gap-4 sm:gap-6 animate-fade-in" style={{ animationDelay: '0.6s' }}>
             <div className="text-center">
               <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-cyan-400">15+</div>
-              <div className="text-xs sm:text-sm text-gray-400 mt-1">Ans d'existence</div>
+              <div className="text-xs sm:text-sm text-gray-400 mt-1">Ans d&apos;existence</div>
             </div>
             <div className="text-center">
               <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-indigo-400">30+</div>

@@ -104,6 +104,7 @@ export default function AdhesionsPage() {
     if (status === "authenticated") {
       fetchApplications(1);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, debouncedSearch, viewedFilter]);
 
   // Gérer la mise à jour après marquage comme vue
@@ -158,9 +159,9 @@ export default function AdhesionsPage() {
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-1 h-6 bg-gradient-to-b from-cyan-400 to-indigo-500 rounded-full"></div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white">Demandes d'Adhésion</h1>
+            <h1 className="text-2xl sm:text-3xl font-black text-white">Demandes d&apos;Adhésion</h1>
           </div>
-          <p className="text-gray-400 text-sm">Gérez les demandes d'adhésion au FCA</p>
+          <p className="text-gray-400 text-sm">Gérez les demandes d&apos;adhésion au FCA</p>
         </div>
 
         {/* Stats Cards */}
@@ -214,7 +215,7 @@ export default function AdhesionsPage() {
           >
             <div className="flex items-center gap-2 mb-2">
               <TrendingUp className="w-4 h-4 text-indigo-400" />
-              <span className="text-xs text-gray-400">Aujourd'hui</span>
+              <span className="text-xs text-gray-400">Aujourd&apos;hui</span>
             </div>
             <div className="text-2xl font-black text-white">{stats.today}</div>
             <div className="text-xs text-gray-500 mt-1">Nouvelles demandes</div>

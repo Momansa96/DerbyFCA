@@ -2,11 +2,11 @@
 
 import { useState, useRef, useEffect } from "react";
 
-type TermsModalProps = {
+interface TermsModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAccept: () => void;
-};
+}
 
 export default function TermsModal({ isOpen, onClose, onAccept }: TermsModalProps) {
   const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
@@ -47,7 +47,7 @@ export default function TermsModal({ isOpen, onClose, onAccept }: TermsModalProp
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-2xl font-bold text-indigo-700">
-            📜 Conditions d'adhésion - FCA
+            📜 Conditions d&apos;adhésion - FCA
           </h2>
           <button
             onClick={onClose}
@@ -71,7 +71,7 @@ export default function TermsModal({ isOpen, onClose, onAccept }: TermsModalProp
             </h3>
             <ul className="space-y-2 text-gray-700">
               <li>• <strong>Respect et fair-play</strong> : Comportement exemplaire envers les coéquipiers, adversaires et arbitres</li>
-              <li>• <strong>Solidarité</strong> : L'esprit d'équipe avant tout</li>
+              <li>• <strong>Solidarité</strong> : L&apos;esprit d&apos;équipe avant tout</li>
               <li>• <strong>Assiduité</strong> : Présence régulière aux entraînements et matchs</li>
               <li>• <strong>Ponctualité</strong> : Respecter les horaires fixés</li>
               <li>• <strong>Discipline</strong> : Suivre les consignes du bureau et des capitaines</li>
@@ -85,9 +85,9 @@ export default function TermsModal({ isOpen, onClose, onAccept }: TermsModalProp
             </h3>
             <div className="space-y-3">
               <div className="bg-cyan-50 border-l-4 border-cyan-500 p-4 rounded">
-                <p className="font-semibold text-cyan-900">Frais d'adhésion</p>
+                <p className="font-semibold text-cyan-900">Frais d&apos;adhésion</p>
                 <p className="text-2xl font-bold text-cyan-700">2000 FCFA</p>
-                <p className="text-sm text-cyan-600">Paiement unique à l'inscription</p>
+                <p className="text-sm text-cyan-600">Paiement unique à l&apos;inscription</p>
               </div>
               <div className="bg-indigo-50 border-l-4 border-indigo-500 p-4 rounded">
                 <p className="font-semibold text-indigo-900">Cotisation hebdomadaire</p>
@@ -117,7 +117,7 @@ export default function TermsModal({ isOpen, onClose, onAccept }: TermsModalProp
               </div>
               <div>
                 <h4 className="font-semibold">Article 4 - Matchs et entraînements</h4>
-                <p className="text-sm">Les matchs se déroulent le samedi. La présence est fortement encouragée pour maintenir la cohésion de l'équipe.</p>
+                <p className="text-sm">Les matchs se déroulent le samedi. La présence est fortement encouragée pour maintenir la cohésion de l&apos;équipe.</p>
               </div>
               <div>
                 <h4 className="font-semibold">Article 5 - Matériel</h4>
@@ -134,7 +134,7 @@ export default function TermsModal({ isOpen, onClose, onAccept }: TermsModalProp
           {!hasScrolledToBottom && (
             <div className="sticky bottom-0 bg-gradient-to-t from-white via-white to-transparent pt-8 pb-4 text-center">
               <p className="text-sm text-gray-500 animate-bounce">
-                ⬇️ Faites défiler jusqu'en bas pour continuer
+                ⬇️ Faites défiler jusqu&apos;en bas pour continuer
               </p>
             </div>
           )}
@@ -158,7 +158,7 @@ export default function TermsModal({ isOpen, onClose, onAccept }: TermsModalProp
                   : "bg-gray-300 text-gray-500 cursor-not-allowed"
               }`}
             >
-              {hasScrolledToBottom ? "✓ J'ai lu et j'accepte" : "Lisez jusqu'en bas"}
+              {hasScrolledToBottom ? "✓ J&apos;ai lu et j&apos;accepte" : "Lisez jusqu&apos;en bas"}
             </button>
           </div>
         </div>
