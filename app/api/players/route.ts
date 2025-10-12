@@ -14,13 +14,13 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    const formattedPlayers = players.map(player => ({
+    const formattedPlayers = players.map((player: any) => ({
       ...player,
       joinDate: player.joinDate.toISOString(),
       createdAt: player.createdAt.toISOString(),
       updatedAt: player.updatedAt.toISOString(),
       goalsCount: player.goals.length,
-      teams: player.teams.map(team => team.name),
+      teams: player.teams.map((team: any) => team.name),
     }));
 
     return NextResponse.json(formattedPlayers);

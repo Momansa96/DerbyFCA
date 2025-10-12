@@ -124,10 +124,10 @@ export async function PUT(
 
       // Compter les victoires par équipe
       const aiglesWins = allMatches.filter(
-        (match) => match.winnerId === aiglesId
+        (match: any) => match.winnerId === aiglesId
       ).length;
       const lionsWins = allMatches.filter(
-        (match) => match.winnerId === lionsId
+        (match: any) => match.winnerId === lionsId
       ).length;
 
       let winnerId: string | null = null;
