@@ -102,7 +102,7 @@ export async function PUT(
     });
 
     const allMatchesCompleted = allMatches.every(
-      (match) => match.status === "COMPLETED"
+      (match: any) => match.status === "COMPLETED"
     );
 
     // Si tous les matchs sont terminés, calculer le vainqueur du derby
