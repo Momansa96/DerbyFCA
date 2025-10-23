@@ -47,6 +47,7 @@ export default function Navbar() {
     { name: "Derbys", href: "/admin/derbys" },
     { name: "Matches", href: "/admin/matches" },
     { name: "Joueurs", href: "/admin/joueurs" },
+    { name: "Cotisations", href: "/admin/cotisations" },
     { name: "Adhésions", href: "/admin/adhesions", badge: newApplicationsCount },
     { name: "Utilisateurs", href: "/admin/users" },
     { name: "Statistiques", href: "/admin/statistiques" },
@@ -56,6 +57,7 @@ export default function Navbar() {
     { name: "Derby", href: "/visitors/tirages" },
     { name: "Calendrier", href: "/visitors/matchs" },
     { name: "L'equipe", href: "/visitors/joueurs" },
+    { name: "Cotisations", href: "/visitors/cotisations" },
     { name: "Statistiques", href: "/visitors/classement" },
     { name: "Le Club", href: "/visitors/club" },
   ];

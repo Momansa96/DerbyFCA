@@ -25,7 +25,7 @@ model User {
 }
 
 model Player {
-  id                String   @id @default(uuid())
+  id                String         @id @default(uuid())
   fullName          String
   alias             String?
   bureauRole        String?
@@ -33,14 +33,15 @@ model Player {
   preferredPosition String?
   description       String?
   number            Int?
-  status            String   @default("ACTIF")
-  joinDate          DateTime @default(now())
+  status            String         @default("ACTIF")
+  joinDate          DateTime       @default(now())
   email             String?
   phone             String?
   teams             Team[]
   goals             Goal[]
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  contributions     Contribution[]
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
 }
 
 model Team {
@@ -161,4 +162,39 @@ model MembershipApplication {
   @@index([isViewed])
   @@index([createdAt])
   @@index([email])
+}
+
+model ContributionWeek {
+  id            String         @id @default(uuid())
+  year          Int            // Année (ex: 2025)
+  weekNumber    Int            // Numéro de la semaine (1-52)
+  weekStartDate DateTime       // Date de début de semaine (lundi)
+  weekEndDate   DateTime       // Date de fin de semaine (dimanche)
+  amount        Int            @default(200) // Montant attendu en FCFA
+  contributions Contribution[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@unique([year, weekNumber]) // Une seule semaine par numéro/année
+  @@index([year])
+  @@index([weekStartDate])
+}
+
+model Contribution {
+  id          String           @id @default(uuid())
+  player      Player           @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  playerId    String
+  week        ContributionWeek @relation(fields: [weekId], references: [id], onDelete: Cascade)
+  weekId      String
+  amountPaid  Int              // Montant payé (peut être différent de 200)
+  paymentDate DateTime         @default(now()) // Date réelle du paiement
+  notes       String?          // Notes (ex: "Payé en retard", "Avance 4 semaines")
+  recordedBy  String?          // ID de l'admin qui a enregistré
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@unique([playerId, weekId]) // Un joueur ne peut payer qu'une fois par semaine
+  @@index([playerId])
+  @@index([weekId])
+  @@index([paymentDate])
 }

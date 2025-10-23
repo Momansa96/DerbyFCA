@@ -33,16 +33,15 @@ export default function CarteStatistiques() {
   }, []);
 
   return (
-    <div className="card-body p-6 flex flex-col items-start">
-      <BarChart3 className="h-10 w-10 text-orange-500 mb-3 group-hover:scale-110 transition-transform" />
-      <h2 className="card-title text-xl font-semibold mb-2 text-gray-800">
+    <div className="p-6 flex flex-col items-start h-full">
+      <BarChart3 className="h-10 w-10 text-yellow-400 mb-3 group-hover:scale-110 transition-transform" />
+      <h2 className="text-xl font-semibold mb-2 text-white">
         Statistiques
       </h2>
-      <p className="text-gray-600 mb-4">Vue d&apos;ensemble du club</p>
       {loading ? (
         <p className="text-sm text-gray-500">Chargement...</p>
       ) : stats ? (
-        <div className="text-sm text-gray-700 space-y-1">
+        <div className="flex space-x-2 items-center  text-sm text-gray-400 space-y-1">
           <p>⚽ {stats.totalDerbys} derby{stats.totalDerbys > 1 ? "s" : ""}</p>
           <p>👥 {stats.totalJoueurs} joueur{stats.totalJoueurs > 1 ? "s" : ""}</p>
           <p>📅 {stats.totalMatchs} match{stats.totalMatchs > 1 ? "s" : ""}</p>

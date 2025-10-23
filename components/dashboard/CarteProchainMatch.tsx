@@ -28,12 +28,12 @@ export default function CarteProchainMatch() {
   }
 
   return (
-    <div className="card-body p-6 flex flex-col items-start">
-      <Trophy className="h-10 w-10 text-purple-500 mb-3 group-hover:scale-110 transition-transform" />
-      <h2 className="card-title text-xl font-semibold mb-2 text-gray-800">
+    <div className="p-6 flex flex-col items-start h-full">
+      <Trophy className="h-10 w-10 text-purple-400 mb-3 group-hover:scale-110 transition-transform" />
+      <h2 className="text-xl font-semibold mb-2 text-white">
         Matchs
       </h2>
-      <p className="text-gray-600 mb-4">Programmation des matchs</p>
+      <p className="text-gray-400 mb-4">Programmation des matchs</p>
       <p className="text-sm text-gray-500">
         Prochain match : {loading ? "Chargement..." : formatDate(nextMatchDate)}
       </p>

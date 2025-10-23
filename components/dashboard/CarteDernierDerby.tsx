@@ -28,12 +28,12 @@ export default function CarteDernierDerby() {
   }
 
   return (
-    <div className="card-body p-6 flex flex-col items-start">
-      <CalendarDaysIcon className="h-10 w-10 text-blue-500 mb-3 group-hover:scale-110 transition-transform" />
-      <h2 className="card-title text-xl font-semibold mb-2 text-gray-800">
+    <div className="p-6 flex flex-col items-start h-full">
+      <CalendarDaysIcon className="h-10 w-10 text-indigo-400 mb-3 group-hover:scale-110 transition-transform" />
+      <h2 className="text-xl font-semibold mb-2 text-white">
         Nouveau Tirage
       </h2>
-      <p className="text-gray-600 mb-4">
+      <p className="text-gray-400 mb-4">
         Créer un nouveau tirage d&apos;équipes
       </p>
       <p className="text-sm text-gray-500">

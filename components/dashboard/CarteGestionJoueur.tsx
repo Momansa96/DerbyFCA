@@ -19,12 +19,12 @@ export default function CarteGestionJoueurs() {
   }, []);
 
   return (
-    <div className="card-body p-6 flex flex-col items-start">
-      <UsersIcon className="h-10 w-10 text-green-500 mb-3 group-hover:scale-110 transition-transform" />
-      <h2 className="card-title text-xl font-semibold mb-2 text-gray-800">
+    <div className="p-6 flex flex-col items-start h-full">
+      <UsersIcon className="h-10 w-10 text-green-400 mb-3 group-hover:scale-110 transition-transform" />
+      <h2 className="text-xl font-semibold mb-2 text-white">
         Gestion des Joueurs
       </h2>
-      <p className="text-gray-600 mb-4">Adhesion et Mise ajour Profil</p>
+      <p className="text-gray-400 mb-4">Adhesion et Mise à jour Profil</p>
       <p className="text-sm text-gray-500">
         Total joueurs : {loading ? "Chargement..." : totalJoueurs}
       </p>
