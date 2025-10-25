@@ -27,8 +27,10 @@ export const useDerbys = () => {
 
             setDerbys(filteredDerbys);
             setTotal(data.total);
+            return data;
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+            throw err;
         } finally {
             setLoading(false);
         }

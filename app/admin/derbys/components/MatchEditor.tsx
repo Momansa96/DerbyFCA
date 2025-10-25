@@ -1,17 +1,26 @@
-import { Target, Check, EyeOff, Eye } from 'lucide-react';
-import { Match, Derby, Goal } from '../utils/types';
+import { Target, Check, EyeOff, Eye, Square } from 'lucide-react';
+import { Match, Derby, Goal, YellowCard, RedCard } from '../utils/types';
 import { GoalManager } from './GoalManager';
+import { CardManager } from './CardManager';
 
 interface MatchEditorProps {
     match: Match;
     derby: Derby;
     scores: { team1: number; team2: number };
     goals: Goal[];
+    yellowCards: YellowCard[];
+    redCards: RedCard[];
     editingGoals: boolean;
+    editingCards: boolean;
     onScoreChange: (matchId: string, team: 'team1' | 'team2', value: string) => void;
     onToggleEditingGoals: () => void;
-    onAddGoal: (matchId: string, teamId: string, playerId: string, isOwnGoal: boolean, derby: Derby) => void;
+    onToggleEditingCards: () => void;
+    onAddGoal: (matchId: string, teamId: string, playerId: string, isOwnGoal: boolean, derby: Derby, assistPlayerId?: string) => void;
     onRemoveGoal: (matchId: string, goalId: string) => void;
+    onAddYellowCard: (matchId: string, playerId: string, derby: Derby) => void;
+    onAddRedCard: (matchId: string, playerId: string, derby: Derby) => void;
+    onRemoveYellowCard: (matchId: string, cardId: string) => void;
+    onRemoveRedCard: (matchId: string, cardId: string) => void;
     onSubmit: () => void;
 }
 
@@ -20,11 +29,19 @@ export const MatchEditor = ({
     derby,
     scores,
     goals,
+    yellowCards,
+    redCards,
     editingGoals,
+    editingCards,
     onScoreChange,
     onToggleEditingGoals,
+    onToggleEditingCards,
     onAddGoal,
     onRemoveGoal,
+    onAddYellowCard,
+    onAddRedCard,
+    onRemoveYellowCard,
+    onRemoveRedCard,
     onSubmit
 }: MatchEditorProps) => {
     return (
@@ -69,6 +86,29 @@ export const MatchEditor = ({
                         goals={goals}
                         onAddGoal={onAddGoal}
                         onRemoveGoal={onRemoveGoal}
+                    />
+                )}
+            </div>
+
+            <div className="mt-4">
+                <button
+                    onClick={onToggleEditingCards}
+                    className="w-full flex items-center justify-center gap-2 bg-gray-700/50 border border-gray-600/50 text-gray-300 px-4 py-3 rounded-lg hover:bg-gray-700 hover:border-gray-600 transition-all"
+                >
+                    {editingCards ? <EyeOff className="w-4 h-4" /> : <Square className="w-4 h-4" />}
+                    {editingCards ? 'Masquer les cartons' : 'Gérer les cartons'}
+                </button>
+
+                {editingCards && (
+                    <CardManager
+                        match={match}
+                        derby={derby}
+                        yellowCards={yellowCards}
+                        redCards={redCards}
+                        onAddYellowCard={(matchId, playerId) => onAddYellowCard(matchId, playerId, derby)}
+                        onAddRedCard={(matchId, playerId) => onAddRedCard(matchId, playerId, derby)}
+                        onRemoveYellowCard={onRemoveYellowCard}
+                        onRemoveRedCard={onRemoveRedCard}
                     />
                 )}
             </div>

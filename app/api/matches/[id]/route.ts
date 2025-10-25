@@ -6,7 +6,7 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { scoreTeam1, scoreTeam2, goals } = await request.json();
+    const { scoreTeam1, scoreTeam2, goals, yellowCards, redCards } = await request.json();
     const matchId = params.id;
 
     // Vérifier d'abord si le match existe
@@ -51,8 +51,14 @@ export async function PUT(
       }
     }
 
-    // Supprimer les buts existants
+    // Supprimer les buts, cartons jaunes et cartons rouges existants
     await prisma.goal.deleteMany({
+      where: { matchId },
+    });
+    await prisma.yellowCard.deleteMany({
+      where: { matchId },
+    });
+    await prisma.redCard.deleteMany({
       where: { matchId },
     });
 
@@ -80,15 +86,53 @@ export async function PUT(
           playerId: goal.playerId,
           teamId: goal.teamId,
           isOwnGoal: goal.isOwnGoal,
+          assistPlayerId: goal.assistPlayerId || null,
         })),
       });
     }
 
-    // Récupérer le match mis à jour avec les buts
+    // Créer les cartons jaunes
+    if (yellowCards && yellowCards.length > 0) {
+      console.log("Creating yellow cards:", yellowCards);
+      await prisma.yellowCard.createMany({
+        data: yellowCards.map((card: any) => ({
+          matchId,
+          playerId: card.playerId,
+          minute: card.minute || null,
+          reason: card.reason || null,
+        })),
+      });
+    }
+
+    // Créer les cartons rouges
+    if (redCards && redCards.length > 0) {
+      console.log("Creating red cards:", redCards);
+      await prisma.redCard.createMany({
+        data: redCards.map((card: any) => ({
+          matchId,
+          playerId: card.playerId,
+          minute: card.minute || null,
+          reason: card.reason || null,
+        })),
+      });
+    }
+
+    // Récupérer le match mis à jour avec les buts et cartons
     const matchWithGoals = await prisma.match.findUnique({
       where: { id: matchId },
       include: {
         goals: {
+          include: {
+            player: true,
+            assistPlayer: true,
+          },
+        },
+        yellowCards: {
+          include: {
+            player: true,
+          },
+        },
+        redCards: {
           include: {
             player: true,
           },
@@ -197,8 +241,12 @@ export async function PUT(
     return NextResponse.json(matchWithGoals);
   } catch (error) {
     console.error("Erreur lors de la mise à jour du match:", error);
+    console.error("Stack trace:", error instanceof Error ? error.stack : 'No stack trace');
     return NextResponse.json(
-      { error: "Erreur lors de la mise à jour du match" },
+      {
+        error: "Erreur lors de la mise à jour du match",
+        details: error instanceof Error ? error.message : String(error)
+      },
       { status: 500 }
     );
   }

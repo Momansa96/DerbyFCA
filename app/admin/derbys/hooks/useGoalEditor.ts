@@ -12,12 +12,16 @@ export const useGoalEditor = () => {
         }));
     };
 
-    const handleAddGoal = (matchId: string, teamId: string, playerId: string, isOwnGoal: boolean, derby: Derby) => {
+    const handleAddGoal = (matchId: string, teamId: string, playerId: string, isOwnGoal: boolean, derby: Derby, assistPlayerId?: string) => {
         const player = [...derby.team1.players, ...derby.team2.players].find(p => p.id === playerId);
         if (!player) {
             console.error('Joueur non trouvé');
             return;
         }
+
+        const assistPlayer = assistPlayerId
+            ? [...derby.team1.players, ...derby.team2.players].find(p => p.id === assistPlayerId)
+            : null;
 
         setGoals(prev => ({
             ...prev,
@@ -26,11 +30,17 @@ export const useGoalEditor = () => {
                 playerId,
                 teamId,
                 isOwnGoal,
+                assistPlayerId: assistPlayerId || null,
                 player: {
                     id: player.id,
                     fullName: player.fullName,
                     profilePhoto: player.profilePhoto
-                }
+                },
+                assistPlayer: assistPlayer ? {
+                    id: assistPlayer.id,
+                    fullName: assistPlayer.fullName,
+                    profilePhoto: assistPlayer.profilePhoto
+                } : null
             }]
         }));
     };

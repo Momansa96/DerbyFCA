@@ -16,6 +16,26 @@ export interface Goal {
     teamId: string;
     isOwnGoal: boolean;
     player: Player;
+    assistPlayerId?: string | null;
+    assistPlayer?: Player | null;
+}
+
+export interface YellowCard {
+    id: string;
+    matchId: string;
+    playerId: string;
+    player: Player;
+    minute?: number | null;
+    reason?: string | null;
+}
+
+export interface RedCard {
+    id: string;
+    matchId: string;
+    playerId: string;
+    player: Player;
+    minute?: number | null;
+    reason?: string | null;
 }
 
 export interface Match {
@@ -28,6 +48,8 @@ export interface Match {
     team2Id: string;
     winnerId: string | null;
     goals: Goal[];
+    yellowCards?: YellowCard[];
+    redCards?: RedCard[];
 }
 
 export interface Derby {

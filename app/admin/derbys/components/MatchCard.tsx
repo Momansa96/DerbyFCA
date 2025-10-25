@@ -1,5 +1,5 @@
 import { Calendar, Edit2 } from 'lucide-react';
-import { Match, Derby, Goal } from '../utils/types';
+import { Match, Derby, Goal, YellowCard, RedCard } from '../utils/types';
 import { getMatchStatus } from '../utils/derbyHelpers';
 import { MatchDisplay } from './MatchDisplay';
 import { MatchEditor } from './MatchEditor';
@@ -10,12 +10,20 @@ interface MatchCardProps {
     isEditing: boolean;
     scores?: { team1: number; team2: number };
     goals?: Goal[];
+    yellowCards?: YellowCard[];
+    redCards?: RedCard[];
     editingGoals: boolean;
+    editingCards: boolean;
     onEdit: () => void;
     onScoreChange: (matchId: string, team: 'team1' | 'team2', value: string) => void;
     onToggleEditingGoals: () => void;
-    onAddGoal: (matchId: string, teamId: string, playerId: string, isOwnGoal: boolean, derby: Derby) => void;
+    onToggleEditingCards: () => void;
+    onAddGoal: (matchId: string, teamId: string, playerId: string, isOwnGoal: boolean, derby: Derby, assistPlayerId?: string) => void;
     onRemoveGoal: (matchId: string, goalId: string) => void;
+    onAddYellowCard: (matchId: string, playerId: string, derby: Derby) => void;
+    onAddRedCard: (matchId: string, playerId: string, derby: Derby) => void;
+    onRemoveYellowCard: (matchId: string, cardId: string) => void;
+    onRemoveRedCard: (matchId: string, cardId: string) => void;
     onSubmit: () => void;
 }
 
@@ -38,12 +46,20 @@ export const MatchCard = ({
     isEditing,
     scores,
     goals = [],
+    yellowCards = [],
+    redCards = [],
     editingGoals,
+    editingCards,
     onEdit,
     onScoreChange,
     onToggleEditingGoals,
+    onToggleEditingCards,
     onAddGoal,
     onRemoveGoal,
+    onAddYellowCard,
+    onAddRedCard,
+    onRemoveYellowCard,
+    onRemoveRedCard,
     onSubmit
 }: MatchCardProps) => {
     return (
@@ -70,11 +86,19 @@ export const MatchCard = ({
                     derby={derby}
                     scores={scores}
                     goals={goals}
+                    yellowCards={yellowCards}
+                    redCards={redCards}
                     editingGoals={editingGoals}
+                    editingCards={editingCards}
                     onScoreChange={onScoreChange}
                     onToggleEditingGoals={onToggleEditingGoals}
+                    onToggleEditingCards={onToggleEditingCards}
                     onAddGoal={onAddGoal}
                     onRemoveGoal={onRemoveGoal}
+                    onAddYellowCard={onAddYellowCard}
+                    onAddRedCard={onAddRedCard}
+                    onRemoveYellowCard={onRemoveYellowCard}
+                    onRemoveRedCard={onRemoveRedCard}
                     onSubmit={onSubmit}
                 />
             ) : (

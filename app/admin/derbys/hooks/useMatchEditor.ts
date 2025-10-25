@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Match, Goal } from '../utils/types';
+import { Match, Goal, YellowCard, RedCard } from '../utils/types';
 
 export const useMatchEditor = (onSuccess: () => void) => {
     const [editingMatch, setEditingMatch] = useState<string | null>(null);
@@ -32,7 +32,7 @@ export const useMatchEditor = (onSuccess: () => void) => {
         setEditingMatch(null);
     };
 
-    const handleScoreSubmit = async (matchId: string, matchGoals: Goal[]) => {
+    const handleScoreSubmit = async (matchId: string, matchGoals: Goal[], matchYellowCards: YellowCard[], matchRedCards: RedCard[]) => {
         try {
             const matchScores = scores[matchId];
             if (!matchScores) return;
@@ -45,7 +45,9 @@ export const useMatchEditor = (onSuccess: () => void) => {
                 body: JSON.stringify({
                     scoreTeam1: matchScores.team1,
                     scoreTeam2: matchScores.team2,
-                    goals: matchGoals
+                    goals: matchGoals,
+                    yellowCards: matchYellowCards,
+                    redCards: matchRedCards
                 }),
             });
 

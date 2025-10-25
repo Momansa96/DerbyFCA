@@ -1,5 +1,5 @@
 import { Trophy, Calendar, Award } from 'lucide-react';
-import { Derby, Goal } from '../utils/types';
+import { Derby, Goal, YellowCard, RedCard } from '../utils/types';
 import { getWinnerName } from '../utils/derbyHelpers';
 import { TeamPanel } from './TeamPanel';
 import { MatchCard } from './MatchCard';
@@ -10,12 +10,20 @@ interface DerbyCardProps {
     editingMatch: string | null;
     scores: { [key: string]: { team1: number; team2: number } };
     goals: { [key: string]: Goal[] };
+    yellowCards: { [key: string]: YellowCard[] };
+    redCards: { [key: string]: RedCard[] };
     editingGoals: string | null;
+    editingCards: string | null;
     onEditMatch: (match: any) => void;
     onScoreChange: (matchId: string, team: 'team1' | 'team2', value: string) => void;
     onToggleEditingGoals: (matchId: string | null) => void;
-    onAddGoal: (matchId: string, teamId: string, playerId: string, isOwnGoal: boolean, derby: Derby) => void;
+    onToggleEditingCards: (matchId: string | null) => void;
+    onAddGoal: (matchId: string, teamId: string, playerId: string, isOwnGoal: boolean, derby: Derby, assistPlayerId?: string) => void;
     onRemoveGoal: (matchId: string, goalId: string) => void;
+    onAddYellowCard: (matchId: string, playerId: string, derby: Derby) => void;
+    onAddRedCard: (matchId: string, playerId: string, derby: Derby) => void;
+    onRemoveYellowCard: (matchId: string, cardId: string) => void;
+    onRemoveRedCard: (matchId: string, cardId: string) => void;
     onSubmitScore: (matchId: string) => void;
 }
 
@@ -24,12 +32,20 @@ export const DerbyCard = ({
     editingMatch,
     scores,
     goals,
+    yellowCards,
+    redCards,
     editingGoals,
+    editingCards,
     onEditMatch,
     onScoreChange,
     onToggleEditingGoals,
+    onToggleEditingCards,
     onAddGoal,
     onRemoveGoal,
+    onAddYellowCard,
+    onAddRedCard,
+    onRemoveYellowCard,
+    onRemoveRedCard,
     onSubmitScore
 }: DerbyCardProps) => {
     const allMatchesCompleted = derby.matches.every(match => match.status === 'COMPLETED');
@@ -85,12 +101,20 @@ export const DerbyCard = ({
                             isEditing={editingMatch === match.id}
                             scores={scores[match.id]}
                             goals={goals[match.id] || []}
+                            yellowCards={yellowCards[match.id] || []}
+                            redCards={redCards[match.id] || []}
                             editingGoals={editingGoals === match.id}
+                            editingCards={editingCards === match.id}
                             onEdit={() => onEditMatch(match)}
                             onScoreChange={onScoreChange}
                             onToggleEditingGoals={() => onToggleEditingGoals(editingGoals === match.id ? null : match.id)}
+                            onToggleEditingCards={() => onToggleEditingCards(editingCards === match.id ? null : match.id)}
                             onAddGoal={onAddGoal}
                             onRemoveGoal={onRemoveGoal}
+                            onAddYellowCard={onAddYellowCard}
+                            onAddRedCard={onAddRedCard}
+                            onRemoveYellowCard={onRemoveYellowCard}
+                            onRemoveRedCard={onRemoveRedCard}
                             onSubmit={() => onSubmitScore(match.id)}
                         />
                     ))}

@@ -38,7 +38,10 @@ model Player {
   email             String?
   phone             String?
   teams             Team[]
-  goals             Goal[]
+  goals             Goal[]         @relation("GoalScorer")
+  assists           Goal[]         @relation("GoalAssist")
+  yellowCards       YellowCard[]
+  redCards          RedCard[]
   contributions     Contribution[]
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
@@ -71,37 +74,42 @@ model Derby {
 }
 
 model Match {
-  id        String   @id @default(uuid())
-  date      DateTime
-  team1     Team     @relation("Team1Matches", fields: [team1Id], references: [id])
-  team1Id   String
-  team2     Team     @relation("Team2Matches", fields: [team2Id], references: [id])
-  team2Id   String
-  derby     Derby    @relation(fields: [derbyId], references: [id])
-  derbyId   String
-  score1    Int?
-  score2    Int?
-  status    String   @default("PENDING")
-  winnerId  String?
-  goals     Goal[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String       @id @default(uuid())
+  date        DateTime
+  team1       Team         @relation("Team1Matches", fields: [team1Id], references: [id])
+  team1Id     String
+  team2       Team         @relation("Team2Matches", fields: [team2Id], references: [id])
+  team2Id     String
+  derby       Derby        @relation(fields: [derbyId], references: [id])
+  derbyId     String
+  score1      Int?
+  score2      Int?
+  status      String       @default("PENDING")
+  winnerId    String?
+  goals       Goal[]
+  yellowCards YellowCard[]
+  redCards    RedCard[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }
 
 model Goal {
-  id        String   @id @default(uuid())
-  match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
-  matchId   String
-  player    Player   @relation(fields: [playerId], references: [id])
-  playerId  String
-  team      Team     @relation(fields: [teamId], references: [id])
-  teamId    String
-  isOwnGoal Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String   @id @default(uuid())
+  match          Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  matchId        String
+  player         Player   @relation("GoalScorer", fields: [playerId], references: [id])
+  playerId       String
+  assistPlayer   Player?  @relation("GoalAssist", fields: [assistPlayerId], references: [id])
+  assistPlayerId String?
+  team           Team     @relation(fields: [teamId], references: [id])
+  teamId         String
+  isOwnGoal      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@index([matchId])
   @@index([playerId])
+  @@index([assistPlayerId])
   @@index([teamId])
 }
 
@@ -197,4 +205,34 @@ model Contribution {
   @@index([playerId])
   @@index([weekId])
   @@index([paymentDate])
+}
+
+model YellowCard {
+  id        String   @id @default(uuid())
+  match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  matchId   String
+  player    Player   @relation(fields: [playerId], references: [id])
+  playerId  String
+  minute    Int?     // Minute du carton (optionnel)
+  reason    String?  // Raison du carton (optionnel)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([matchId])
+  @@index([playerId])
+}
+
+model RedCard {
+  id        String   @id @default(uuid())
+  match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  matchId   String
+  player    Player   @relation(fields: [playerId], references: [id])
+  playerId  String
+  minute    Int?     // Minute du carton (optionnel)
+  reason    String?  // Raison du carton (optionnel)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([matchId])
+  @@index([playerId])
 }

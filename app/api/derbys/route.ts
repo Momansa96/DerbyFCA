@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     // Créer les équipes
     const team1 = await prisma.team.create({
       data: {
-        name: "Équipe 1",
+        name: "Aigles",
         players: {
           connect: team1Players.map((playerId: string) => ({ id: playerId })),
         },
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
 
     const team2 = await prisma.team.create({
       data: {
-        name: "Équipe 2",
+        name: "Lions",
         players: {
           connect: team2Players.map((playerId: string) => ({ id: playerId })),
         },
@@ -40,29 +40,29 @@ export async function POST(req: NextRequest) {
         team2Id: team2.id,
         matches: {
           create: [
-            // Premier match
+            // Premier match - Aujourd'hui (samedi de création)
             {
-              date: new Date(new Date().setDate(new Date().getDate() + 7)), // Prochain samedi
+              date: new Date(),
               team1Id: team1.id,
               team2Id: team2.id,
             },
-            // Deuxième match
+            // Deuxième match - Samedi prochain
+            {
+              date: new Date(new Date().setDate(new Date().getDate() + 7)),
+              team1Id: team1.id,
+              team2Id: team2.id,
+            },
+            // Troisième match - Dans 2 semaines
             {
               date: new Date(new Date().setDate(new Date().getDate() + 14)),
-              team1Id: team2.id,
-              team2Id: team1.id,
+              team1Id: team1.id,
+              team2Id: team2.id,
             },
-            // Troisième match
+            // Quatrième match - Dans 3 semaines
             {
               date: new Date(new Date().setDate(new Date().getDate() + 21)),
               team1Id: team1.id,
               team2Id: team2.id,
-            },
-            // Quatrième match
-            {
-              date: new Date(new Date().setDate(new Date().getDate() + 28)),
-              team1Id: team2.id,
-              team2Id: team1.id,
             },
           ],
         },
@@ -106,6 +106,17 @@ export async function GET(req: NextRequest) {
         matches: {
           include: {
             goals: {
+              include: {
+                player: true,
+                assistPlayer: true,
+              },
+            },
+            yellowCards: {
+              include: {
+                player: true,
+              },
+            },
+            redCards: {
               include: {
                 player: true,
               },

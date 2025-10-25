@@ -1,11 +1,13 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Trophy, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useDerbys } from './hooks/useDerbys';
 import { useMatchEditor } from './hooks/useMatchEditor';
 import { useGoalEditor } from './hooks/useGoalEditor';
+import { useCardEditor } from './hooks/useCardEditor';
 import { DerbyFilters } from './components/DerbyFilters';
 import { DerbyCard } from './components/DerbyCard';
 import { Match } from './utils/types';
@@ -29,15 +31,41 @@ export default function AdminDerbysPage() {
 
     const { editingMatch, scores, handleScoreChange, startEditing, handleScoreSubmit } = useMatchEditor(refetch);
     const { goals, editingGoals, initializeGoals, handleAddGoal, handleRemoveGoal, toggleEditingGoals } = useGoalEditor();
+    const {
+        yellowCards,
+        redCards,
+        initializeCards,
+        handleAddYellowCard,
+        handleAddRedCard,
+        handleRemoveYellowCard,
+        handleRemoveRedCard
+    } = useCardEditor();
+
+    const [editingCards, setEditingCards] = useState<string | null>(null);
+
+    const toggleEditingCards = (matchId: string | null) => {
+        setEditingCards(matchId);
+    };
 
     const handleEditMatch = (match: Match) => {
         startEditing(match);
         initializeGoals(match.id, match.goals || []);
+        initializeCards(match.id, match.yellowCards || [], match.redCards || []);
     };
 
     const handleSubmitScore = async (matchId: string) => {
-        await handleScoreSubmit(matchId, goals[matchId] || []);
+        await handleScoreSubmit(matchId, goals[matchId] || [], yellowCards[matchId] || [], redCards[matchId] || []);
         toggleEditingGoals(null);
+        toggleEditingCards(null);
+    };
+
+    // Wrapper functions to include derby in card handlers
+    const handleAddYellowCardWithDerby = (matchId: string, playerId: string, derby: any) => {
+        handleAddYellowCard(matchId, playerId, derby);
+    };
+
+    const handleAddRedCardWithDerby = (matchId: string, playerId: string, derby: any) => {
+        handleAddRedCard(matchId, playerId, derby);
     };
 
     if (loading) {
@@ -151,12 +179,20 @@ export default function AdminDerbysPage() {
                                 editingMatch={editingMatch}
                                 scores={scores}
                                 goals={goals}
+                                yellowCards={yellowCards}
+                                redCards={redCards}
                                 editingGoals={editingGoals}
+                                editingCards={editingCards}
                                 onEditMatch={handleEditMatch}
                                 onScoreChange={handleScoreChange}
                                 onToggleEditingGoals={toggleEditingGoals}
+                                onToggleEditingCards={toggleEditingCards}
                                 onAddGoal={handleAddGoal}
                                 onRemoveGoal={handleRemoveGoal}
+                                onAddYellowCard={handleAddYellowCardWithDerby}
+                                onAddRedCard={handleAddRedCardWithDerby}
+                                onRemoveYellowCard={handleRemoveYellowCard}
+                                onRemoveRedCard={handleRemoveRedCard}
                                 onSubmitScore={handleSubmitScore}
                             />
                         </motion.div>

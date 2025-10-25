@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Trophy, Users, Calendar, Target, ChevronDown, ChevronUp, Flame } from "lucide-react";
+import { Trophy, Users, Calendar, Target, ChevronDown, ChevronUp, Flame, Award, UserPlus } from "lucide-react";
 
 type Player = {
   id: string;
@@ -17,8 +17,19 @@ type Team = {
 type Goal = {
   id: string;
   player: Player;
+  assistPlayer?: Player | null;
   teamId: string;
   isOwnGoal: boolean;
+};
+
+type YellowCard = {
+  id: string;
+  player: Player;
+};
+
+type RedCard = {
+  id: string;
+  player: Player;
 };
 
 type Match = {
@@ -29,7 +40,10 @@ type Match = {
   score1?: number | null;
   score2?: number | null;
   status: string;
+  winnerId?: string | null;
   goals?: Goal[];
+  yellowCards?: YellowCard[];
+  redCards?: RedCard[];
 };
 
 type Derby = {
@@ -38,6 +52,8 @@ type Derby = {
   team2: Team;
   matches: Match[];
   createdAt: string;
+  status: string;
+  winnerId?: string | null;
 };
 
 export default function DerbysPage() {
@@ -72,19 +88,61 @@ export default function DerbysPage() {
   };
 
   const getDerbyWinner = (derby: Derby) => {
+    // Si le derby est terminé, utiliser le winnerId
+    if (derby.status === "COMPLETED" && derby.winnerId) {
+      const winnerTeam = derby.winnerId === derby.team1.id ? derby.team1 : derby.team2;
+      return {
+        winner: winnerTeam.name,
+        color: winnerTeam.name === "Aigles" ? "cyan" : "orange",
+        status: "completed"
+      };
+    }
+
+    // Sinon calculer manuellement (fallback)
+    const completedMatches = derby.matches.filter(m => m.status === "COMPLETED");
+
+    if (completedMatches.length === 0) {
+      return { winner: "En attente", color: "gray", status: "pending" };
+    }
+
+    if (completedMatches.length < derby.matches.length) {
+      return { winner: "En cours", color: "yellow", status: "in_progress" };
+    }
+
+    // Calculer le vainqueur si pas de winnerId
     let team1Wins = 0;
     let team2Wins = 0;
 
-    derby.matches.forEach((match) => {
-      if (match.score1 !== null && match.score1 !== undefined && match.score2 !== null && match.score2 !== undefined) {
-        if (match.score1 > match.score2) team1Wins++;
-        else if (match.score2 > match.score1) team2Wins++;
-      }
+    completedMatches.forEach((match) => {
+      if (match.winnerId === derby.team1.id) team1Wins++;
+      else if (match.winnerId === derby.team2.id) team2Wins++;
     });
 
-    if (team1Wins > team2Wins) return { winner: derby.team1.name, color: "cyan" };
-    if (team2Wins > team1Wins) return { winner: derby.team2.name, color: "orange" };
-    return { winner: "Égalité", color: "gray" };
+    if (team1Wins > team2Wins) return { winner: derby.team1.name, color: "cyan", status: "completed" };
+    if (team2Wins > team1Wins) return { winner: derby.team2.name, color: "orange", status: "completed" };
+
+    // Départage par buts
+    let team1Goals = 0;
+    let team2Goals = 0;
+
+    completedMatches.forEach((match) => {
+      team1Goals += match.score1 ?? 0;
+      team2Goals += match.score2 ?? 0;
+    });
+
+    if (team1Goals > team2Goals) return { winner: derby.team1.name, color: "cyan", status: "completed" };
+    if (team2Goals > team1Goals) return { winner: derby.team2.name, color: "orange", status: "completed" };
+
+    return { winner: "Égalité parfaite", color: "gray", status: "draw" };
+  };
+
+  const getMatchStatus = (match: Match, derby: Derby) => {
+    if (match.status !== "COMPLETED") return "En attente";
+
+    if (!match.winnerId) return "Match nul";
+
+    const winner = match.winnerId === derby.team1.id ? derby.team1.name : derby.team2.name;
+    return `Victoire ${winner}`;
   };
 
   if (loading) {
@@ -202,7 +260,7 @@ export default function DerbysPage() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <h3 className="text-base sm:text-lg font-bold text-white truncate">
-                              {derby.team1.name} vs {derby.team2.name}
+                              Derby {derby.team1.name} vs {derby.team2.name}
                             </h3>
                             <div className="flex items-center gap-2 mt-1 flex-wrap">
                               {index === 0 && (
@@ -224,17 +282,28 @@ export default function DerbysPage() {
 
                         {/* Winner badge */}
                         <div className="flex items-center gap-2 mt-3">
-                          <Trophy className="w-4 h-4 text-yellow-400" />
+                          {winnerInfo.status === "completed" ? (
+                            <Trophy className="w-4 h-4 text-yellow-400" />
+                          ) : (
+                            <Award className="w-4 h-4 text-gray-500" />
+                          )}
                           <span
                             className={`text-sm font-bold ${
                               winnerInfo.color === "cyan"
                                 ? "text-cyan-400"
                                 : winnerInfo.color === "orange"
                                 ? "text-orange-400"
+                                : winnerInfo.color === "yellow"
+                                ? "text-yellow-400"
                                 : "text-gray-400"
                             }`}
                           >
-                            Vainqueur: {winnerInfo.winner}
+                            {winnerInfo.status === "pending"
+                              ? "En attente de résultats"
+                              : winnerInfo.status === "in_progress"
+                              ? "En cours..."
+                              : `Vainqueur: ${winnerInfo.winner}`
+                            }
                           </span>
                         </div>
                       </div>
@@ -280,6 +349,9 @@ export default function DerbysPage() {
                               >
                                 {team.name}
                               </h4>
+                              <span className="ml-auto text-xs text-gray-500">
+                                {team.players.length} joueurs
+                              </span>
                             </div>
                             <div className="space-y-1 max-h-32 overflow-y-auto">
                               {team.players.map((player) => (
@@ -298,83 +370,130 @@ export default function DerbysPage() {
 
                       {/* Matches */}
                       <div className="p-4 sm:p-6 pt-0 space-y-3">
-                        <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wide mb-3">
-                          Résultats
+                        <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wide mb-3 flex items-center gap-2">
+                          <Calendar className="w-4 h-4" />
+                          Résultats des matchs
                         </h4>
-                        {derby.matches.map((match) => (
-                          <div
-                            key={match.id}
-                            className="bg-gray-800/30 border border-gray-700/30 rounded-xl p-4"
-                          >
-                            <div className="flex items-center justify-between mb-3">
-                              <div className="flex items-center gap-2 text-sm text-gray-400">
-                                <Calendar className="w-4 h-4" />
-                                {new Date(match.date).toLocaleDateString("fr-FR")}
-                              </div>
-                              <div className="text-xl font-black text-white">
-                                {match.score1 !== null && match.score1 !== undefined && match.score2 !== null && match.score2 !== undefined ? (
-                                  <>
-                                    <span
-                                      className={
-                                        match.score1 > match.score2
-                                          ? "text-cyan-400"
-                                          : match.score1 < match.score2
-                                          ? "text-gray-400"
-                                          : "text-white"
-                                      }
-                                    >
-                                      {match.score1}
-                                    </span>
-                                    <span className="text-gray-600 mx-2">-</span>
-                                    <span
-                                      className={
-                                        match.score2 > match.score1
-                                          ? "text-orange-400"
-                                          : match.score2 < match.score1
-                                          ? "text-gray-400"
-                                          : "text-white"
-                                      }
-                                    >
-                                      {match.score2}
-                                    </span>
-                                  </>
-                                ) : (
-                                  <span className="text-sm text-gray-500 font-normal">
-                                    {match.status}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                          {[...derby.matches]
+                            .sort((a, b) => {
+                              // Prioriser les matchs terminés
+                              if (a.status === "COMPLETED" && b.status !== "COMPLETED") return -1;
+                              if (a.status !== "COMPLETED" && b.status === "COMPLETED") return 1;
+                              // Ensuite trier par date décroissante
+                              return new Date(b.date).getTime() - new Date(a.date).getTime();
+                            })
+                            .map((match, idx) => (
+                            <div
+                              key={match.id}
+                              className="bg-gray-800/40 border border-gray-700/40 rounded-xl p-4 hover:border-gray-600/60 transition-all"
+                            >
+                              {/* Match header */}
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-500/20 to-purple-500/20 flex items-center justify-center border border-cyan-500/30">
+                                    <span className="text-xs font-bold text-cyan-400">#{idx + 1}</span>
+                                  </div>
+                                  <span className="text-xs text-gray-400">
+                                    {new Date(match.date).toLocaleDateString("fr-FR", {
+                                      day: "numeric",
+                                      month: "short"
+                                    })}
                                   </span>
-                                )}
+                                </div>
+                                <span className={`text-xs font-semibold px-2 py-0.5 rounded ${
+                                  match.status === "COMPLETED"
+                                    ? "bg-green-500/20 text-green-400 border border-green-500/30"
+                                    : "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30"
+                                }`}>
+                                  {match.status === "COMPLETED" ? "Terminé" : "À venir"}
+                                </span>
                               </div>
-                            </div>
 
-                            {/* Goals */}
-                            {match.goals && match.goals.length > 0 && (
-                              <div className="bg-gray-900/50 rounded-lg p-3 border border-gray-700/50">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <Target className="w-4 h-4 text-green-400" />
-                                  <span className="text-xs font-bold text-gray-400 uppercase">
-                                    Buteurs
-                                  </span>
+                              {/* Score */}
+                              <div className="text-center mb-3">
+                                <div className="text-2xl font-black">
+                                  {match.score1 !== null && match.score1 !== undefined && match.score2 !== null && match.score2 !== undefined ? (
+                                    <>
+                                      <span className={match.score1 > match.score2 ? "text-cyan-400" : "text-gray-400"}>
+                                        {match.score1}
+                                      </span>
+                                      <span className="text-gray-600 mx-2">-</span>
+                                      <span className={match.score2 > match.score1 ? "text-orange-400" : "text-gray-400"}>
+                                        {match.score2}
+                                      </span>
+                                    </>
+                                  ) : (
+                                    <span className="text-sm text-gray-500 font-normal">- - -</span>
+                                  )}
                                 </div>
-                                <div className="space-y-1 max-h-24 overflow-y-auto">
-                                  {match.goals.map((goal) => (
-                                    <div
-                                      key={goal.id}
-                                      className={`text-sm flex items-center gap-2 ${
-                                        goal.isOwnGoal ? "text-red-400" : "text-gray-300"
-                                      }`}
-                                    >
-                                      <span className="w-1 h-1 rounded-full bg-green-400"></span>
-                                      {goal.player.fullName}
-                                      {goal.isOwnGoal && (
-                                        <span className="text-xs font-bold">(CSC)</span>
-                                      )}
-                                    </div>
-                                  ))}
+                                <div className="text-xs text-gray-500 mt-1">
+                                  {getMatchStatus(match, derby)}
                                 </div>
                               </div>
-                            )}
-                          </div>
-                        ))}
+
+                              {/* Goals, Cards */}
+                              {match.status === "COMPLETED" && (
+                                <div className="space-y-2">
+                                  {/* Goals */}
+                                  {match.goals && match.goals.length > 0 && (
+                                    <div className="bg-gray-900/50 rounded-lg p-2 border border-gray-700/50">
+                                      <div className="flex items-center gap-1 mb-1">
+                                        <Target className="w-3 h-3 text-green-400" />
+                                        <span className="text-xs font-bold text-gray-400">Buteurs</span>
+                                      </div>
+                                      <div className="space-y-1">
+                                        {match.goals.map((goal) => (
+                                          <div key={goal.id} className="text-xs text-gray-300">
+                                            <div className="flex items-center gap-1">
+                                              <span className="text-green-400">⚽</span>
+                                              <span className={goal.isOwnGoal ? "text-red-400" : ""}>
+                                                {goal.player.fullName}
+                                              </span>
+                                              {goal.isOwnGoal && (
+                                                <span className="text-red-400 font-bold">(CSC)</span>
+                                              )}
+                                            </div>
+                                            {goal.assistPlayer && (
+                                              <div className="ml-4 text-gray-500 flex items-center gap-1">
+                                                <UserPlus className="w-3 h-3" />
+                                                <span>Passe: {goal.assistPlayer.fullName}</span>
+                                              </div>
+                                            )}
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Cards */}
+                                  {((match.yellowCards && match.yellowCards.length > 0) ||
+                                    (match.redCards && match.redCards.length > 0)) && (
+                                    <div className="bg-gray-900/50 rounded-lg p-2 border border-gray-700/50">
+                                      <div className="flex items-center gap-1 mb-1">
+                                        <span className="text-xs font-bold text-gray-400">Cartons</span>
+                                      </div>
+                                      <div className="space-y-1">
+                                        {match.yellowCards?.map((card) => (
+                                          <div key={card.id} className="text-xs text-gray-300 flex items-center gap-1">
+                                            <span className="text-yellow-400">🟨</span>
+                                            {card.player.fullName}
+                                          </div>
+                                        ))}
+                                        {match.redCards?.map((card) => (
+                                          <div key={card.id} className="text-xs text-gray-300 flex items-center gap-1">
+                                            <span className="text-red-400">🟥</span>
+                                            {card.player.fullName}
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   )}
