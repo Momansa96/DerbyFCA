@@ -194,6 +194,7 @@ export default function AdminDerbysPage() {
                                 onRemoveYellowCard={handleRemoveYellowCard}
                                 onRemoveRedCard={handleRemoveRedCard}
                                 onSubmitScore={handleSubmitScore}
+                                onTeamUpdate={refetch}
                             />
                         </motion.div>
                     ))}

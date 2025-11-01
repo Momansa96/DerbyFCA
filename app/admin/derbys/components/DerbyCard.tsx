@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { Trophy, Calendar, Award } from 'lucide-react';
 import { Derby, Goal, YellowCard, RedCard } from '../utils/types';
 import { getWinnerName } from '../utils/derbyHelpers';
 import { TeamPanel } from './TeamPanel';
 import { MatchCard } from './MatchCard';
 import { DerbyRecap } from './DerbyRecap';
+import { TeamManagementModal } from './TeamManagementModal';
 
 interface DerbyCardProps {
     derby: Derby;
@@ -25,6 +27,7 @@ interface DerbyCardProps {
     onRemoveYellowCard: (matchId: string, cardId: string) => void;
     onRemoveRedCard: (matchId: string, cardId: string) => void;
     onSubmitScore: (matchId: string) => void;
+    onTeamUpdate?: () => void;
 }
 
 export const DerbyCard = ({
@@ -46,9 +49,11 @@ export const DerbyCard = ({
     onAddRedCard,
     onRemoveYellowCard,
     onRemoveRedCard,
-    onSubmitScore
+    onSubmitScore,
+    onTeamUpdate
 }: DerbyCardProps) => {
     const allMatchesCompleted = derby.matches.every(match => match.status === 'COMPLETED');
+    const [managingTeam, setManagingTeam] = useState<'team1' | 'team2' | null>(null);
 
     return (
         <div className="bg-gray-900/50 border border-gray-700/50 rounded-xl p-4 sm:p-6 backdrop-blur-sm transition-all hover:border-gray-600/50">
@@ -83,9 +88,33 @@ export const DerbyCard = ({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
-                <TeamPanel team={derby.team1} colorScheme="blue" />
-                <TeamPanel team={derby.team2} colorScheme="pink" />
+                <TeamPanel
+                    team={derby.team1}
+                    colorScheme="blue"
+                    onManage={() => setManagingTeam('team1')}
+                />
+                <TeamPanel
+                    team={derby.team2}
+                    colorScheme="pink"
+                    onManage={() => setManagingTeam('team2')}
+                />
             </div>
+
+            {/* Modal de gestion d'équipe */}
+            {managingTeam && (
+                <TeamManagementModal
+                    team={managingTeam === 'team1' ? derby.team1 : derby.team2}
+                    unavailablePlayers={managingTeam === 'team1'
+                        ? derby.team2.players.map(p => p.id)
+                        : derby.team1.players.map(p => p.id)
+                    }
+                    onClose={() => setManagingTeam(null)}
+                    onUpdate={() => {
+                        setManagingTeam(null);
+                        onTeamUpdate?.();
+                    }}
+                />
+            )}
 
             <div>
                 <h3 className="text-lg font-semibold text-white mb-4">Matches</h3>

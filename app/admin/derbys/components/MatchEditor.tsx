@@ -1,4 +1,5 @@
-import { Target, Check, EyeOff, Eye, Square } from 'lucide-react';
+import { useState } from 'react';
+import { Target, Check, EyeOff, Eye, Square, Loader2 } from 'lucide-react';
 import { Match, Derby, Goal, YellowCard, RedCard } from '../utils/types';
 import { GoalManager } from './GoalManager';
 import { CardManager } from './CardManager';
@@ -21,7 +22,7 @@ interface MatchEditorProps {
     onAddRedCard: (matchId: string, playerId: string, derby: Derby) => void;
     onRemoveYellowCard: (matchId: string, cardId: string) => void;
     onRemoveRedCard: (matchId: string, cardId: string) => void;
-    onSubmit: () => void;
+    onSubmit: () => Promise<void> | void;
 }
 
 export const MatchEditor = ({
@@ -44,6 +45,18 @@ export const MatchEditor = ({
     onRemoveRedCard,
     onSubmit
 }: MatchEditorProps) => {
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleSubmit = async () => {
+        if (isSubmitting) return; // Protection contre double clic
+
+        setIsSubmitting(true);
+        try {
+            await onSubmit();
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
     return (
         <div className="space-y-4">
             <div className="flex justify-between items-center gap-4">
@@ -114,11 +127,21 @@ export const MatchEditor = ({
             </div>
 
             <button
-                onClick={onSubmit}
-                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-green-500/20 to-emerald-500/20 hover:from-green-500/30 hover:to-emerald-500/30 border border-green-500/30 text-green-400 px-4 py-3 rounded-lg font-semibold transition-all hover:scale-[1.02]"
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-green-500/20 to-emerald-500/20 hover:from-green-500/30 hover:to-emerald-500/30 border border-green-500/30 text-green-400 px-4 py-3 rounded-lg font-semibold transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
-                <Check className="w-5 h-5" />
-                Valider
+                {isSubmitting ? (
+                    <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        Validation en cours...
+                    </>
+                ) : (
+                    <>
+                        <Check className="w-5 h-5" />
+                        Valider
+                    </>
+                )}
             </button>
         </div>
     );

@@ -1,13 +1,14 @@
 import Image from 'next/image';
-import { Users } from 'lucide-react';
+import { Users, Settings } from 'lucide-react';
 import { Team } from '../utils/types';
 
 interface TeamPanelProps {
     team: Team;
     colorScheme: 'blue' | 'pink';
+    onManage?: () => void;
 }
 
-export const TeamPanel = ({ team, colorScheme }: TeamPanelProps) => {
+export const TeamPanel = ({ team, colorScheme, onManage }: TeamPanelProps) => {
     const config = colorScheme === 'blue'
         ? {
             gradient: 'from-cyan-500/10 to-blue-500/5',
@@ -24,11 +25,23 @@ export const TeamPanel = ({ team, colorScheme }: TeamPanelProps) => {
 
     return (
         <div className={`bg-gradient-to-br ${config.gradient} border ${config.border} rounded-xl p-4 backdrop-blur-sm`}>
-            <div className="flex items-center gap-2 mb-4">
-                <Users className={`w-5 h-5 ${config.text}`} />
-                <h3 className={`text-lg font-bold ${config.text}`}>
-                    {team.name}
-                </h3>
+            <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                    <Users className={`w-5 h-5 ${config.text}`} />
+                    <h3 className={`text-lg font-bold ${config.text}`}>
+                        {team.name}
+                    </h3>
+                    <span className="text-xs text-gray-400">({team.players.length})</span>
+                </div>
+                {onManage && (
+                    <button
+                        onClick={onManage}
+                        className="p-2 hover:bg-gray-800/50 rounded-lg transition-colors group"
+                        title="Gérer les joueurs"
+                    >
+                        <Settings className={`w-4 h-4 ${config.text} group-hover:rotate-90 transition-transform`} />
+                    </button>
+                )}
             </div>
             <ul className="space-y-2">
                 {team.players.map((player) => (
