@@ -26,6 +26,7 @@ interface Payment {
   paid: boolean;
   amount: number;
   notes: string;
+  alreadyPaid: boolean;
 }
 
 export default function EnregistrerCotisationsPage() {
@@ -40,10 +41,16 @@ export default function EnregistrerCotisationsPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    fetchData();
+    fetchPlayers();
   }, []);
 
-  const fetchData = async () => {
+  useEffect(() => {
+    if (players.length > 0) {
+      fetchAlreadyPaid(selectedDate);
+    }
+  }, [selectedDate, players]);
+
+  const fetchPlayers = async () => {
     try {
       const playersRes = await fetch('/api/players');
 
@@ -63,7 +70,8 @@ export default function EnregistrerCotisationsPage() {
             playerId: player.id,
             paid: false,
             amount: 200,
-            notes: ''
+            notes: '',
+            alreadyPaid: false
           };
         });
       setPayments(initialPayments);
@@ -75,7 +83,32 @@ export default function EnregistrerCotisationsPage() {
     }
   };
 
+  const fetchAlreadyPaid = async (date: string) => {
+    try {
+      const res = await fetch(`/api/contributions?date=${date}`);
+      if (!res.ok) return;
+
+      const contributions = await res.json();
+      const paidPlayerIds = new Set(contributions.map((c: any) => c.playerId));
+
+      setPayments(prev => {
+        const updated = { ...prev };
+        Object.keys(updated).forEach(playerId => {
+          updated[playerId] = {
+            ...updated[playerId],
+            alreadyPaid: paidPlayerIds.has(playerId),
+            paid: false,
+          };
+        });
+        return updated;
+      });
+    } catch (error) {
+      console.error('Erreur lors de la vérification des paiements:', error);
+    }
+  };
+
   const togglePayment = (playerId: string) => {
+    if (payments[playerId]?.alreadyPaid) return;
     setPayments(prev => ({
       ...prev,
       [playerId]: {
@@ -86,10 +119,13 @@ export default function EnregistrerCotisationsPage() {
   };
 
   const toggleAll = () => {
-    const allPaid = Object.values(payments).every(p => p.paid);
+    const selectablePlayers = Object.values(payments).filter(p => !p.alreadyPaid);
+    const allPaid = selectablePlayers.every(p => p.paid);
     const newPayments = { ...payments };
     Object.keys(newPayments).forEach(playerId => {
-      newPayments[playerId].paid = !allPaid;
+      if (!newPayments[playerId].alreadyPaid) {
+        newPayments[playerId].paid = !allPaid;
+      }
     });
     setPayments(newPayments);
   };
@@ -147,7 +183,7 @@ export default function EnregistrerCotisationsPage() {
             playerId: payment.playerId,
             paymentDate: selectedDate,
             amountPaid: payment.amount,
-            notes: payment.notes || null,
+            ...(payment.notes ? { notes: payment.notes } : {}),
           }))
         ),
       });
@@ -164,14 +200,8 @@ export default function EnregistrerCotisationsPage() {
           toast.error(`${errorCount} erreur(s) - certains joueurs ont peut-être déjà payé cette semaine`);
         }
 
-        // Réinitialiser le formulaire
-        fetchData();
-        // Réinitialiser les sélections
-        const resetPayments = { ...payments };
-        Object.keys(resetPayments).forEach(playerId => {
-          resetPayments[playerId].paid = false;
-        });
-        setPayments(resetPayments);
+        // Rafraîchir les joueurs déjà payés pour cette date
+        await fetchAlreadyPaid(selectedDate);
       } else {
         const error = await response.json();
         console.error('Erreur:', error);
@@ -190,7 +220,8 @@ export default function EnregistrerCotisationsPage() {
     (player.alias && player.alias.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
-  const paidCount = Object.values(payments).filter(p => p.paid).length;
+  const paidCount = Object.values(payments).filter(p => p.paid && !p.alreadyPaid).length;
+  const alreadyPaidCount = Object.values(payments).filter(p => p.alreadyPaid).length;
 
   return (
     <div className="min-h-screen bg-[#0A0E27] text-white pt-4 pb-20">
@@ -269,8 +300,11 @@ export default function EnregistrerCotisationsPage() {
                   {Object.values(payments).every(p => p.paid) ? 'Tout décocher' : 'Tout cocher'}
                 </button>
               </div>
-              <div className="mt-4 text-sm text-gray-400">
-                {paidCount} joueur(s) sélectionné(s) • Total : {Object.values(payments).filter(p => p.paid).reduce((sum, p) => sum + p.amount, 0).toLocaleString()} FCFA
+              <div className="mt-4 text-sm text-gray-400 flex flex-wrap gap-x-4 gap-y-1">
+                <span>{paidCount} joueur(s) sélectionné(s) • Total : {Object.values(payments).filter(p => p.paid && !p.alreadyPaid).reduce((sum, p) => sum + p.amount, 0).toLocaleString()} FCFA</span>
+                {alreadyPaidCount > 0 && (
+                  <span className="text-green-400">{alreadyPaidCount} déjà payé(s) cette semaine</span>
+                )}
               </div>
             </motion.div>
 
@@ -286,6 +320,8 @@ export default function EnregistrerCotisationsPage() {
               </h2>
               <div className="space-y-3 max-h-[600px] overflow-y-auto">
                 {filteredPlayers.map((player, index) => {
+                  const isAlreadyPaid = payments[player.id]?.alreadyPaid;
+
                   return (
                     <motion.div
                       key={player.id}
@@ -293,19 +329,25 @@ export default function EnregistrerCotisationsPage() {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.03 }}
                       className={`p-4 rounded-lg border ${
-                        payments[player.id]?.paid
-                          ? 'bg-cyan-500/10 border-cyan-500/30'
-                          : 'bg-gray-900/30 border-gray-700/30'
+                        isAlreadyPaid
+                          ? 'bg-green-500/10 border-green-500/30 opacity-60'
+                          : payments[player.id]?.paid
+                            ? 'bg-cyan-500/10 border-cyan-500/30'
+                            : 'bg-gray-900/30 border-gray-700/30'
                       }`}
                     >
                       <div className="flex items-center gap-4">
-                        {/* Checkbox */}
-                        <input
-                          type="checkbox"
-                          checked={payments[player.id]?.paid}
-                          onChange={() => togglePayment(player.id)}
-                          className="w-5 h-5 rounded cursor-pointer"
-                        />
+                        {/* Checkbox ou indicateur déjà payé */}
+                        {isAlreadyPaid ? (
+                          <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
+                        ) : (
+                          <input
+                            type="checkbox"
+                            checked={payments[player.id]?.paid}
+                            onChange={() => togglePayment(player.id)}
+                            className="w-5 h-5 rounded cursor-pointer"
+                          />
+                        )}
 
                       {/* Photo */}
                       <Image
@@ -322,23 +364,28 @@ export default function EnregistrerCotisationsPage() {
                         {player.alias && (
                           <p className="text-sm text-gray-400">&quot;{player.alias}&quot;</p>
                         )}
+                        {isAlreadyPaid && (
+                          <p className="text-xs text-green-400 font-medium mt-0.5">Déjà payé cette semaine</p>
+                        )}
                       </div>
 
                       {/* Montant */}
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="number"
-                          value={payments[player.id]?.amount || 200}
-                          onChange={(e) => updateAmount(player.id, e.target.value)}
-                          disabled={!payments[player.id]?.paid}
-                          className="w-24 px-3 py-2 bg-gray-900/50 border border-gray-700/50 rounded-lg text-white text-center focus:outline-none focus:ring-2 focus:ring-cyan-500/50 disabled:opacity-50"
-                        />
-                        <span className="text-gray-400 text-sm">FCFA</span>
-                      </div>
+                      {!isAlreadyPaid && (
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            value={payments[player.id]?.amount || 200}
+                            onChange={(e) => updateAmount(player.id, e.target.value)}
+                            disabled={!payments[player.id]?.paid}
+                            className="w-24 px-3 py-2 bg-gray-900/50 border border-gray-700/50 rounded-lg text-white text-center focus:outline-none focus:ring-2 focus:ring-cyan-500/50 disabled:opacity-50"
+                          />
+                          <span className="text-gray-400 text-sm">FCFA</span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Notes */}
-                    {payments[player.id]?.paid && (
+                    {payments[player.id]?.paid && !isAlreadyPaid && (
                       <div className="mt-3 pl-12">
                         <input
                           type="text"

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { findOrCreateWeek } from '@/lib/weekUtils';
+import { findOrCreateWeek, getWeekInfo } from '@/lib/weekUtils';
 import { requireAdmin } from '@/lib/auth/requireAdmin';
 import { validateContribution, validateContributionBatch } from '@/lib/validations/contributions';
 
@@ -16,6 +16,7 @@ export async function GET(request: NextRequest) {
     const playerId = searchParams.get('playerId');
     const weekId = searchParams.get('weekId');
     const year = searchParams.get('year');
+    const date = searchParams.get('date');
 
     const where: any = {};
 
@@ -27,7 +28,19 @@ export async function GET(request: NextRequest) {
       where.weekId = weekId;
     }
 
-    if (year) {
+    // Filtre par date : trouver la semaine correspondante
+    if (date) {
+      const { year: weekYear, weekNumber } = getWeekInfo(new Date(date));
+      const week = await prisma.contributionWeek.findUnique({
+        where: { year_weekNumber: { year: weekYear, weekNumber } },
+      });
+      if (week) {
+        where.weekId = week.id;
+      } else {
+        // Aucune semaine n'existe pour cette date, donc aucune cotisation
+        return NextResponse.json([], { status: 200 });
+      }
+    } else if (year) {
       where.week = {
         year: parseInt(year)
       };
@@ -118,75 +131,85 @@ export async function POST(request: NextRequest) {
       errors: [] as any[],
     };
 
-    // Transaction Prisma pour tout créer d'un coup
-    await prisma.$transaction(async (tx) => {
-      for (const payment of payments) {
-        const { playerId, amountPaid, notes, recordedBy } = payment;
+    // Traiter chaque paiement individuellement (pas de transaction interactive
+    // car une erreur P2002 corrompt la transaction PostgreSQL entière)
+    for (const payment of paymentsArray) {
+      const { playerId, amountPaid, notes, recordedBy } = payment;
 
-        if (!playerId) {
+      if (!playerId) {
+        results.errors.push({
+          playerId: null,
+          error: 'playerId manquant',
+        });
+        continue;
+      }
+
+      try {
+        // Vérifier si le joueur existe
+        const player = await prisma.player.findUnique({
+          where: { id: playerId },
+        });
+
+        if (!player) {
           results.errors.push({
-            playerId: null,
-            error: 'playerId manquant',
+            playerId,
+            error: 'Joueur introuvable',
           });
           continue;
         }
 
-        try {
-          // Vérifier si le joueur existe
-          const player = await tx.player.findUnique({
-            where: { id: playerId },
-          });
-
-          if (!player) {
-            results.errors.push({
-              playerId,
-              error: 'Joueur introuvable',
-            });
-            continue;
-          }
-
-          // Créer la cotisation
-          const contribution = await tx.contribution.create({
-            data: {
+        // Vérifier si le joueur a déjà payé cette semaine
+        const existing = await prisma.contribution.findUnique({
+          where: {
+            playerId_weekId: {
               playerId,
               weekId: week.id,
-              amountPaid: amountPaid ? parseInt(amountPaid.toString()) : 200,
-              paymentDate: date,
-              notes,
-              recordedBy,
             },
-            include: {
-              player: {
-                select: {
-                  id: true,
-                  fullName: true,
-                },
-              },
-              week: {
-                select: {
-                  year: true,
-                  weekNumber: true,
-                },
-              },
-            },
-          });
+          },
+        });
 
-          results.success.push(contribution);
-        } catch (error: any) {
-          if (error.code === 'P2002') {
-            results.errors.push({
-              playerId,
-              error: 'Ce joueur a déjà payé pour cette semaine',
-            });
-          } else {
-            results.errors.push({
-              playerId,
-              error: error.message || 'Erreur inconnue',
-            });
-          }
+        if (existing) {
+          results.errors.push({
+            playerId,
+            error: 'Ce joueur a déjà payé pour cette semaine',
+          });
+          continue;
         }
+
+        // Créer la cotisation
+        const contribution = await prisma.contribution.create({
+          data: {
+            playerId,
+            weekId: week.id,
+            amountPaid: amountPaid ? parseInt(amountPaid.toString()) : 200,
+            paymentDate: date,
+            notes,
+            recordedBy,
+          },
+          include: {
+            player: {
+              select: {
+                id: true,
+                fullName: true,
+              },
+            },
+            week: {
+              select: {
+                year: true,
+                weekNumber: true,
+              },
+            },
+          },
+        });
+
+        results.success.push(contribution);
+      } catch (error: any) {
+        results.errors.push({
+          playerId,
+          error: error.message || 'Erreur inconnue',
+        });
       }
-    });
+    }
 
     // Mode single: retourner l'objet directement ou erreur
     if (!isBatch) {

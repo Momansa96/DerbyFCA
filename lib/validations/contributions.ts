@@ -64,6 +64,7 @@ export const ContributionSchema = z.object({
     .string()
     .max(500, 'Les notes ne peuvent pas dépasser 500 caractères')
     .trim()
+    .nullable()
     .optional()
     .transform((val) => {
       // Sanitize: supprimer HTML/scripts potentiels

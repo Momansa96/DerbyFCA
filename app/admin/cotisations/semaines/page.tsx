@@ -72,8 +72,9 @@ export default function SemainesPage() {
                 onChange={(e) => setYearFilter(parseInt(e.target.value))}
                 className="px-4 py-2.5 bg-gray-900/50 border border-gray-700/50 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
               >
-                <option value={2025}>2025</option>
-                <option value={2024}>2024</option>
+                {Array.from({ length: new Date().getFullYear() - 2023 }, (_, i) => new Date().getFullYear() - i).map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
               </select>
             </div>
 
