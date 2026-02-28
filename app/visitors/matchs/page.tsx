@@ -146,7 +146,7 @@ export default function MatchsPage() {
             <div className="w-1 h-6 bg-gradient-to-b from-cyan-400 to-indigo-500 rounded-full"></div>
             <h1 className="text-2xl sm:text-3xl font-black text-white">Calendrier</h1>
           </div>
-          <p className="text-gray-400 text-sm">Saison 2025 • {stats.total} matchs</p>
+          <p className="text-gray-400 text-sm">Saison {new Date().getFullYear()} • {stats.total} matchs</p>
         </div>
 
         {/* Stats Cards */}

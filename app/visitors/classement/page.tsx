@@ -101,7 +101,7 @@ export default function ClassementPage() {
             <div className="w-1 h-6 bg-gradient-to-b from-cyan-400 to-indigo-500 rounded-full"></div>
             <h1 className="text-2xl sm:text-3xl font-black text-white">Classement Buteurs</h1>
           </div>
-          <p className="text-gray-400 text-sm">Saison 2025 • {sortedPlayers.length} joueurs</p>
+          <p className="text-gray-400 text-sm">Saison {new Date().getFullYear()} • {sortedPlayers.length} joueurs</p>
         </div>
 
         {/* Stats Overview */}

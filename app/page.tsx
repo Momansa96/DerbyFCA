@@ -23,7 +23,7 @@ export default function Home() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-3 w-3 bg-cyan-500"></span>
             </span>
-            <span className="text-sm font-semibold text-cyan-200">🏆 Saison 2025 en cours</span>
+            <span className="text-sm font-semibold text-cyan-200">🏆 Saison {new Date().getFullYear()} en cours</span>
           </div>
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-indigo-300 to-cyan-300 drop-shadow-[0_0_20px_rgba(6,182,212,0.5)] animate-fade-in">

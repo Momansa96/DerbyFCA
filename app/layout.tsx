@@ -10,9 +10,9 @@ export const metadata: Metadata = {
   title: 'FCA Derby Manager',
   description: 'Gestion des tirages et activités sportives du FCA',
   icons: {
-    icon: '/images/default.jpeg',
-    shortcut: '/favicon.ico',
-    apple: '/images/default.jpeg',
+    icon: '/images/logo-fca.jpeg',
+    shortcut: '/images/logo-fca.jpeg',
+    apple: '/images/logo-fca.jpeg',
   },
 };
 

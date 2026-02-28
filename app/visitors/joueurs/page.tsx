@@ -124,7 +124,7 @@ export default function JoueursPage() {
                     <div className="h-px flex-1 bg-gradient-to-r from-indigo-500/30 to-transparent"></div>
                   </div>
                   <p className="text-gray-400 text-sm">
-                    Mandat en cours • Saison 2025
+                    Mandat en cours • Saison {new Date().getFullYear()}
                   </p>
                 </div>
 
