@@ -2,24 +2,27 @@ name: Keep Supabase Alive
 
 on:
   schedule:
-    # Ping toutes les 5 jours à minuit UTC
-    - cron: '0 0 */5 * *'
+    # Requête toutes les 3 jours à minuit UTC
+    - cron: '0 0 */3 * *'
   workflow_dispatch: # Permet de lancer manuellement
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Supabase
+      - name: Query Supabase Database
         run: |
-          response=$(curl -s -o /dev/null -w "%{http_code}" \
-            "https://cpyqxvpskpmezjjkrhog.supabase.co/rest/v1/" \
+          response=$(curl -s -w "\n%{http_code}" \
+            "https://cpyqxvpskpmezjjkrhog.supabase.co/rest/v1/Player?select=id&limit=1" \
             -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
-          echo "Response: $response"
-          if [ "$response" -ge 200 ] && [ "$response" -lt 400 ]; then
-            echo "Supabase is alive!"
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | head -n -1)
+          echo "HTTP Status: $http_code"
+          echo "Response body: $body"
+          if [ "$http_code" -ge 200 ] && [ "$http_code" -lt 400 ]; then
+            echo "Supabase is alive! Database query successful."
           else
-            echo "Ping failed with status $response"
+            echo "Query failed with status $http_code"
             exit 1
           fi
