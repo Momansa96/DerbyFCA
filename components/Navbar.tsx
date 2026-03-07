@@ -66,7 +66,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 group">
             <Image
-              src="/images/default.jpeg"
+              src="/images/logo-fca.jpeg"
               alt="Logo FCA"
               width={40}
               height={40}
@@ -158,7 +158,7 @@ export default function Navbar() {
           <div className="flex items-center justify-between p-6 border-b border-gray-700">
             <div className="flex items-center gap-3">
               <Image
-                src="/images/default.jpeg"
+                src="/images/logo-fca.jpeg"
                 alt="Logo FCA"
                 width={36}
                 height={36}

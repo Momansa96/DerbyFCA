@@ -124,62 +124,34 @@ export default function JoueursPage() {
 
       const method = editingPlayer ? 'PUT' : 'POST';
 
-      if (editingPlayer) {
-        // Pour la modification, on envoie en JSON
-        const response = await fetch(url, {
-          method,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            fullName: formData.fullName,
-            alias: formData.alias,
-            bureauRole: formData.bureauRole,
-            preferredPosition: formData.preferredPosition || null,
-            description: formData.description,
-            number: formData.number ? Number(formData.number) : null,
-            status: formData.status,
-            joinDate: formData.joinDate,
-            email: formData.email,
-            phone: formData.phone,
-          }),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Erreur lors de l\'opération');
-        }
-        toast.success('Joueur modifié avec succès');
-      } else {
-        // Pour la création, on garde le FormData pour l'upload de fichier
-        const formDataToSend = new FormData();
-        Object.entries(formData).forEach(([key, value]) => {
-          if (value !== null) {
-            if (key === 'number') {
-              if (value && value.toString().trim() !== '') {
-                formDataToSend.append(key, Number(value).toString());
-              } else {
-                formDataToSend.append(key, '');
-              }
-            } else if (key === 'profilePhoto' && value instanceof File) {
-              formDataToSend.append(key, value);
-            } else if (typeof value === 'string') {
-              formDataToSend.append(key, value || '');
+      // Toujours utiliser FormData pour supporter l'upload de photo
+      const formDataToSend = new FormData();
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value !== null) {
+          if (key === 'number') {
+            if (value && value.toString().trim() !== '') {
+              formDataToSend.append(key, Number(value).toString());
+            } else {
+              formDataToSend.append(key, '');
             }
+          } else if (key === 'profilePhoto' && value instanceof File) {
+            formDataToSend.append(key, value);
+          } else if (typeof value === 'string') {
+            formDataToSend.append(key, value || '');
           }
-        });
-
-        const response = await fetch(url, {
-          method,
-          body: formDataToSend,
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Erreur lors de l\'opération');
         }
-        toast.success('Joueur créé avec succès');
+      });
+
+      const response = await fetch(url, {
+        method,
+        body: formDataToSend,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erreur lors de l\'opération');
       }
+      toast.success(editingPlayer ? 'Joueur modifié avec succès' : 'Joueur créé avec succès');
 
       await fetchPlayers();
       resetForm();

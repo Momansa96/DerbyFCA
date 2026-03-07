@@ -19,11 +19,6 @@ const barlowCondensed = Barlow_Condensed({
 export const metadata: Metadata = {
   title: 'FCA Derby Manager',
   description: 'Gestion des tirages et activités sportives du FCA',
-  icons: {
-    icon: '/images/logo-fca.jpeg',
-    shortcut: '/images/logo-fca.jpeg',
-    apple: '/images/logo-fca.jpeg',
-  },
 };
 
 export default function RootLayout({

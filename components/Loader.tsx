@@ -8,7 +8,7 @@ export default function FootballLoader() {
         {/* Ballon de foot */}
         <div className="w-16 h-16 animate-bounce-soccer">
           <Image
-            src="/images/default.jpeg"
+            src="/images/logo-fca.jpeg"
             alt="Ballon de foot"
             width={64}
             height={64}

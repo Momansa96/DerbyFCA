@@ -179,7 +179,7 @@ export default function Home() {
             <div>
               <div className="flex items-center gap-3 mb-3">
                 <Image
-                  src="/images/default.jpeg"
+                  src="/images/logo-fca.jpeg"
                   alt="Logo FCA"
                   width={36}
                   height={36}

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { writeFile, mkdir } from "fs/promises";
+import path from "path";
 
 // GET /api/players/[id]
 export async function GET(
@@ -25,7 +27,52 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const data = await req.json();
+    const contentType = req.headers.get("content-type") || "";
+    let data: Record<string, any>;
+    let profilePhotoUrl: string | undefined;
+
+    if (contentType.includes("multipart/form-data")) {
+      const formData = await req.formData();
+
+      // Gestion de la photo
+      const file = formData.get("profilePhoto") as File;
+      if (file?.size > 0) {
+        const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+        if (!allowedTypes.includes(file.type)) {
+          return NextResponse.json(
+            { error: "Format d'image non supporté" },
+            { status: 400 }
+          );
+        }
+
+        const uploadDir = path.join(process.cwd(), "public", "uploads", "players");
+        await mkdir(uploadDir, { recursive: true });
+
+        const fileName = `${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
+        const filePath = path.join(uploadDir, fileName);
+
+        const arrayBuffer = await file.arrayBuffer();
+        await writeFile(filePath, new Uint8Array(arrayBuffer));
+
+        profilePhotoUrl = `/uploads/players/${fileName}`;
+      }
+
+      data = {
+        fullName: formData.get("fullName") as string,
+        alias: formData.get("alias") as string,
+        bureauRole: formData.get("bureauRole") as string,
+        preferredPosition: formData.get("preferredPosition") as string,
+        description: formData.get("description") as string,
+        number: formData.get("number") ? parseInt(formData.get("number") as string) : null,
+        status: formData.get("status") as string,
+        joinDate: formData.get("joinDate") as string,
+        email: formData.get("email") as string,
+        phone: formData.get("phone") as string,
+      };
+    } else {
+      data = await req.json();
+    }
+
     const player = await prisma.player.update({
       where: { id: params.id },
       data: {
@@ -36,8 +83,10 @@ export async function PUT(
         description: data.description || null,
         status: data.status,
         joinDate: data.joinDate ? new Date(data.joinDate) : undefined,
+        email: data.email || null,
         phone: data.phone || null,
         ...(data.number !== undefined && { number: data.number }),
+        ...(profilePhotoUrl && { profilePhoto: profilePhotoUrl }),
       },
     });
     return NextResponse.json(player);
