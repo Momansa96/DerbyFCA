@@ -4,17 +4,34 @@ import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 
-const images = [
+const row1Images = [
   "/gallery/gal1.jpg",
   "/gallery/gal2.jpg",
   "/gallery/gal3.jpg",
   "/gallery/gal4.jpg",
   "/gallery/gal5.jpg",
+  "/gallery/gal6.jpg",
+  "/gallery/gal7.jpg",
+  "/gallery/gal8.jpg",
+  "/gallery/gal9.jpg",
+  "/gallery/gal10.jpg",
+];
+
+const row2Images = [
+  "/gallery/gal11.jpg",
+  "/gallery/gal12.jpg",
+  "/gallery/gal13.jpg",
+  "/gallery/gal14.jpg",
+  "/gallery/gal15.jpg",
+  "/gallery/gal16.jpg",
+  "/gallery/gal17.jpg",
+  "/gallery/gal18.jpg",
+  "/gallery/gal19.jpg",
 ];
 
 // Double les images pour un défilement continu sans coupure
-const row1 = [...images, ...images];
-const row2 = [...[...images].reverse(), ...[...images].reverse()];
+const row1 = [...row1Images, ...row1Images];
+const row2 = [...row2Images, ...row2Images];
 
 export default function GalleryMarquee() {
   return (
@@ -41,7 +58,7 @@ export default function GalleryMarquee() {
             >
               <Image
                 src={src}
-                alt={`Moment FCA ${(i % images.length) + 1}`}
+                alt={`Moment FCA ${(i % row1Images.length) + 1}`}
                 fill
                 className="object-cover transition-transform duration-500 group-hover/img:scale-110"
               />
@@ -59,7 +76,7 @@ export default function GalleryMarquee() {
             >
               <Image
                 src={src}
-                alt={`Moment FCA ${(i % images.length) + 1}`}
+                alt={`Moment FCA ${(i % row2Images.length) + 1}`}
                 fill
                 className="object-cover transition-transform duration-500 group-hover/img:scale-110"
               />

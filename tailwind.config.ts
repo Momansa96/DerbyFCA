@@ -33,8 +33,8 @@ const config: Config = {
         },
       },
       animation: {
-        'marquee-left': 'marquee-left 30s linear infinite',
-        'marquee-right': 'marquee-right 30s linear infinite',
+        'marquee-left': 'marquee-left 45s linear infinite',
+        'marquee-right': 'marquee-right 40s linear infinite',
       },
     },
   },

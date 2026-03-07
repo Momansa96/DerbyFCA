@@ -11,10 +11,10 @@ export default function Home() {
       <section className="relative bg-secondary overflow-hidden">
         <div className="absolute inset-0 z-0">
           <Image
-            src="/images/default.jpeg"
-            alt=""
+            src="/gallery/gal6.jpg"
+            alt="Les membres du FCA"
             fill
-            className="object-cover opacity-15"
+            className="object-cover opacity-75"
             priority
           />
           <div className="absolute inset-0 bg-gradient-to-b from-secondary/80 to-secondary" />

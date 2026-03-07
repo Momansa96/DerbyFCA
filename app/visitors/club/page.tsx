@@ -1,9 +1,7 @@
 "use client"
-import 'swiper/css'
-import { Swiper, SwiperSlide } from 'swiper/react'
-import { Autoplay } from 'swiper/modules'
 import Image from 'next/image'
 import FcaPresentation from '@/components/FcaPresentation'
+import PhotoGallery from '@/components/club/PhotoGallery'
 
 import {
   Users,
@@ -82,13 +80,6 @@ const newsItems = [
   },
 ];
 
-const moments = [
-  '/gallery/gal1.jpg',
-  '/gallery/gal2.jpg',
-  '/gallery/gal3.jpg',
-  '/gallery/gal4.jpg',
-  '/gallery/gal5.jpg',
-]
 
 export default function ClubPage() {
   return (
@@ -98,10 +89,10 @@ export default function ClubPage() {
         {/* Background image */}
         <div className="absolute inset-0 z-0">
           <Image
-            src="/images/default.jpeg"
-            alt="FCA Background"
+            src="/gallery/gal6.jpg"
+            alt="Les membres du FCA en maillot"
             fill
-            className="object-cover opacity-20"
+            className="object-cover opacity-30"
             priority
           />
           <div className="absolute inset-0 bg-secondary/80" />
@@ -172,10 +163,10 @@ export default function ClubPage() {
             <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center p-8 sm:p-12">
               {/* Image */}
               <div className="relative order-2 lg:order-1">
-                <div className="relative aspect-square rounded-2xl overflow-hidden shadow-md ring-4 ring-gray-200">
+                <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-md ring-4 ring-gray-200">
                   <Image
-                    src="/images/default.jpeg"
-                    alt="Logo du Football Club Atrokpocodji"
+                    src="/gallery/gal6.jpg"
+                    alt="Photo de groupe du Football Club Atrokpocodji"
                     fill
                     className="object-cover"
                   />
@@ -237,7 +228,7 @@ export default function ClubPage() {
       {/* Galerie Photos */}
       <section className="relative py-16 bg-secondary">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12">
+          <div className="text-center mb-10">
             <div className="inline-flex items-center gap-2 bg-primary/15 border border-primary/30 rounded-full px-4 py-2 mb-4">
               <Trophy className="w-4 h-4 text-primary" />
               <span className="text-sm font-semibold text-primary-light">Galerie</span>
@@ -246,52 +237,12 @@ export default function ClubPage() {
               Moments du Club
             </h2>
             <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-              Revivez les temps forts qui font la richesse de notre communauté
+              Cliquez sur une photo pour l&apos;agrandir
             </p>
           </div>
 
-          <Swiper
-            modules={[Autoplay]}
-            slidesPerView={1}
-            spaceBetween={24}
-            loop
-            autoplay={{
-              delay: 3000,
-              disableOnInteraction: false,
-            }}
-            breakpoints={{
-              640: { slidesPerView: 1 },
-              768: { slidesPerView: 2 },
-              1024: { slidesPerView: 3 },
-            }}
-            className="!pb-12"
-          >
-            {moments.map((src, i) => (
-              <SwiperSlide key={i}>
-                <div className="group relative aspect-[4/3] rounded-2xl overflow-hidden">
-                  <Image
-                    fill
-                    src={src}
-                    alt={`Moment ${i + 1}`}
-                    className="object-cover transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-opacity duration-300" />
-                </div>
-              </SwiperSlide>
-            ))}
-          </Swiper>
+          <PhotoGallery />
         </div>
-
-        <style jsx global>{`
-          .swiper-pagination-bullet {
-            background: rgba(21,128,61,0.5);
-            opacity: 1;
-          }
-          .swiper-pagination-bullet-active {
-            background: #15803D;
-            transform: scale(1.3);
-          }
-        `}</style>
       </section>
 
       {/* Valeurs */}
