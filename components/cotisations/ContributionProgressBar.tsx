@@ -25,12 +25,12 @@ export default function ContributionProgressBar({
   return (
     <div className="w-full">
       {showLabel && (
-        <div className="flex items-center justify-between text-xs text-gray-400 mb-2">
+        <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
           <span>{weeksPaid} / {weeksElapsed} semaines</span>
           <span className="font-semibold">{percentage.toFixed(0)}%</span>
         </div>
       )}
-      <div className="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
+      <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
         <div
           className={`h-full ${getColor()} transition-all duration-500 ease-out`}
           style={{ width: `${percentage}%` }}

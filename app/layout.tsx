@@ -1,10 +1,20 @@
 import './globals.css';
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Barlow, Barlow_Condensed } from 'next/font/google';
 import Navbar from '@/components/Navbar';
 import Providers from '@/components/Providers';
 
-const inter = Inter({ subsets: ['latin'] });
+const barlow = Barlow({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-barlow',
+});
+
+const barlowCondensed = Barlow_Condensed({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-barlow-condensed',
+});
 
 export const metadata: Metadata = {
   title: 'FCA Derby Manager',
@@ -23,10 +33,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr">
-      <body className={inter.className}>
+      <body className={`${barlow.variable} ${barlowCondensed.variable} font-body`}>
         <Providers>
           <Navbar />
-          <main className="flex flex-col justify-center min-h-screen pt-10 bg-gray-100">
+          <main className="flex flex-col justify-center min-h-screen pt-16 bg-surface">
             {children}
           </main>
         </Providers>

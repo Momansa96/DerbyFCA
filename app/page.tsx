@@ -1,103 +1,246 @@
+import { Trophy, Users, ArrowRight, Swords, UserCheck, Handshake, Calendar, MapPin, Clock, ChevronRight } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import LastDerbyPreview from "@/components/home/LastDerbyPreview";
+import GalleryMarquee from "@/components/home/GalleryMarquee";
+
 export default function Home() {
   return (
-    <div className="relative min-h-[calc(100vh-4.5rem)] bg-gradient-to-br from-gray-900 via-indigo-900 to-black overflow-hidden">
-      {/* Background animé optimisé */}
-      <div
-        className="absolute inset-0 z-0 bg-[url('/images/default.jpeg')] opacity-10 bg-cover bg-center bg-no-repeat animate-subtle-zoom"
-        aria-hidden="true"
-      />
+    <div>
+      {/* ─── HERO ─── */}
+      <section className="relative bg-secondary overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/images/default.jpeg"
+            alt=""
+            fill
+            className="object-cover opacity-15"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-secondary/80 to-secondary" />
+        </div>
 
-      {/* Overlay gradient pour meilleure lisibilité */}
-      <div className="absolute inset-0 z-0 bg-gradient-to-t from-black/60 via-transparent to-black/30" aria-hidden="true" />
-
-      {/* Halos lumineux décoratifs */}
-      <div className="absolute top-20 left-10 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl animate-pulse-slow" aria-hidden="true" />
-      <div className="absolute bottom-20 right-10 w-80 h-80 bg-indigo-500/20 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '1s' }} aria-hidden="true" />
-
-      {/* Main content */}
-      <div className="relative z-10 flex items-center justify-center min-h-[calc(100vh-4.5rem)] px-4 sm:px-6 py-12">
-        <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl p-6 sm:p-8 md:p-10 max-w-3xl w-full text-center text-white transition-all duration-300 hover:bg-white/15 hover:shadow-cyan-500/20">
-          {/* Badge animé */}
-          <div className="inline-flex items-center gap-2 bg-cyan-500/20 backdrop-blur-sm border border-cyan-400/30 rounded-full px-4 py-2 mb-6 animate-fade-in">
-            <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-cyan-500"></span>
-            </span>
-            <span className="text-sm font-semibold text-cyan-200">🏆 Saison {new Date().getFullYear()} en cours</span>
-          </div>
-
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-indigo-300 to-cyan-300 drop-shadow-[0_0_20px_rgba(6,182,212,0.5)] animate-fade-in">
-            Football Club Atrokpocodji
+        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 py-20 sm:py-28 text-center">
+          <h1 className="font-heading text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white mb-4">
+            Football Club{" "}
+            <span className="text-primary">Atrokpocodji</span>
           </h1>
 
-          <p className="mt-4 sm:mt-6 text-lg sm:text-xl md:text-2xl font-bold text-cyan-300 animate-fade-in" style={{ animationDelay: '0.1s' }}>
-            Bienvenue sur votre plateforme digitale
+          <p className="text-xl sm:text-2xl text-accent font-heading font-semibold mb-4">
+            Unis par la passion, guidés par la fraternité
           </p>
 
-          <p className="mt-6 sm:mt-8 text-base sm:text-lg md:text-xl leading-relaxed text-gray-200 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '0.2s' }}>
-
-            Découvrez les résultats des derbys, suivez vos statistiques personnelles, consultez le calendrier des matchs et vivez l&apos;expérience FCA comme jamais auparavant.
+          <p className="text-base sm:text-lg text-gray-400 max-w-xl mx-auto mb-10">
+            Club de football amateur depuis 2010 à Atrokpocodji. Rejoignez une communauté de passionnés.
           </p>
 
-          <div className="mt-10 sm:mt-12 flex flex-col sm:flex-row gap-4 sm:gap-5 justify-center items-center animate-fade-in" style={{ animationDelay: '0.4s' }}>
-            <a
-              href="visitors/adhesion"
-              className="group relative w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-white font-bold rounded-xl shadow-xl hover:shadow-green-500/60 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-green-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900"
+          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+            <Link
+              href="/visitors/adhesion"
+              className="w-full sm:w-auto px-8 py-3.5 bg-primary hover:bg-primary-dark text-white font-bold rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
             >
-              <span className="relative z-10 flex items-center justify-center gap-2">
-                ⚽ Rejoindre le FCA
-                <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </span>
-              <div className="absolute inset-0 bg-white/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            </a>
+              Rejoindre le FCA
+              <ArrowRight className="w-5 h-5" />
+            </Link>
 
-            <a
-              href="visitors/tirages"
-              className="group relative w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-xl hover:shadow-cyan-500/60 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-cyan-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900"
+            <Link
+              href="/visitors/club"
+              className="w-full sm:w-auto px-8 py-3.5 text-gray-300 hover:text-white font-semibold transition-colors duration-200 flex items-center justify-center gap-2"
             >
-              <span className="relative z-10 flex items-center justify-center gap-2">
-                Voir les tirages
-                <svg className="w-5 h-5 transform group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-              </span>
-              <div className="absolute inset-0 bg-white/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            </a>
-
-            <a
-              href="visitors/matchs"
-              className="group relative w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-white/10 backdrop-blur-sm hover:bg-white/20 border-2 border-white/30 hover:border-cyan-400/60 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900"
-            >
-              <span className="relative z-10 flex items-center justify-center gap-2">
-                Calendrier des matchs
-                <svg className="w-5 h-5 transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </span>
-              <div className="absolute inset-0 bg-white/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            </a>
+              Découvrir le club
+              <ChevronRight className="w-4 h-4" />
+            </Link>
           </div>
 
-          {/* Stats preview */}
-          <div className="mt-12 pt-8 border-t border-white/20 grid grid-cols-3 gap-4 sm:gap-6 animate-fade-in" style={{ animationDelay: '0.6s' }}>
+          {/* Stats */}
+          <div className="mt-12 sm:mt-16 pt-8 border-t border-gray-700/50 grid grid-cols-3 gap-4 sm:gap-6 max-w-md mx-auto">
             <div className="text-center">
-              <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-cyan-400">15+</div>
-              <div className="text-xs sm:text-sm text-gray-400 mt-1">Ans d&apos;existence</div>
+              <div className="text-2xl sm:text-4xl font-heading font-bold text-accent">15+</div>
+              <div className="text-[10px] sm:text-sm text-gray-500 mt-1">Ans d&apos;existence</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-indigo-400">30+</div>
-              <div className="text-xs sm:text-sm text-gray-400 mt-1">Joueurs actifs</div>
+              <div className="text-2xl sm:text-4xl font-heading font-bold text-primary">30+</div>
+              <div className="text-[10px] sm:text-sm text-gray-500 mt-1">Joueurs actifs</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-green-400">100+</div>
-              <div className="text-xs sm:text-sm text-gray-400 mt-1">Matchs organisés</div>
+              <div className="text-2xl sm:text-4xl font-heading font-bold text-white">100+</div>
+              <div className="text-[10px] sm:text-sm text-gray-500 mt-1">Matchs organisés</div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* ─── COMMENT ÇA MARCHE ─── */}
+      <section className="bg-surface py-16 sm:py-20">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-12">
+            <h2 className="font-heading text-2xl sm:text-3xl font-bold text-secondary mb-3">
+              Bien plus qu&apos;un club de foot
+            </h2>
+            <p className="text-gray-500 max-w-2xl mx-auto">
+              Le FCA, c&apos;est avant tout une fraternité. Un groupe d&apos;amis qui se retrouvent chaque samedi pour partager leur passion du ballon, dans la bonne humeur, le respect et l&apos;esprit de compétition.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-3 gap-6">
+            <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+              <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center mb-4">
+                <Swords className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="font-heading text-lg font-bold text-secondary mb-2">Nos derbys du samedi</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">
+                Chaque mois, deux équipes sont formées par tirage au sort. Pendant 4 samedis, elles s&apos;affrontent dans une série de 4 matchs où l&apos;engagement est total&hellip; mais toujours dans la bonne ambiance.
+              </p>
+              <p className="text-gray-400 text-xs mt-3 italic">
+                Buteurs, passes décisives, cartons : tout est suivi et consigné.
+              </p>
+            </div>
+
+            <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+              <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center mb-4">
+                <UserCheck className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="font-heading text-lg font-bold text-secondary mb-2">Chaque joueur compte</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">
+                Au FCA, chaque membre fait partie de l&apos;histoire du club. Buts marqués, matchs joués, classement des buteurs : les statistiques sont mises à jour régulièrement pour alimenter les débats&hellip; et les petites rivalités amicales.
+              </p>
+            </div>
+
+            <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+              <div className="w-12 h-12 bg-accent-dark rounded-lg flex items-center justify-center mb-4">
+                <Handshake className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="font-heading text-lg font-bold text-secondary mb-2">Ouvert à tous</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">
+                Pas besoin d&apos;être Messi pour rejoindre le FCA. Ici, tout le monde est le bienvenu. Une cotisation accessible, une ambiance fraternelle, et surtout le plaisir de jouer ensemble.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── DERNIER DERBY (dynamique) ─── */}
+      <LastDerbyPreview />
+
+      {/* ─── GALERIE ─── */}
+      <GalleryMarquee />
+
+      {/* ─── CITATION ─── */}
+      <section className="bg-secondary py-16 sm:py-20">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
+          <blockquote className="text-lg sm:text-2xl md:text-3xl font-heading font-bold text-white leading-snug mb-6">
+            Depuis 2010, le FCA rassemble des amis autour du football, du respect et de la fraternité.
+          </blockquote>
+          <div className="flex items-center justify-center gap-3">
+            <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center">
+              <Users className="w-5 h-5 text-primary" />
+            </div>
+            <div className="text-left">
+              <div className="text-white font-semibold text-sm">La communauté FCA</div>
+              <div className="text-gray-400 text-xs">Depuis 2010</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── CTA FINAL ─── */}
+      <section className="bg-surface py-16 sm:py-20">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 text-center">
+          <h2 className="font-heading text-2xl sm:text-3xl font-bold text-secondary mb-4">
+            Prêt à rejoindre la famille ?
+          </h2>
+          <p className="text-gray-500 mb-8 max-w-lg mx-auto">
+            Aucun niveau requis. Juste l&apos;envie de jouer, de partager et de vivre des moments inoubliables entre amis.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link
+              href="/visitors/adhesion"
+              className="px-8 py-3.5 bg-primary hover:bg-primary-dark text-white font-bold rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+            >
+              Faire ma demande d&apos;adhésion
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+            <Link
+              href="/visitors/matchs"
+              className="px-8 py-3.5 bg-white hover:bg-gray-50 border border-gray-200 text-secondary font-semibold rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 shadow-sm"
+            >
+              <Calendar className="w-5 h-5" />
+              Voir le calendrier
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── FOOTER ─── */}
+      <footer className="bg-secondary border-t border-gray-800 py-10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="grid sm:grid-cols-3 gap-8 mb-8">
+            {/* Logo + description */}
+            <div>
+              <div className="flex items-center gap-3 mb-3">
+                <Image
+                  src="/images/default.jpeg"
+                  alt="Logo FCA"
+                  width={36}
+                  height={36}
+                  className="rounded-full"
+                />
+                <span className="font-heading font-bold text-white text-lg">FCA</span>
+              </div>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Football Club Atrokpocodji. Club de football amateur fondé en 2010.
+              </p>
+            </div>
+
+            {/* Liens rapides */}
+            <div>
+              <h4 className="font-heading font-bold text-white mb-3 text-sm uppercase tracking-wide">Navigation</h4>
+              <ul className="space-y-2">
+                {[
+                  { name: "Derbys", href: "/visitors/tirages" },
+                  { name: "Calendrier", href: "/visitors/matchs" },
+                  { name: "L'équipe", href: "/visitors/joueurs" },
+                  { name: "Classement", href: "/visitors/classement" },
+                ].map(link => (
+                  <li key={link.name}>
+                    <Link href={link.href} className="text-gray-400 hover:text-white text-sm transition-colors">
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Contact */}
+            <div>
+              <h4 className="font-heading font-bold text-white mb-3 text-sm uppercase tracking-wide">Rejoindre</h4>
+              <ul className="space-y-2">
+                <li>
+                  <Link href="/visitors/adhesion" className="text-gray-400 hover:text-white text-sm transition-colors">
+                    Demande d&apos;adhésion
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/visitors/cotisations" className="text-gray-400 hover:text-white text-sm transition-colors">
+                    Cotisations
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/visitors/club" className="text-gray-400 hover:text-white text-sm transition-colors">
+                    À propos du club
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-800 pt-6 text-center">
+            <p className="text-gray-500 text-xs">
+              &copy; {new Date().getFullYear()} Football Club Atrokpocodji. Tous droits réservés.
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

@@ -4,14 +4,13 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import {
-  DollarSign,
-  TrendingUp,
   Users,
   Search,
   CheckCircle,
   AlertTriangle,
   XCircle,
-  TrendingUpIcon
+  TrendingUp,
+  Loader2
 } from 'lucide-react';
 import ContributionProgressBar from '@/components/cotisations/ContributionProgressBar';
 
@@ -83,41 +82,41 @@ export default function CotisationsPublicPage() {
     switch (status) {
       case 'ahead':
         return {
-          color: 'text-blue-400',
-          bgColor: 'bg-blue-500/10',
-          borderColor: 'border-blue-500/30',
-          icon: TrendingUpIcon,
+          color: 'text-blue-600',
+          bgColor: 'bg-blue-50',
+          borderColor: 'border-blue-200',
+          icon: TrendingUp,
           label: 'En avance',
         };
       case 'up_to_date':
         return {
-          color: 'text-green-400',
-          bgColor: 'bg-green-500/10',
-          borderColor: 'border-green-500/30',
+          color: 'text-green-600',
+          bgColor: 'bg-green-50',
+          borderColor: 'border-green-200',
           icon: CheckCircle,
-          label: 'À jour',
+          label: 'A jour',
         };
       case 'late':
         return {
-          color: 'text-orange-400',
-          bgColor: 'bg-orange-500/10',
-          borderColor: 'border-orange-500/30',
+          color: 'text-orange-600',
+          bgColor: 'bg-orange-50',
+          borderColor: 'border-orange-200',
           icon: AlertTriangle,
           label: 'En retard',
         };
       case 'very_late':
         return {
-          color: 'text-red-400',
-          bgColor: 'bg-red-500/10',
-          borderColor: 'border-red-500/30',
+          color: 'text-red-600',
+          bgColor: 'bg-red-50',
+          borderColor: 'border-red-200',
           icon: XCircle,
-          label: 'Très en retard',
+          label: 'Tres en retard',
         };
       default:
         return {
-          color: 'text-gray-400',
-          bgColor: 'bg-gray-500/10',
-          borderColor: 'border-gray-500/30',
+          color: 'text-gray-500',
+          bgColor: 'bg-gray-50',
+          borderColor: 'border-gray-200',
           icon: CheckCircle,
           label: 'Inconnu',
         };
@@ -127,46 +126,43 @@ export default function CotisationsPublicPage() {
   const collectionRate = stats ? ((stats.totalCollected / stats.totalExpected) * 100).toFixed(1) : 0;
 
   return (
-    <div className="min-h-screen bg-[#0A0E27] text-white pt-2">
+    <div className="min-h-screen bg-surface text-secondary pt-2">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-1 h-6 bg-gradient-to-b from-cyan-400 to-indigo-500 rounded-full"></div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white">Tableau des Cotisations</h1>
+            <div className="w-1 h-6 bg-primary rounded-full"></div>
+            <h1 className="font-heading text-2xl sm:text-3xl font-black text-secondary">Tableau des Cotisations</h1>
           </div>
-          <p className="text-gray-400 text-sm">
-            Suivi transparent des cotisations hebdomadaires • 200 FCFA par samedi
+          <p className="text-gray-500 text-sm">
+            Suivi transparent des cotisations hebdomadaires - 200 FCFA par samedi
           </p>
         </div>
 
         {loading ? (
           <div className="flex flex-col justify-center items-center h-64 gap-4">
-            <div className="relative w-16 h-16">
-              <div className="absolute inset-0 border-4 border-cyan-500/20 rounded-full"></div>
-              <div className="absolute inset-0 border-4 border-t-cyan-500 rounded-full animate-spin"></div>
-            </div>
-            <p className="text-gray-400 font-medium">Chargement des données...</p>
+            <Loader2 className="w-10 h-10 text-primary animate-spin" />
+            <p className="text-gray-500 font-medium">Chargement des donnees...</p>
           </div>
         ) : (
           <>
-            {/* Stats Cards */}
+            {/* Stats Card */}
             {stats && (
               <div className="flex mb-8">
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
                   transition={{ delay: 0.3 }}
-                  className="bg-gradient-to-br from-indigo-500/10 to-indigo-600/5 border border-indigo-500/20 rounded-xl p-4"
+                  className="bg-white border border-gray-200 rounded-xl shadow-sm p-4"
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                        <p className="text-gray-400 text-sm mb-1">Membres à jour</p>
-                      <p className="text-2xl font-bold text-indigo-400">{stats.playersUpToDate}/{stats.totalPlayers}</p>
-                      <p className="text-gray-500 text-xs mt-1">{stats.playersLate} en retard</p>
+                      <p className="text-gray-500 text-sm mb-1">Membres a jour</p>
+                      <p className="text-2xl font-bold text-primary">{stats.playersUpToDate}/{stats.totalPlayers}</p>
+                      <p className="text-gray-400 text-xs mt-1">{stats.playersLate} en retard</p>
                     </div>
-                    <div className="w-12 h-12 bg-indigo-500/20 rounded-lg flex items-center justify-center">
-                      <Users className="w-6 h-6 text-indigo-400" />
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                      <Users className="w-6 h-6 text-primary" />
                     </div>
                   </div>
                 </motion.div>
@@ -174,7 +170,7 @@ export default function CotisationsPublicPage() {
             )}
 
             {/* Search & Filters */}
-            <div className="bg-gradient-to-br from-gray-800/40 to-gray-900/20 border border-gray-700/50 rounded-xl p-4 mb-6">
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 mb-6">
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex-1 relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -183,36 +179,36 @@ export default function CotisationsPublicPage() {
                     placeholder="Rechercher un membre..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-gray-900/50 border border-gray-700/50 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-lg text-secondary placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50"
                   />
                 </div>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setFilterStatus('all')}
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                    className={`cursor-pointer px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
                       filterStatus === 'all'
-                        ? 'bg-cyan-500 text-white'
-                        : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50'
+                        ? 'bg-primary text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
                   >
                     Tous
                   </button>
                   <button
                     onClick={() => setFilterStatus('up_to_date')}
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                    className={`cursor-pointer px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
                       filterStatus === 'up_to_date'
-                        ? 'bg-green-500 text-white'
-                        : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50'
+                        ? 'bg-primary text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
                   >
-                    À jour
+                    A jour
                   </button>
                   <button
                     onClick={() => setFilterStatus('late')}
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                    className={`cursor-pointer px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
                       filterStatus === 'late'
-                        ? 'bg-orange-500 text-white'
-                        : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50'
+                        ? 'bg-primary text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
                   >
                     En retard
@@ -221,7 +217,7 @@ export default function CotisationsPublicPage() {
               </div>
             </div>
 
-            {/* Tableau */}
+            {/* Player Cards */}
             <div className="grid grid-cols-1 gap-4">
               {filteredSummary.map((player, index) => {
                 const config = getStatusConfig(player.status);
@@ -230,25 +226,25 @@ export default function CotisationsPublicPage() {
                 return (
                   <motion.div
                     key={player.playerId}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
                     transition={{ delay: index * 0.05 }}
-                    className={`bg-gradient-to-br from-gray-800/40 to-gray-900/20 border ${config.borderColor} rounded-xl p-6 hover:border-cyan-500/50 transition-all`}
+                    className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 hover:border-primary/40 transition-all"
                   >
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                      {/* Photo + Nom */}
+                      {/* Photo + Name */}
                       <div className="flex items-center gap-4 flex-1">
                         <Image
                           src={player.profilePhoto || '/images/avatar-default.png'}
                           alt={player.fullName}
                           width={64}
                           height={64}
-                          className="rounded-full object-cover border-2 border-gray-700"
+                          className="rounded-full object-cover border-2 border-gray-200"
                         />
                         <div>
-                          <h3 className="text-lg font-bold text-white">{player.fullName}</h3>
+                          <h3 className="text-lg font-bold text-secondary">{player.fullName}</h3>
                           {player.alias && (
-                            <p className="text-sm text-cyan-400">&quot;{player.alias}&quot;</p>
+                            <p className="text-sm text-primary">&quot;{player.alias}&quot;</p>
                           )}
                           {player.lastContribution && (
                             <p className="text-xs text-gray-400 mt-1">
@@ -261,8 +257,8 @@ export default function CotisationsPublicPage() {
                       {/* Stats */}
                       <div className="flex-1 space-y-3">
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-400">Semaines payées</span>
-                          <span className="text-white font-semibold">{player.weeksPaid} / {player.weeksElapsed}</span>
+                          <span className="text-gray-500">Semaines payees</span>
+                          <span className="text-secondary font-semibold">{player.weeksPaid} / {player.weeksElapsed}</span>
                         </div>
                         <ContributionProgressBar
                           weeksPaid={player.weeksPaid}
@@ -271,10 +267,10 @@ export default function CotisationsPublicPage() {
                         />
                       </div>
 
-                      {/* Solde + Statut */}
+                      {/* Balance + Status */}
                       <div className="text-right">
                         <div className="mb-2">
-                          <p className="text-xs text-gray-400 mb-1">Solde</p>
+                          <p className="text-xs text-gray-500 mb-1">Solde</p>
                           <p className={`text-2xl font-bold ${config.color}`}>
                             {player.balance >= 0 ? '+' : ''}{player.balance} FCFA
                           </p>
@@ -291,8 +287,8 @@ export default function CotisationsPublicPage() {
             </div>
 
             {filteredSummary.length === 0 && (
-              <div className="text-center py-12 text-gray-400">
-                Aucun membre trouvé
+              <div className="text-center py-12 text-gray-500">
+                Aucun membre trouve
               </div>
             )}
           </>
