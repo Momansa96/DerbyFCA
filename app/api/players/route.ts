@@ -9,23 +9,49 @@ export async function GET(req: NextRequest) {
     const players = await prisma.player.findMany({
       orderBy: { fullName: "asc" },
       include: {
-        teams: { select: { id: true, name: true } }, // Inclure les équipes
+        teams: {
+          select: {
+            id: true,
+            name: true,
+            // Matchs joués via les équipes du joueur (status COMPLETED uniquement)
+            team1Matches: {
+              where: { status: "COMPLETED" },
+              select: { id: true },
+            },
+            team2Matches: {
+              where: { status: "COMPLETED" },
+              select: { id: true },
+            },
+          },
+        },
         goals: { select: { id: true } }, // Compter les buts
         yellowCards: { select: { id: true } }, // Compter les cartons jaunes
         redCards: { select: { id: true } }, // Compter les cartons rouges
       },
     });
 
-    const formattedPlayers = players.map((player: any) => ({
-      ...player,
-      joinDate: player.joinDate.toISOString(),
-      createdAt: player.createdAt.toISOString(),
-      updatedAt: player.updatedAt.toISOString(),
-      goalsCount: player.goals.length,
-      yellowCount: player.yellowCards.length,
-      redCount: player.redCards.length,
-      teams: player.teams.map((team: any) => team.name),
-    }));
+    const formattedPlayers = players.map((player: any) => {
+      // matchesPlayed = nombre de matchs COMPLETED distincts où l'une des
+      // équipes du joueur a joué (team1 ou team2). Set pour dédupliquer si
+      // un joueur appartient à plusieurs équipes ayant joué le même match.
+      const matchIdSet = new Set<string>();
+      for (const team of player.teams) {
+        for (const m of team.team1Matches) matchIdSet.add(m.id);
+        for (const m of team.team2Matches) matchIdSet.add(m.id);
+      }
+
+      return {
+        ...player,
+        joinDate: player.joinDate.toISOString(),
+        createdAt: player.createdAt.toISOString(),
+        updatedAt: player.updatedAt.toISOString(),
+        goalsCount: player.goals.length,
+        yellowCount: player.yellowCards.length,
+        redCount: player.redCards.length,
+        matchesPlayed: matchIdSet.size,
+        teams: player.teams.map((team: any) => team.name),
+      };
+    });
 
     return NextResponse.json(formattedPlayers);
   } catch (error) {
