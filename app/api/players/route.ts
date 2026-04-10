@@ -11,6 +11,8 @@ export async function GET(req: NextRequest) {
       include: {
         teams: { select: { id: true, name: true } }, // Inclure les équipes
         goals: { select: { id: true } }, // Compter les buts
+        yellowCards: { select: { id: true } }, // Compter les cartons jaunes
+        redCards: { select: { id: true } }, // Compter les cartons rouges
       },
     });
 
@@ -20,6 +22,8 @@ export async function GET(req: NextRequest) {
       createdAt: player.createdAt.toISOString(),
       updatedAt: player.updatedAt.toISOString(),
       goalsCount: player.goals.length,
+      yellowCount: player.yellowCards.length,
+      redCount: player.redCards.length,
       teams: player.teams.map((team: any) => team.name),
     }));
 

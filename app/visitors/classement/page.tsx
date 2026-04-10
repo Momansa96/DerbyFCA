@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
-import { Trophy, Target, TrendingUp, BarChart3, ChevronRight, X } from "lucide-react";
+import { Trophy, Target, TrendingUp, BarChart3, ChevronRight, X, RectangleVertical, AlertTriangle } from "lucide-react";
 
 type Player = {
   id: string;
@@ -13,6 +13,8 @@ type Player = {
   preferredPosition?: string;
   teams: string[];
   goalsCount: number;
+  yellowCount: number;
+  redCount: number;
   matchesPlayed?: number;
 };
 
@@ -22,6 +24,7 @@ export default function ClassementPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [viewMode, setViewMode] = useState<"compact" | "expanded">("compact");
+  const [tab, setTab] = useState<"buteurs" | "cartons">("buteurs");
 
   useEffect(() => {
     async function fetchPlayers() {
@@ -38,7 +41,9 @@ export default function ClassementPage() {
           profilePhoto: player.profilePhoto || "/images/default.jpeg",
           preferredPosition: player.preferredPosition,
           teams: player.teams || [],
-          goalsCount: player.goals?.length || 0,
+          goalsCount: player.goalsCount ?? player.goals?.length ?? 0,
+          yellowCount: player.yellowCount ?? 0,
+          redCount: player.redCount ?? 0,
           matchesPlayed: player.matchesPlayed || 0,
         }));
 
@@ -56,10 +61,25 @@ export default function ClassementPage() {
     return [...players].sort((a, b) => b.goalsCount - a.goalsCount);
   }, [players]);
 
+  const sortedByCards = useMemo(() => {
+    return [...players]
+      .map((p) => ({ ...p, totalCards: (p.yellowCount || 0) + (p.redCount || 0) }))
+      .sort((a, b) => {
+        if (b.totalCards !== a.totalCards) return b.totalCards - a.totalCards;
+        // Tie-break: rouges d'abord, puis jaunes
+        if ((b.redCount || 0) !== (a.redCount || 0)) return (b.redCount || 0) - (a.redCount || 0);
+        return (b.yellowCount || 0) - (a.yellowCount || 0);
+      });
+  }, [players]);
+
   const topScorer = sortedPlayers[0];
   const avgGoals = sortedPlayers.length > 0
     ? (sortedPlayers.reduce((acc, p) => acc + p.goalsCount, 0) / sortedPlayers.length).toFixed(1)
     : 0;
+
+  const topCardPlayer = sortedByCards[0];
+  const totalYellow = sortedByCards.reduce((acc, p) => acc + (p.yellowCount || 0), 0);
+  const totalRed = sortedByCards.reduce((acc, p) => acc + (p.redCount || 0), 0);
 
   if (loading) {
     return (
@@ -88,14 +108,46 @@ export default function ClassementPage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
 
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-1 h-6 bg-primary rounded-full"></div>
-            <h1 className="font-heading text-2xl sm:text-3xl font-bold text-secondary">Classement Buteurs</h1>
+            <h1 className="font-heading text-2xl sm:text-3xl font-bold text-secondary">
+              {tab === "buteurs" ? "Classement Buteurs" : "Classement Cartons"}
+            </h1>
           </div>
-          <p className="text-gray-500 text-sm">Saison {new Date().getFullYear()} - {sortedPlayers.length} joueurs</p>
+          <p className="text-gray-500 text-sm">
+            Saison {new Date().getFullYear()} - {players.length} joueurs
+          </p>
         </div>
 
+        {/* Tabs Buteurs / Cartons */}
+        <div className="mb-8 inline-flex gap-1 bg-gray-100 p-1 rounded-xl">
+          <button
+            onClick={() => setTab("buteurs")}
+            className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-colors cursor-pointer ${
+              tab === "buteurs"
+                ? "bg-primary text-white shadow-sm"
+                : "text-gray-500 hover:text-secondary"
+            }`}
+          >
+            <Target className="w-4 h-4" />
+            Buteurs
+          </button>
+          <button
+            onClick={() => setTab("cartons")}
+            className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-colors cursor-pointer ${
+              tab === "cartons"
+                ? "bg-primary text-white shadow-sm"
+                : "text-gray-500 hover:text-secondary"
+            }`}
+          >
+            <RectangleVertical className="w-4 h-4" />
+            Cartons
+          </button>
+        </div>
+
+        {tab === "buteurs" && (
+        <>
         {/* Stats Overview */}
         <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-8">
           <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-5 shadow-sm">
@@ -340,6 +392,270 @@ export default function ClassementPage() {
             );
           })}
         </div>
+        </>
+        )}
+
+        {tab === "cartons" && (
+        <>
+        {/* Stats Overview Cartons */}
+        <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-8">
+          <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-5 shadow-sm">
+            <div className="flex items-center gap-2 mb-2">
+              <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" />
+              <span className="text-xs sm:text-sm text-gray-500">Plus sanctionné</span>
+            </div>
+            <div className="text-xl sm:text-2xl font-bold text-secondary mb-1">{topCardPlayer?.totalCards || 0}</div>
+            <div className="text-xs text-gray-400 truncate">{topCardPlayer?.fullName || "N/A"}</div>
+          </div>
+
+          <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-5 shadow-sm">
+            <div className="flex items-center gap-2 mb-2">
+              <RectangleVertical className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500 fill-yellow-400" />
+              <span className="text-xs sm:text-sm text-gray-500">Cartons jaunes</span>
+            </div>
+            <div className="text-xl sm:text-2xl font-bold text-secondary mb-1">{totalYellow}</div>
+            <div className="text-xs text-gray-400">au total</div>
+          </div>
+
+          <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-5 shadow-sm">
+            <div className="flex items-center gap-2 mb-2">
+              <RectangleVertical className="w-4 h-4 sm:w-5 sm:h-5 text-red-500 fill-red-500" />
+              <span className="text-xs sm:text-sm text-gray-500">Cartons rouges</span>
+            </div>
+            <div className="text-xl sm:text-2xl font-bold text-secondary mb-1">{totalRed}</div>
+            <div className="text-xs text-gray-400">au total</div>
+          </div>
+        </div>
+
+        {/* Top 3 Podium Cartons */}
+        {sortedByCards.length >= 3 && sortedByCards[0].totalCards > 0 && (
+          <div className="mb-8">
+            <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 shadow-sm">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg sm:text-xl font-heading font-bold text-secondary flex items-center gap-2">
+                  <AlertTriangle className="w-5 h-5 text-red-500" /> Top 3
+                </h2>
+                <span className="text-xs text-gray-400 bg-gray-100 px-3 py-1 rounded-full">Plus sanctionnés</span>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3 sm:gap-6">
+                {/* 2nd */}
+                <div className="flex flex-col items-center">
+                  <div className="relative mb-3">
+                    <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24">
+                      <Image
+                        src={sortedByCards[1]?.profilePhoto || "/images/default.jpeg"}
+                        alt={sortedByCards[1]?.fullName}
+                        fill
+                        className="rounded-full object-cover border-[3px] border-gray-300"
+                      />
+                    </div>
+                    <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-7 h-7 sm:w-8 sm:h-8 bg-gray-400 rounded-full flex items-center justify-center text-white font-bold text-xs sm:text-sm shadow">
+                      2
+                    </div>
+                  </div>
+                  <h3 className="text-xs sm:text-sm font-bold text-secondary text-center mb-1 line-clamp-1 px-1">
+                    {sortedByCards[1]?.fullName}
+                  </h3>
+                  <div className="flex items-center gap-1 bg-gray-100 px-2 sm:px-3 py-1 rounded-lg">
+                    <span className="text-sm sm:text-base font-bold text-gray-600">{sortedByCards[1]?.totalCards}</span>
+                  </div>
+                  <div className="flex items-center gap-1 mt-1.5">
+                    <span className="text-[10px] sm:text-xs font-semibold text-yellow-600">{sortedByCards[1]?.yellowCount}J</span>
+                    <span className="text-[10px] sm:text-xs text-gray-300">·</span>
+                    <span className="text-[10px] sm:text-xs font-semibold text-red-600">{sortedByCards[1]?.redCount}R</span>
+                  </div>
+                </div>
+
+                {/* 1st */}
+                <div className="flex flex-col items-center -mt-4">
+                  <div className="relative mb-3">
+                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28">
+                      <Image
+                        src={sortedByCards[0]?.profilePhoto || "/images/default.jpeg"}
+                        alt={sortedByCards[0]?.fullName}
+                        fill
+                        className="rounded-full object-cover border-[3px] border-red-400 shadow-lg"
+                      />
+                      <div className="absolute -top-2 -right-2 sm:-top-3 sm:-right-3">
+                        <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-red-500" />
+                      </div>
+                    </div>
+                    <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-8 h-8 sm:w-10 sm:h-10 bg-red-500 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base shadow-md">
+                      1
+                    </div>
+                  </div>
+                  <h3 className="text-sm sm:text-base font-bold text-red-700 text-center mb-1 line-clamp-1 px-1">
+                    {sortedByCards[0]?.fullName}
+                  </h3>
+                  <div className="flex items-center gap-1.5 bg-red-50 border border-red-200 px-3 sm:px-4 py-1.5 rounded-lg">
+                    <span className="text-base sm:text-lg font-bold text-red-700">{sortedByCards[0]?.totalCards}</span>
+                  </div>
+                  <div className="flex items-center gap-1 mt-1.5">
+                    <span className="text-[10px] sm:text-xs font-semibold text-yellow-600">{sortedByCards[0]?.yellowCount}J</span>
+                    <span className="text-[10px] sm:text-xs text-gray-300">·</span>
+                    <span className="text-[10px] sm:text-xs font-semibold text-red-600">{sortedByCards[0]?.redCount}R</span>
+                  </div>
+                </div>
+
+                {/* 3rd */}
+                <div className="flex flex-col items-center">
+                  <div className="relative mb-3">
+                    <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24">
+                      <Image
+                        src={sortedByCards[2]?.profilePhoto || "/images/default.jpeg"}
+                        alt={sortedByCards[2]?.fullName}
+                        fill
+                        className="rounded-full object-cover border-[3px] border-orange-400"
+                      />
+                    </div>
+                    <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-7 h-7 sm:w-8 sm:h-8 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-xs sm:text-sm shadow">
+                      3
+                    </div>
+                  </div>
+                  <h3 className="text-xs sm:text-sm font-bold text-secondary text-center mb-1 line-clamp-1 px-1">
+                    {sortedByCards[2]?.fullName}
+                  </h3>
+                  <div className="flex items-center gap-1 bg-orange-50 px-2 sm:px-3 py-1 rounded-lg">
+                    <span className="text-sm sm:text-base font-bold text-orange-600">{sortedByCards[2]?.totalCards}</span>
+                  </div>
+                  <div className="flex items-center gap-1 mt-1.5">
+                    <span className="text-[10px] sm:text-xs font-semibold text-yellow-600">{sortedByCards[2]?.yellowCount}J</span>
+                    <span className="text-[10px] sm:text-xs text-gray-300">·</span>
+                    <span className="text-[10px] sm:text-xs font-semibold text-red-600">{sortedByCards[2]?.redCount}R</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* View Toggle */}
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-heading font-bold text-secondary">Classement complet</h2>
+          <div className="flex gap-1 bg-gray-100 p-1 rounded-lg">
+            <button
+              onClick={() => setViewMode("compact")}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
+                viewMode === "compact"
+                  ? "bg-primary text-white"
+                  : "text-gray-500 hover:text-secondary"
+              }`}
+            >
+              Compact
+            </button>
+            <button
+              onClick={() => setViewMode("expanded")}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
+                viewMode === "expanded"
+                  ? "bg-primary text-white"
+                  : "text-gray-500 hover:text-secondary"
+              }`}
+            >
+              Détails
+            </button>
+          </div>
+        </div>
+
+        {/* Rankings List Cartons */}
+        <div className="space-y-2">
+          {sortedByCards.map((player, index) => {
+            const rank = index + 1;
+            const isTop3 = rank <= 3 && player.totalCards > 0;
+
+            const rankColors = {
+              1: { bar: "bg-red-500", badge: "bg-red-500 text-white", border: "border-red-300" },
+              2: { bar: "bg-gray-400", badge: "bg-gray-400 text-white", border: "border-gray-300" },
+              3: { bar: "bg-orange-500", badge: "bg-orange-500 text-white", border: "border-orange-300" },
+            };
+
+            const defaultStyle = { bar: "bg-gray-300", badge: "bg-gray-100 text-gray-600", border: "border-gray-200" };
+            const style = isTop3 ? rankColors[rank as 1 | 2 | 3] : defaultStyle;
+
+            const topCardCount = sortedByCards[0]?.totalCards || 0;
+
+            return (
+              <div
+                key={player.id}
+                onClick={() => setSelectedPlayer(player)}
+                className={`group relative bg-white hover:bg-gray-50 border ${style.border} transition-colors cursor-pointer rounded-xl overflow-hidden shadow-sm`}
+              >
+                <div className={`absolute left-0 top-0 bottom-0 w-1 ${style.bar}`} />
+
+                <div className="p-3 sm:p-4 pl-5 sm:pl-6">
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center font-bold text-sm sm:text-base ${style.badge}`}>
+                      {rank}
+                    </div>
+
+                    <div className="relative w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0">
+                      <Image
+                        src={player.profilePhoto || "/images/default.jpeg"}
+                        alt={player.fullName}
+                        fill
+                        className="rounded-full object-cover border border-gray-200"
+                      />
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm sm:text-base font-bold text-secondary truncate">
+                        {player.fullName}
+                      </h3>
+                      {viewMode === "expanded" && player.alias && (
+                        <p className="text-xs text-gray-400 truncate">&quot;{player.alias}&quot;</p>
+                      )}
+                      {viewMode === "expanded" && player.preferredPosition && (
+                        <p className="text-xs text-gray-400 mt-0.5">{player.preferredPosition}</p>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                      <div className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg font-bold text-xs sm:text-sm bg-yellow-100 text-yellow-700">
+                        <RectangleVertical className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-yellow-400" />
+                        <span>{player.yellowCount}</span>
+                      </div>
+                      <div className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg font-bold text-xs sm:text-sm bg-red-100 text-red-700">
+                        <RectangleVertical className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-red-500" />
+                        <span>{player.redCount}</span>
+                      </div>
+                      <div className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold text-sm ${
+                        isTop3 ? "bg-secondary/10 text-secondary" : "bg-gray-100 text-gray-600"
+                      }`}>
+                        <span>Total</span>
+                        <span>{player.totalCards}</span>
+                      </div>
+
+                      <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-primary transition-colors" />
+                    </div>
+                  </div>
+
+                  {viewMode === "expanded" && (
+                    <div className="mt-3 pt-3 border-t border-gray-100">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs text-gray-400">Sanctions (sur le leader)</span>
+                        <span className="text-xs text-gray-500">
+                          {topCardCount > 0 ? Math.round((player.totalCards / topCardCount) * 100) : 0}%
+                        </span>
+                      </div>
+                      <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-red-500 rounded-full transition-all"
+                          style={{
+                            width: topCardCount > 0
+                              ? `${(player.totalCards / topCardCount) * 100}%`
+                              : "0%",
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        </>
+        )}
       </div>
 
       {selectedPlayer && <PlayerModal player={selectedPlayer} onClose={() => setSelectedPlayer(null)} />}
@@ -405,6 +721,20 @@ function PlayerModal({ player, onClose }: { player: Player; onClose: () => void 
               <TrendingUp className="w-7 h-7 text-gray-500 mx-auto mb-2" />
               <div className="text-3xl font-bold text-secondary mb-1">{player.matchesPlayed || 0}</div>
               <div className="text-xs text-gray-500 font-medium">Matchs joués</div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-5 text-center">
+              <RectangleVertical className="w-7 h-7 text-yellow-500 fill-yellow-400 mx-auto mb-2" />
+              <div className="text-3xl font-bold text-secondary mb-1">{player.yellowCount}</div>
+              <div className="text-xs text-gray-500 font-medium">Cartons jaunes</div>
+            </div>
+
+            <div className="bg-red-50 border border-red-200 rounded-xl p-5 text-center">
+              <RectangleVertical className="w-7 h-7 text-red-500 fill-red-500 mx-auto mb-2" />
+              <div className="text-3xl font-bold text-secondary mb-1">{player.redCount}</div>
+              <div className="text-xs text-gray-500 font-medium">Cartons rouges</div>
             </div>
           </div>
 
