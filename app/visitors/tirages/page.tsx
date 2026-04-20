@@ -375,15 +375,24 @@ export default function DerbysPage() {
                           Résultats des matchs
                         </h4>
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                          {[...derby.matches]
-                            .sort((a, b) => {
-                              // Prioriser les matchs terminés
-                              if (a.status === "COMPLETED" && b.status !== "COMPLETED") return -1;
-                              if (a.status !== "COMPLETED" && b.status === "COMPLETED") return 1;
-                              // Ensuite trier par date décroissante
-                              return new Date(b.date).getTime() - new Date(a.date).getTime();
-                            })
-                            .map((match, idx) => (
+                          {(() => {
+                            // Séparer terminés (du + récent au + ancien) et à venir (chronologique)
+                            const completed = derby.matches
+                              .filter((m) => m.status === "COMPLETED")
+                              .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+                            const upcoming = derby.matches
+                              .filter((m) => m.status !== "COMPLETED")
+                              .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+                            // Ordre : dernier terminé, prochain à venir, puis le reste
+                            const ordered = [
+                              ...(completed[0] ? [completed[0]] : []),
+                              ...(upcoming[0] ? [upcoming[0]] : []),
+                              ...completed.slice(1),
+                              ...upcoming.slice(1),
+                            ];
+
+                            return ordered.map((match, idx) => (
                             <div
                               key={match.id}
                               className="bg-white border border-gray-200 rounded-xl p-4 hover:border-gray-300 transition-all shadow-sm"
@@ -492,7 +501,8 @@ export default function DerbysPage() {
                                 </div>
                               )}
                             </div>
-                          ))}
+                          ));
+                          })()}
                         </div>
                       </div>
                     </div>
