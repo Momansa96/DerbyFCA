@@ -3,7 +3,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast, { Toaster } from "react-hot-toast";
-import { Sparkles, Calendar, Clock, MapPin, Users, Pencil, Trash2, Plus, Search, Filter, TrendingUp, Home, Plane, Trophy } from "lucide-react";
+import { Sparkles, Calendar, Clock, MapPin, Users, Pencil, Trash2, Plus, Search, Filter, TrendingUp, Home, Plane, Trophy, Settings2, CheckCircle2 } from "lucide-react";
+import Link from "next/link";
 
 const matchTypes = ["officiel", "amical"];
 
@@ -15,6 +16,9 @@ interface Match {
   location: string;
   place: string;
   opponent: string;
+  status?: string;
+  ourScore?: number | null;
+  opponentScore?: number | null;
   createdAt?: string;
 }
 
@@ -323,9 +327,17 @@ export default function AdminMatchsPage() {
 
                   {/* Middle: Match Info */}
                   <div className="flex-1">
-                    <h3 className="text-lg font-bold text-white mb-2 group-hover:text-cyan-400 transition-colors">
-                      vs {match.opponent}
-                    </h3>
+                    <div className="flex items-center gap-3 mb-2 flex-wrap">
+                      <h3 className="text-lg font-bold text-white group-hover:text-cyan-400 transition-colors">
+                        vs {match.opponent}
+                      </h3>
+                      {match.status === "COMPLETED" && match.ourScore != null && match.opponentScore != null && (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-green-500/15 border border-green-500/40 text-green-400 text-xs font-black">
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          {match.ourScore} - {match.opponentScore}
+                        </span>
+                      )}
+                    </div>
                     <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs text-gray-400">
                       <div className="flex items-center gap-1.5">
                         <Calendar className="w-3.5 h-3.5" />
@@ -344,15 +356,24 @@ export default function AdminMatchsPage() {
 
                   {/* Right: Actions */}
                   <div className="flex items-center gap-2 sm:flex-shrink-0">
+                    <Link
+                      href={`/admin/matches/${match.id}`}
+                      className="p-2.5 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 rounded-lg transition-all"
+                      title="Gérer la compo et le résultat"
+                    >
+                      <Settings2 className="w-4 h-4 text-indigo-400" />
+                    </Link>
                     <button
                       onClick={() => handleEdit(match)}
                       className="p-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 rounded-lg transition-all group/btn"
+                      title="Modifier les infos"
                     >
                       <Pencil className="w-4 h-4 text-cyan-400" />
                     </button>
                     <button
                       onClick={() => confirmDelete(match)}
                       className="p-2.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 rounded-lg transition-all group/btn"
+                      title="Supprimer"
                     >
                       <Trash2 className="w-4 h-4 text-red-400" />
                     </button>

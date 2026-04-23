@@ -43,6 +43,9 @@ model Player {
   yellowCards       YellowCard[]
   redCards          RedCard[]
   contributions     Contribution[]
+  friendlyCompositions FriendlyMatchPlayer[]
+  friendlyGoals     FriendlyMatchGoal[] @relation("FMGoalScorer")
+  friendlyAssists   FriendlyMatchGoal[] @relation("FMGoalAssist")
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
 }
@@ -114,14 +117,52 @@ model Goal {
 }
 
 model FriendlyMatch {
-  id        String   @id @default(uuid())
-  type      String   // Amical, Exhibition, etc.
-  date      String   // format : YYYY-MM-DD
-  time      String   // format : HH:MM
-  location  String   // exemple : Stade Gbegamey
-  place     String   // Domicile ou Extérieur
-  opponent  String   // Nom de l'équipe adverse
-  createdAt DateTime @default(now())
+  id            String   @id @default(uuid())
+  type          String   // "officiel" | "amical" | "exhibition"
+  date          String   // format : YYYY-MM-DD
+  time          String   // format : HH:MM
+  location      String   // exemple : Stade Gbegamey
+  place         String   // "domicile" | "extérieur"
+  opponent      String   // Nom de l'équipe adverse
+  ourScore      Int?     // Score FCA (null tant que non joué)
+  opponentScore Int?     // Score adversaire
+  status        String   @default("SCHEDULED") // SCHEDULED | COMPLETED
+  notes         String?  // Commentaire libre
+  compositions  FriendlyMatchPlayer[]
+  goals         FriendlyMatchGoal[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now()) @updatedAt
+}
+
+model FriendlyMatchPlayer {
+  id              String        @id @default(uuid())
+  friendlyMatch   FriendlyMatch @relation(fields: [friendlyMatchId], references: [id], onDelete: Cascade)
+  friendlyMatchId String
+  player          Player        @relation(fields: [playerId], references: [id])
+  playerId        String
+  role            String        // "TITULAIRE" | "REMPLACANT"
+  position        String?       // "GK" | "DEF" | "MID" | "ATT_L" | "ATT_R" (null si REMPLACANT)
+  createdAt       DateTime      @default(now())
+
+  @@unique([friendlyMatchId, playerId])
+  @@index([friendlyMatchId])
+  @@index([playerId])
+}
+
+model FriendlyMatchGoal {
+  id              String        @id @default(uuid())
+  friendlyMatch   FriendlyMatch @relation(fields: [friendlyMatchId], references: [id], onDelete: Cascade)
+  friendlyMatchId String
+  player          Player        @relation("FMGoalScorer", fields: [playerId], references: [id])
+  playerId        String
+  assistPlayer    Player?       @relation("FMGoalAssist", fields: [assistPlayerId], references: [id])
+  assistPlayerId  String?
+  minute          Int?
+  createdAt       DateTime      @default(now())
+
+  @@index([friendlyMatchId])
+  @@index([playerId])
+  @@index([assistPlayerId])
 }
 
 model AuditLog {

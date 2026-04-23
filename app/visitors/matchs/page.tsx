@@ -13,33 +13,83 @@ import {
   Filter,
   AlertTriangle,
   Radio,
+  Goal as GoalIcon,
+  User as UserIcon,
+  Home,
+  Plane,
 } from "lucide-react";
+import FormationField, {
+  FormationPosition,
+  FormationSlots,
+  SlotPlayer,
+} from "@/components/matchs/FormationField";
 
 // Types
+type MatchPlayer = {
+  id: string;
+  fullName: string;
+  alias?: string | null;
+  profilePhoto?: string | null;
+  number?: number | null;
+};
+
+type Composition = {
+  id: string;
+  playerId: string;
+  role: "TITULAIRE" | "REMPLACANT";
+  position: FormationPosition | null;
+  player: MatchPlayer;
+};
+
+type MatchGoal = {
+  id: string;
+  playerId: string;
+  assistPlayerId: string | null;
+  minute: number | null;
+  player: MatchPlayer;
+  assistPlayer: MatchPlayer | null;
+};
+
 type Match = {
   id: string;
+  type: string; // "officiel" | "amical" | "exhibition" | (legacy values)
   date: string;
   time: string;
   location: string;
-  type: "friendly" | "derby" | "exhibition";
+  place: string;
+  opponent: string;
+  status?: string;
+  ourScore?: number | null;
+  opponentScore?: number | null;
+  notes?: string | null;
+  compositions: Composition[];
+  goals: MatchGoal[];
 };
 
-// Utils
-const formatDate = (dateStr: string) =>
-  new Date(dateStr).toISOString().split("T")[0];
-
-const typeConfig = {
-  derby: {
-    label: "Derby",
-    icon: Flame,
-    accentColor: "bg-orange-500",
-    iconBg: "bg-orange-50",
-    iconColor: "text-orange-600",
-    borderColor: "border-orange-200",
-    bgColor: "bg-orange-50",
-    badge: "bg-orange-50 text-orange-700 border-orange-200",
+const typeConfig: Record<
+  string,
+  {
+    label: string;
+    icon: any;
+    accentColor: string;
+    iconBg: string;
+    iconColor: string;
+    borderColor: string;
+    bgColor: string;
+    badge: string;
+  }
+> = {
+  officiel: {
+    label: "Match Officiel",
+    icon: Trophy,
+    accentColor: "bg-indigo-500",
+    iconBg: "bg-indigo-50",
+    iconColor: "text-indigo-600",
+    borderColor: "border-indigo-200",
+    bgColor: "bg-indigo-50",
+    badge: "bg-indigo-50 text-indigo-700 border-indigo-200",
   },
-  friendly: {
+  amical: {
     label: "Match Amical",
     icon: Users,
     accentColor: "bg-primary",
@@ -59,7 +109,19 @@ const typeConfig = {
     bgColor: "bg-purple-50",
     badge: "bg-purple-50 text-purple-700 border-purple-200",
   },
+  derby: {
+    label: "Derby",
+    icon: Flame,
+    accentColor: "bg-orange-500",
+    iconBg: "bg-orange-50",
+    iconColor: "text-orange-600",
+    borderColor: "border-orange-200",
+    bgColor: "bg-orange-50",
+    badge: "bg-orange-50 text-orange-700 border-orange-200",
+  },
 };
+
+const getConfig = (type: string) => typeConfig[type] || typeConfig.amical;
 
 export default function MatchsPage() {
   const [matches, setMatches] = useState<Match[]>([]);
@@ -81,26 +143,32 @@ export default function MatchsPage() {
         setLoading(false);
       }
     };
-
     fetchMatches();
   }, []);
 
   const now = useMemo(() => new Date(), []);
   const todayMatches = useMemo(
-    () => matches.filter((m) => {
-      const matchDate = new Date(m.date);
-      return matchDate.toDateString() === now.toDateString();
-    }),
+    () =>
+      matches.filter((m) => {
+        const matchDate = new Date(m.date);
+        return matchDate.toDateString() === now.toDateString();
+      }),
     [matches, now]
   );
 
   const upcomingMatches = useMemo(
-    () => matches.filter((m) => new Date(m.date) > now).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()),
+    () =>
+      matches
+        .filter((m) => new Date(m.date) > now)
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()),
     [matches, now]
   );
 
   const pastMatches = useMemo(
-    () => matches.filter((m) => new Date(m.date) < now).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
+    () =>
+      matches
+        .filter((m) => new Date(m.date) < now)
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
     [matches, now]
   );
 
@@ -151,7 +219,9 @@ export default function MatchsPage() {
             <div className="w-1 h-6 bg-primary rounded-full"></div>
             <h1 className="text-2xl sm:text-3xl font-heading text-secondary">Calendrier</h1>
           </div>
-          <p className="text-gray-500 text-sm">Saison {new Date().getFullYear()} &bull; {stats.total} matchs</p>
+          <p className="text-gray-500 text-sm">
+            Saison {new Date().getFullYear()} &bull; {stats.total} matchs
+          </p>
         </div>
 
         {/* Stats Cards */}
@@ -187,11 +257,18 @@ export default function MatchsPage() {
             <div className="bg-green-50 border border-green-200 rounded-xl p-4 sm:p-6">
               <div className="flex items-center gap-2 mb-4">
                 <Radio className="w-5 h-5 text-green-600" />
-                <h2 className="text-lg sm:text-xl font-heading text-secondary">En direct &bull; Aujourd&apos;hui</h2>
+                <h2 className="text-lg sm:text-xl font-heading text-secondary">
+                  En direct &bull; Aujourd&apos;hui
+                </h2>
               </div>
               <div className="grid gap-4">
                 {todayMatches.map((match) => (
-                  <MatchCard key={match.id} match={match} isLive onClick={() => setSelectedMatch(match)} />
+                  <MatchCard
+                    key={match.id}
+                    match={match}
+                    isLive
+                    onClick={() => setSelectedMatch(match)}
+                  />
                 ))}
               </div>
             </div>
@@ -243,12 +320,14 @@ export default function MatchsPage() {
       </div>
 
       {/* Modal */}
-      {selectedMatch && <MatchModal match={selectedMatch} onClose={() => setSelectedMatch(null)} />}
+      {selectedMatch && (
+        <MatchModal match={selectedMatch} onClose={() => setSelectedMatch(null)} />
+      )}
     </div>
   );
 }
 
-// Match Card Component
+// === Match Card ===
 function MatchCard({
   match,
   isLive = false,
@@ -258,10 +337,12 @@ function MatchCard({
   isLive?: boolean;
   onClick: () => void;
 }) {
-  const config = typeConfig[match.type] || typeConfig.friendly; // Fallback to friendly
+  const config = getConfig(match.type);
   const Icon = config.icon;
   const matchDate = new Date(match.date);
   const isPast = matchDate < new Date();
+  const hasResult =
+    match.status === "COMPLETED" && match.ourScore != null && match.opponentScore != null;
 
   return (
     <motion.div
@@ -272,24 +353,33 @@ function MatchCard({
         isLive ? "border-green-300" : "border-gray-200"
       } hover:shadow-md transition-all cursor-pointer rounded-xl overflow-hidden shadow-sm`}
     >
-      {/* Left accent bar */}
       <div className={`absolute left-0 top-0 bottom-0 w-1 ${config.accentColor}`} />
 
       <div className="p-4 sm:p-5 pl-5 sm:pl-6">
         <div className="flex items-start justify-between gap-4">
-          {/* Left section */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-3">
-              <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl ${config.iconBg} border ${config.borderColor} flex items-center justify-center flex-shrink-0`}>
+              <div
+                className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl ${config.iconBg} border ${config.borderColor} flex items-center justify-center flex-shrink-0`}
+              >
                 <Icon className={`w-5 h-5 sm:w-6 sm:h-6 ${config.iconColor}`} />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-base sm:text-lg font-bold text-secondary truncate">{config.label}</h3>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-md border ${config.badge}`}>
+                <h3 className="text-base sm:text-lg font-bold text-secondary truncate">
+                  {config.label} &bull; vs {match.opponent}
+                </h3>
+                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                  <span
+                    className={`text-xs font-semibold px-2 py-0.5 rounded-md border ${config.badge}`}
+                  >
                     {match.type.toUpperCase()}
                   </span>
-                  {isPast && (
+                  {hasResult && (
+                    <span className="text-xs font-black px-2 py-0.5 rounded-md bg-green-50 text-green-700 border border-green-200">
+                      {match.ourScore} - {match.opponentScore}
+                    </span>
+                  )}
+                  {isPast && !hasResult && (
                     <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-gray-100 text-gray-500 border border-gray-200">
                       TERMINE
                     </span>
@@ -304,7 +394,6 @@ function MatchCard({
               </div>
             </div>
 
-            {/* Match info */}
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <CalendarIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
@@ -328,7 +417,6 @@ function MatchCard({
             </div>
           </div>
 
-          {/* Right arrow */}
           <div className="flex items-center">
             <ChevronRight className="w-6 h-6 text-gray-300 group-hover:text-primary group-hover:translate-x-1 transition-all" />
           </div>
@@ -338,11 +426,29 @@ function MatchCard({
   );
 }
 
-// Match Modal
+// === Modal ===
 function MatchModal({ match, onClose }: { match: Match; onClose: () => void }) {
-  const config = typeConfig[match.type] || typeConfig.friendly; // Fallback to friendly
+  const config = getConfig(match.type);
   const Icon = config.icon;
   const matchDate = new Date(match.date);
+  const hasResult =
+    match.status === "COMPLETED" && match.ourScore != null && match.opponentScore != null;
+
+  const titulaires = match.compositions.filter((c) => c.role === "TITULAIRE");
+  const remplacants = match.compositions.filter((c) => c.role === "REMPLACANT");
+
+  const slots: FormationSlots = {};
+  for (const t of titulaires) {
+    if (t.position) {
+      slots[t.position] = {
+        id: t.player.id,
+        fullName: t.player.fullName,
+        alias: t.player.alias,
+        profilePhoto: t.player.profilePhoto,
+        number: t.player.number,
+      };
+    }
+  }
 
   return (
     <div
@@ -352,10 +458,9 @@ function MatchModal({ match, onClose }: { match: Match; onClose: () => void }) {
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-white border border-gray-200 rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl relative"
+        className="bg-white border border-gray-200 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close button */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center text-gray-500 hover:text-secondary transition-all z-10 cursor-pointer"
@@ -364,67 +469,193 @@ function MatchModal({ match, onClose }: { match: Match; onClose: () => void }) {
         </button>
 
         {/* Header */}
-        <div className={`relative p-8 pb-6 ${config.bgColor} border-b ${config.borderColor}`}>
-          <div className="flex items-center gap-4">
-            <div className={`w-16 h-16 rounded-2xl ${config.iconBg} border ${config.borderColor} flex items-center justify-center`}>
-              <Icon className={`w-8 h-8 ${config.iconColor}`} />
+        <div className={`relative p-6 sm:p-8 ${config.bgColor} border-b ${config.borderColor}`}>
+          <div className="flex items-center gap-4 mb-4">
+            <div
+              className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl ${config.iconBg} border ${config.borderColor} flex items-center justify-center flex-shrink-0`}
+            >
+              <Icon className={`w-7 h-7 sm:w-8 sm:h-8 ${config.iconColor}`} />
             </div>
-            <div>
-              <h2 className="text-2xl font-heading text-secondary mb-1">{config.label}</h2>
-              <span className={`text-xs font-semibold px-3 py-1 rounded-md border ${config.badge}`}>
-                {match.type.toUpperCase()}
-              </span>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-xl sm:text-2xl font-heading text-secondary mb-1 truncate">
+                FCA vs {match.opponent}
+              </h2>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-md border ${config.badge}`}>
+                  {config.label}
+                </span>
+                {match.place === "domicile" ? (
+                  <span className="inline-flex items-center gap-1 text-green-700 text-xs font-semibold">
+                    <Home className="w-3 h-3" /> Domicile
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-orange-700 text-xs font-semibold">
+                    <Plane className="w-3 h-3" /> Extérieur
+                  </span>
+                )}
+              </div>
             </div>
           </div>
+
+          {/* Score */}
+          {hasResult && (
+            <div className="flex items-center justify-center gap-4 mt-4 bg-white rounded-xl border border-gray-200 p-4">
+              <div className="text-center flex-1">
+                <div className="text-[11px] text-gray-500 mb-1 font-semibold uppercase tracking-wide">
+                  FCA
+                </div>
+                <div className="text-4xl font-black text-secondary">{match.ourScore}</div>
+              </div>
+              <div className="text-gray-300 text-2xl font-black">—</div>
+              <div className="text-center flex-1">
+                <div className="text-[11px] text-gray-500 mb-1 font-semibold uppercase tracking-wide truncate">
+                  {match.opponent}
+                </div>
+                <div className="text-4xl font-black text-secondary">{match.opponentScore}</div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Content */}
-        <div className="p-8">
-          <div className="space-y-6">
-            {/* Date */}
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-center flex-shrink-0">
-                <CalendarIcon className="w-6 h-6 text-primary" />
+        <div className="p-6 sm:p-8 space-y-6">
+          {/* Infos */}
+          <div className="grid sm:grid-cols-3 gap-3">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-center flex-shrink-0">
+                <CalendarIcon className="w-5 h-5 text-primary" />
               </div>
-              <div className="flex-1">
-                <div className="text-sm text-gray-500 mb-1">Date</div>
-                <div className="text-base font-bold text-secondary">
+              <div>
+                <div className="text-xs text-gray-500">Date</div>
+                <div className="text-sm font-bold text-secondary">
                   {matchDate.toLocaleDateString("fr-FR", {
-                    weekday: "long",
-                    day: "numeric",
+                    day: "2-digit",
                     month: "long",
                     year: "numeric",
                   })}
                 </div>
               </div>
             </div>
-
-            {/* Time */}
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-center flex-shrink-0">
-                <Clock className="w-6 h-6 text-primary" />
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-center flex-shrink-0">
+                <Clock className="w-5 h-5 text-primary" />
               </div>
-              <div className="flex-1">
-                <div className="text-sm text-gray-500 mb-1">Heure</div>
-                <div className="text-base font-bold text-secondary">{match.time}</div>
+              <div>
+                <div className="text-xs text-gray-500">Heure</div>
+                <div className="text-sm font-bold text-secondary">{match.time}</div>
               </div>
             </div>
-
-            {/* Location */}
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-center flex-shrink-0">
-                <MapPin className="w-6 h-6 text-primary" />
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-center flex-shrink-0">
+                <MapPin className="w-5 h-5 text-primary" />
               </div>
-              <div className="flex-1">
-                <div className="text-sm text-gray-500 mb-1">Lieu</div>
-                <div className="text-base font-bold text-secondary">{match.location}</div>
+              <div>
+                <div className="text-xs text-gray-500">Lieu</div>
+                <div className="text-sm font-bold text-secondary">{match.location}</div>
               </div>
             </div>
           </div>
 
+          {/* Composition */}
+          {titulaires.length > 0 && (
+            <div>
+              <h3 className="text-sm font-black text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                Composition
+              </h3>
+              <FormationField slots={slots} opponentLabel={match.opponent} />
+
+              {remplacants.length > 0 && (
+                <div className="mt-5">
+                  <h4 className="text-xs font-bold text-gray-500 uppercase mb-2">
+                    Remplaçants ({remplacants.length})
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {remplacants.map((r) => (
+                      <div
+                        key={r.id}
+                        className="inline-flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-full pl-1 pr-3 py-1"
+                      >
+                        <div className="w-6 h-6 rounded-full overflow-hidden bg-gray-200 flex-shrink-0 flex items-center justify-center">
+                          {r.player.profilePhoto ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={r.player.profilePhoto}
+                              alt=""
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <UserIcon className="w-3 h-3 text-gray-400" />
+                          )}
+                        </div>
+                        <span className="text-xs font-semibold text-secondary">
+                          {r.player.alias || r.player.fullName}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Buteurs */}
+          {match.goals.length > 0 && (
+            <div>
+              <h3 className="text-sm font-black text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                <GoalIcon className="w-4 h-4" />
+                Buteurs FCA
+              </h3>
+              <div className="space-y-2">
+                {match.goals.map((g) => (
+                  <div
+                    key={g.id}
+                    className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-lg p-3"
+                  >
+                    <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex-shrink-0 flex items-center justify-center">
+                      {g.player.profilePhoto ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={g.player.profilePhoto}
+                          alt=""
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <UserIcon className="w-5 h-5 text-gray-400" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-sm text-secondary truncate">
+                        {g.player.alias || g.player.fullName}
+                      </p>
+                      {g.assistPlayer && (
+                        <p className="text-xs text-gray-500 truncate">
+                          Passe&nbsp;: {g.assistPlayer.alias || g.assistPlayer.fullName}
+                        </p>
+                      )}
+                    </div>
+                    {g.minute != null && (
+                      <span className="text-xs font-black bg-primary/10 text-primary px-2 py-1 rounded-md">
+                        {g.minute}&apos;
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Notes */}
+          {match.notes && (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+              <h4 className="text-xs font-black text-amber-800 uppercase mb-1">Notes</h4>
+              <p className="text-sm text-amber-900 whitespace-pre-wrap">{match.notes}</p>
+            </div>
+          )}
+
           <button
             onClick={onClose}
-            className="w-full mt-8 py-3.5 bg-primary hover:bg-primary-dark text-white font-bold rounded-xl transition-all duration-200 shadow-sm cursor-pointer"
+            className="w-full py-3 bg-primary hover:bg-primary-dark text-white font-bold rounded-xl transition-all duration-200 shadow-sm cursor-pointer"
           >
             Fermer
           </button>
