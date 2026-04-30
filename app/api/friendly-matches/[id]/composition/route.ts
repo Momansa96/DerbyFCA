@@ -5,10 +5,10 @@ import { requireAdmin } from "@/lib/auth/requireAdmin";
 type CompositionEntry = {
   playerId: string;
   role: "TITULAIRE" | "REMPLACANT";
-  position?: "GK" | "DEF" | "MID" | "ATT_L" | "ATT_R" | null;
+  position?: "GK" | "DEF" | "ATT_L" | "ATT_C" | "ATT_R" | null;
 };
 
-const VALID_POSITIONS = ["GK", "DEF", "MID", "ATT_L", "ATT_R"];
+const VALID_POSITIONS = ["GK", "DEF", "ATT_L", "ATT_C", "ATT_R"];
 
 /**
  * PUT /api/friendly-matches/[id]/composition

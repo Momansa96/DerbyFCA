@@ -78,8 +78,8 @@ type GoalDraft = {
 const POSITION_LABEL: Record<FormationPosition, string> = {
   GK: "Gardien",
   DEF: "Défenseur",
-  MID: "Milieu",
   ATT_L: "Attaquant G",
+  ATT_C: "Attaquant C",
   ATT_R: "Attaquant D",
 };
 
@@ -454,7 +454,7 @@ export default function AdminMatchDetailPage() {
             {/* Terrain */}
             <div>
               <h2 className="text-sm font-black text-gray-400 uppercase tracking-wider mb-3">
-                Formation 1-1-2
+                Formation 1-1-3
               </h2>
               <FormationField
                 slots={slots}
@@ -466,7 +466,7 @@ export default function AdminMatchDetailPage() {
 
               {/* Actions par slot (clear) */}
               <div className="mt-4 grid grid-cols-5 gap-2">
-                {(["GK", "DEF", "MID", "ATT_L", "ATT_R"] as FormationPosition[]).map(
+                {(["GK", "DEF", "ATT_L", "ATT_C", "ATT_R"] as FormationPosition[]).map(
                   (pos) => (
                     <button
                       key={pos}

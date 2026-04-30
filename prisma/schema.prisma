@@ -141,7 +141,7 @@ model FriendlyMatchPlayer {
   player          Player        @relation(fields: [playerId], references: [id])
   playerId        String
   role            String        // "TITULAIRE" | "REMPLACANT"
-  position        String?       // "GK" | "DEF" | "MID" | "ATT_L" | "ATT_R" (null si REMPLACANT)
+  position        String?       // "GK" | "DEF" | "ATT_L" | "ATT_C" | "ATT_R" (null si REMPLACANT)
   createdAt       DateTime      @default(now())
 
   @@unique([friendlyMatchId, playerId])
