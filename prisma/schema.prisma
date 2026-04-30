@@ -123,11 +123,12 @@ model FriendlyMatch {
   time          String   // format : HH:MM
   location      String   // exemple : Stade Gbegamey
   place         String   // "domicile" | "extérieur"
-  opponent      String   // Nom de l'équipe adverse
-  ourScore      Int?     // Score FCA (null tant que non joué)
-  opponentScore Int?     // Score adversaire
+  opponent      String   // Nom de l'équipe adverse (= "Match interne" si isInternal)
+  ourScore      Int?     // Score FCA / Équipe 1 (null tant que non joué)
+  opponentScore Int?     // Score adversaire / Équipe 2
   status        String   @default("SCHEDULED") // SCHEDULED | COMPLETED
   notes         String?  // Commentaire libre
+  isInternal    Boolean  @default(false) // true = exhibition interne entre joueurs FCA
   compositions  FriendlyMatchPlayer[]
   goals         FriendlyMatchGoal[]
   createdAt     DateTime @default(now())
@@ -141,7 +142,8 @@ model FriendlyMatchPlayer {
   player          Player        @relation(fields: [playerId], references: [id])
   playerId        String
   role            String        // "TITULAIRE" | "REMPLACANT"
-  position        String?       // "GK" | "DEF" | "ATT_L" | "ATT_C" | "ATT_R" (null si REMPLACANT)
+  position        String?       // "GK" | "DEF" | "ATT_L" | "ATT_C" | "ATT_R" (null si REMPLACANT ou exhibition interne)
+  side            String        @default("HOME") // "HOME" = FCA / Équipe 1, "AWAY" = Équipe 2 (interne uniquement)
   createdAt       DateTime      @default(now())
 
   @@unique([friendlyMatchId, playerId])
@@ -158,6 +160,7 @@ model FriendlyMatchGoal {
   assistPlayer    Player?       @relation("FMGoalAssist", fields: [assistPlayerId], references: [id])
   assistPlayerId  String?
   minute          Int?
+  side            String        @default("HOME") // "HOME" / "AWAY" — utile pour exhibition interne
   createdAt       DateTime      @default(now())
 
   @@index([friendlyMatchId])

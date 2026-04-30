@@ -32,14 +32,34 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { type, date, time, location, place, opponent } = body;
+    const { type, date, time, location, place, opponent, isInternal } = body;
 
-    if (!type || !date || !time || !location || !place || !opponent) {
+    if (!type || !date || !time || !location) {
+      return NextResponse.json({ error: 'Champs manquants' }, { status: 400 });
+    }
+
+    // Match interne : pas d'adversaire ni de place à fournir, on les force
+    if (isInternal) {
+      const match = await prisma.friendlyMatch.create({
+        data: {
+          type: 'exhibition',
+          date,
+          time,
+          location,
+          place: 'domicile',
+          opponent: 'Match interne',
+          isInternal: true,
+        },
+      });
+      return NextResponse.json(match, { status: 201 });
+    }
+
+    if (!place || !opponent) {
       return NextResponse.json({ error: 'Champs manquants' }, { status: 400 });
     }
 
     const match = await prisma.friendlyMatch.create({
-      data: { type, date, time, location, place, opponent },
+      data: { type, date, time, location, place, opponent, isInternal: false },
     });
 
     return NextResponse.json(match, { status: 201 });

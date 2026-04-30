@@ -92,8 +92,8 @@ export async function GET() {
       },
     });
 
-    // Moyenne de buts par match (sur tous les matchs joués)
-    const totalButs = await prisma.goal.count({
+    // Moyenne de buts par match (sur tous les matchs joués) — derbys + exhibitions internes
+    const totalButsDerby = await prisma.goal.count({
       where: {
         match: {
           date: {
@@ -103,6 +103,16 @@ export async function GET() {
       },
     });
 
+    const totalButsInterne = await prisma.friendlyMatchGoal.count({
+      where: {
+        friendlyMatch: {
+          isInternal: true,
+          status: "COMPLETED",
+        },
+      },
+    });
+
+    const totalButs = totalButsDerby + totalButsInterne;
     const moyenneButs = matchsJoues > 0 ? totalButs / matchsJoues : 0;
 
     // Classement (exemple simplifié)

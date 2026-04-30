@@ -36,11 +36,14 @@ type Player = {
   number?: number | null;
 };
 
+type Side = "HOME" | "AWAY";
+
 type Composition = {
   id: string;
   playerId: string;
   role: "TITULAIRE" | "REMPLACANT";
   position: FormationPosition | null;
+  side: Side;
   player: Player;
 };
 
@@ -49,6 +52,7 @@ type MatchGoal = {
   playerId: string;
   assistPlayerId: string | null;
   minute: number | null;
+  side: Side;
   player: Player;
   assistPlayer: Player | null;
 };
@@ -61,6 +65,7 @@ type FriendlyMatch = {
   location: string;
   place: string;
   opponent: string;
+  isInternal: boolean;
   ourScore: number | null;
   opponentScore: number | null;
   status: string;
@@ -73,6 +78,7 @@ type GoalDraft = {
   playerId: string;
   assistPlayerId: string;
   minute: string;
+  side: Side;
 };
 
 const POSITION_LABEL: Record<FormationPosition, string> = {
@@ -92,12 +98,16 @@ export default function AdminMatchDetailPage() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Composition state
+  // Composition state — mode externe
   const [slots, setSlots] = useState<FormationSlots>({});
   const [remplacants, setRemplacants] = useState<SlotPlayer[]>([]);
+  // Composition state — mode interne (deux camps simples)
+  const [homePlayers, setHomePlayers] = useState<SlotPlayer[]>([]);
+  const [awayPlayers, setAwayPlayers] = useState<SlotPlayer[]>([]);
   const [picker, setPicker] = useState<
     | { kind: "position"; position: FormationPosition }
     | { kind: "remplacant" }
+    | { kind: "side"; side: Side }
     | null
   >(null);
   const [savingCompo, setSavingCompo] = useState(false);
@@ -132,24 +142,46 @@ export default function AdminMatchDetailPage() {
       setPlayers(playersData);
 
       // Hydrater la compo
-      const nextSlots: FormationSlots = {};
-      const nextBench: SlotPlayer[] = [];
-      for (const c of matchData.compositions) {
-        const sp: SlotPlayer = {
-          id: c.player.id,
-          fullName: c.player.fullName,
-          alias: c.player.alias,
-          profilePhoto: c.player.profilePhoto,
-          number: c.player.number,
-        };
-        if (c.role === "TITULAIRE" && c.position) {
-          nextSlots[c.position] = sp;
-        } else {
-          nextBench.push(sp);
+      if (matchData.isInternal) {
+        const home: SlotPlayer[] = [];
+        const away: SlotPlayer[] = [];
+        for (const c of matchData.compositions) {
+          const sp: SlotPlayer = {
+            id: c.player.id,
+            fullName: c.player.fullName,
+            alias: c.player.alias,
+            profilePhoto: c.player.profilePhoto,
+            number: c.player.number,
+          };
+          if (c.side === "AWAY") away.push(sp);
+          else home.push(sp);
         }
+        setHomePlayers(home);
+        setAwayPlayers(away);
+        setSlots({});
+        setRemplacants([]);
+      } else {
+        const nextSlots: FormationSlots = {};
+        const nextBench: SlotPlayer[] = [];
+        for (const c of matchData.compositions) {
+          const sp: SlotPlayer = {
+            id: c.player.id,
+            fullName: c.player.fullName,
+            alias: c.player.alias,
+            profilePhoto: c.player.profilePhoto,
+            number: c.player.number,
+          };
+          if (c.role === "TITULAIRE" && c.position) {
+            nextSlots[c.position] = sp;
+          } else {
+            nextBench.push(sp);
+          }
+        }
+        setSlots(nextSlots);
+        setRemplacants(nextBench);
+        setHomePlayers([]);
+        setAwayPlayers([]);
       }
-      setSlots(nextSlots);
-      setRemplacants(nextBench);
 
       // Hydrater le résultat
       setOurScore(matchData.ourScore?.toString() ?? "");
@@ -160,6 +192,7 @@ export default function AdminMatchDetailPage() {
           playerId: g.playerId,
           assistPlayerId: g.assistPlayerId ?? "",
           minute: g.minute?.toString() ?? "",
+          side: g.side ?? "HOME",
         }))
       );
     } catch (e: any) {
@@ -169,13 +202,15 @@ export default function AdminMatchDetailPage() {
     }
   };
 
-  // Joueurs déjà sur le terrain ou sur le banc
+  // Joueurs déjà placés (terrain + banc en externe, ou les deux camps en interne)
   const usedPlayerIds = useMemo(() => {
     const set = new Set<string>();
     for (const p of Object.values(slots)) if (p) set.add(p.id);
     for (const r of remplacants) set.add(r.id);
+    for (const p of homePlayers) set.add(p.id);
+    for (const p of awayPlayers) set.add(p.id);
     return set;
-  }, [slots, remplacants]);
+  }, [slots, remplacants, homePlayers, awayPlayers]);
 
   const availableForPicker = useMemo(() => {
     return players.filter((p) => !usedPlayerIds.has(p.id));
@@ -196,10 +231,18 @@ export default function AdminMatchDetailPage() {
     };
     if (picker.kind === "position") {
       setSlots((prev) => ({ ...prev, [picker.position]: sp }));
-    } else {
+    } else if (picker.kind === "remplacant") {
       setRemplacants((prev) => [...prev, sp]);
+    } else if (picker.kind === "side") {
+      if (picker.side === "HOME") setHomePlayers((prev) => [...prev, sp]);
+      else setAwayPlayers((prev) => [...prev, sp]);
     }
     setPicker(null);
+  };
+
+  const handleRemoveFromSide = (side: Side, playerId: string) => {
+    if (side === "HOME") setHomePlayers((prev) => prev.filter((p) => p.id !== playerId));
+    else setAwayPlayers((prev) => prev.filter((p) => p.id !== playerId));
   };
 
   const handleClearSlot = (position: FormationPosition) => {
@@ -217,20 +260,33 @@ export default function AdminMatchDetailPage() {
   const handleSaveCompo = async () => {
     setSavingCompo(true);
     try {
-      const entries = [
-        ...(Object.entries(slots) as Array<[FormationPosition, SlotPlayer | null]>)
-          .filter(([, p]) => p)
-          .map(([position, p]) => ({
-            playerId: p!.id,
-            role: "TITULAIRE" as const,
-            position,
-          })),
-        ...remplacants.map((r) => ({
-          playerId: r.id,
-          role: "REMPLACANT" as const,
-          position: null,
-        })),
-      ];
+      const entries = match?.isInternal
+        ? [
+            ...homePlayers.map((p) => ({
+              playerId: p.id,
+              role: "TITULAIRE" as const,
+              side: "HOME" as const,
+            })),
+            ...awayPlayers.map((p) => ({
+              playerId: p.id,
+              role: "TITULAIRE" as const,
+              side: "AWAY" as const,
+            })),
+          ]
+        : [
+            ...(Object.entries(slots) as Array<[FormationPosition, SlotPlayer | null]>)
+              .filter(([, p]) => p)
+              .map(([position, p]) => ({
+                playerId: p!.id,
+                role: "TITULAIRE" as const,
+                position,
+              })),
+            ...remplacants.map((r) => ({
+              playerId: r.id,
+              role: "REMPLACANT" as const,
+              position: null,
+            })),
+          ];
 
       const res = await fetch(`/api/friendly-matches/${matchId}/composition`, {
         method: "PUT",
@@ -249,10 +305,16 @@ export default function AdminMatchDetailPage() {
 
   // === Résultat ===
   const ourScoreNum = parseInt(ourScore || "0", 10) || 0;
-  const goalsExpected = ourScoreNum;
+  const opponentScoreNum = parseInt(opponentScore || "0", 10) || 0;
+  const goalsExpected = match?.isInternal ? ourScoreNum + opponentScoreNum : ourScoreNum;
+  const homeGoalsCount = goals.filter((g) => g.side === "HOME").length;
+  const awayGoalsCount = goals.filter((g) => g.side === "AWAY").length;
 
-  const handleAddGoal = () => {
-    setGoals((prev) => [...prev, { playerId: "", assistPlayerId: "", minute: "" }]);
+  const handleAddGoal = (side: Side = "HOME") => {
+    setGoals((prev) => [
+      ...prev,
+      { playerId: "", assistPlayerId: "", minute: "", side },
+    ]);
   };
 
   const handleUpdateGoal = (index: number, field: keyof GoalDraft, value: string) => {
@@ -270,7 +332,16 @@ export default function AdminMatchDetailPage() {
       toast.error("Renseignez les deux scores");
       return;
     }
-    if (goals.length !== goalsExpected) {
+    if (match?.isInternal) {
+      if (homeGoalsCount !== ourScoreNum) {
+        toast.error(`Buteurs Équipe 1 (${homeGoalsCount}) ≠ score (${ourScoreNum})`);
+        return;
+      }
+      if (awayGoalsCount !== opponentScoreNum) {
+        toast.error(`Buteurs Équipe 2 (${awayGoalsCount}) ≠ score (${opponentScoreNum})`);
+        return;
+      }
+    } else if (goals.length !== goalsExpected) {
       toast.error(
         `${goalsExpected} buteur(s) attendu(s) mais ${goals.length} renseigné(s)`
       );
@@ -295,6 +366,7 @@ export default function AdminMatchDetailPage() {
             playerId: g.playerId,
             assistPlayerId: g.assistPlayerId || null,
             minute: g.minute ? parseInt(g.minute, 10) : null,
+            side: g.side,
           })),
         }),
       });
@@ -334,17 +406,31 @@ export default function AdminMatchDetailPage() {
       year: "numeric",
     });
 
-  // Liste de joueurs autorisés dans le select buteur : titulaires + remplaçants uniquement
-  const playersOnSheet: Player[] = [
-    ...(Object.values(slots).filter(Boolean) as SlotPlayer[]),
-    ...remplacants,
-  ].map((sp) => ({
+  // Liste de joueurs autorisés dans le select buteur
+  const playersOnSheet: Player[] = (
+    match.isInternal
+      ? [...homePlayers, ...awayPlayers]
+      : [...(Object.values(slots).filter(Boolean) as SlotPlayer[]), ...remplacants]
+  ).map((sp) => ({
     id: sp.id,
     fullName: sp.fullName,
     alias: sp.alias,
     profilePhoto: sp.profilePhoto,
     number: sp.number,
   }));
+
+  // En interne : restreindre le select buteur aux joueurs du côté du but
+  const playersForGoal = (side: Side): Player[] => {
+    if (!match.isInternal) return playersOnSheet;
+    const list = side === "HOME" ? homePlayers : awayPlayers;
+    return list.map((sp) => ({
+      id: sp.id,
+      fullName: sp.fullName,
+      alias: sp.alias,
+      profilePhoto: sp.profilePhoto,
+      number: sp.number,
+    }));
+  };
 
   return (
     <div className="min-h-screen bg-[#0A0E27] text-white pt-4 pb-24">
@@ -362,23 +448,31 @@ export default function AdminMatchDetailPage() {
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-2 flex-wrap">
-                <span
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bold ${
-                    match.type === "officiel"
-                      ? "bg-indigo-500/20 text-indigo-400 border border-indigo-500/30"
-                      : "bg-purple-500/20 text-purple-400 border border-purple-500/30"
-                  }`}
-                >
-                  {match.type === "officiel" ? "Match Officiel" : "Match Amical"}
-                </span>
-                {match.place === "domicile" ? (
-                  <span className="inline-flex items-center gap-1 text-green-400 text-xs">
-                    <Home className="w-3.5 h-3.5" /> Domicile
+                {match.isInternal ? (
+                  <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                    Exhibition interne
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 text-orange-400 text-xs">
-                    <Plane className="w-3.5 h-3.5" /> Extérieur
-                  </span>
+                  <>
+                    <span
+                      className={`px-2.5 py-1 rounded-lg text-xs font-bold ${
+                        match.type === "officiel"
+                          ? "bg-indigo-500/20 text-indigo-400 border border-indigo-500/30"
+                          : "bg-purple-500/20 text-purple-400 border border-purple-500/30"
+                      }`}
+                    >
+                      {match.type === "officiel" ? "Match Officiel" : "Match Amical"}
+                    </span>
+                    {match.place === "domicile" ? (
+                      <span className="inline-flex items-center gap-1 text-green-400 text-xs">
+                        <Home className="w-3.5 h-3.5" /> Domicile
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-orange-400 text-xs">
+                        <Plane className="w-3.5 h-3.5" /> Extérieur
+                      </span>
+                    )}
+                  </>
                 )}
                 {match.status === "COMPLETED" && (
                   <span className="px-2 py-0.5 rounded-md bg-green-500/15 border border-green-500/40 text-green-400 text-xs font-bold">
@@ -387,7 +481,7 @@ export default function AdminMatchDetailPage() {
                 )}
               </div>
               <h1 className="text-2xl sm:text-3xl font-black text-white mb-2">
-                FCA vs {match.opponent}
+                {match.isInternal ? "Match interne FCA" : `FCA vs ${match.opponent}`}
               </h1>
               <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400">
                 <span className="inline-flex items-center gap-1.5">
@@ -407,13 +501,15 @@ export default function AdminMatchDetailPage() {
               match.opponentScore != null && (
                 <div className="flex items-center gap-2 self-start">
                   <div className="text-center px-4 py-3 bg-gradient-to-br from-cyan-500/10 to-indigo-500/10 border border-cyan-500/30 rounded-xl">
-                    <div className="text-[10px] text-gray-400 mb-1 font-semibold">FCA</div>
+                    <div className="text-[10px] text-gray-400 mb-1 font-semibold">
+                      {match.isInternal ? "Équipe 1" : "FCA"}
+                    </div>
                     <div className="text-3xl font-black text-white">{match.ourScore}</div>
                   </div>
                   <div className="text-gray-500 text-xl font-black">—</div>
                   <div className="text-center px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl">
                     <div className="text-[10px] text-gray-400 mb-1 font-semibold truncate max-w-[80px]">
-                      {match.opponent}
+                      {match.isInternal ? "Équipe 2" : match.opponent}
                     </div>
                     <div className="text-3xl font-black text-white">{match.opponentScore}</div>
                   </div>
@@ -448,8 +544,86 @@ export default function AdminMatchDetailPage() {
           </button>
         </div>
 
-        {/* === Tab Composition === */}
-        {tab === "compo" && (
+        {/* === Tab Composition === MODE INTERNE === */}
+        {tab === "compo" && match.isInternal && (
+          <div className="space-y-6">
+            <div className="grid sm:grid-cols-2 gap-4">
+              {(["HOME", "AWAY"] as Side[]).map((side) => {
+                const list = side === "HOME" ? homePlayers : awayPlayers;
+                const label = side === "HOME" ? "Équipe 1" : "Équipe 2";
+                const accent =
+                  side === "HOME"
+                    ? "from-cyan-500/10 to-indigo-500/10 border-cyan-500/30"
+                    : "from-amber-500/10 to-orange-500/10 border-amber-500/30";
+                return (
+                  <div
+                    key={side}
+                    className={`bg-gradient-to-br ${accent} border rounded-2xl p-5`}
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-sm font-black text-white uppercase tracking-wider">
+                        {label} ({list.length})
+                      </h2>
+                      <button
+                        onClick={() => setPicker({ kind: "side", side })}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-bold transition-all"
+                      >
+                        <Plus className="w-3.5 h-3.5" /> Ajouter
+                      </button>
+                    </div>
+                    {list.length === 0 ? (
+                      <p className="text-gray-400 text-sm text-center py-6">
+                        Aucun joueur
+                      </p>
+                    ) : (
+                      <div className="space-y-2">
+                        {list.map((p) => (
+                          <div
+                            key={p.id}
+                            className="flex items-center gap-3 bg-gray-900/40 border border-gray-700/50 rounded-lg p-2.5"
+                          >
+                            <div className="w-9 h-9 rounded-full overflow-hidden bg-gray-700 flex-shrink-0 flex items-center justify-center">
+                              {p.profilePhoto ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={p.profilePhoto} alt="" className="w-full h-full object-cover" />
+                              ) : (
+                                <UserIcon className="w-4 h-4 text-gray-400" />
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-bold text-sm truncate">{p.fullName.split(" ")[0]}</p>
+                              {p.number != null && (
+                                <p className="text-xs text-gray-500">#{p.number}</p>
+                              )}
+                            </div>
+                            <button
+                              onClick={() => handleRemoveFromSide(side, p.id)}
+                              className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 transition-all"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            <button
+              onClick={handleSaveCompo}
+              disabled={savingCompo || (homePlayers.length === 0 && awayPlayers.length === 0)}
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 disabled:from-gray-700 disabled:to-gray-800 disabled:cursor-not-allowed font-bold shadow-lg shadow-cyan-500/20 transition-all flex items-center justify-center gap-2"
+            >
+              <Save className="w-4 h-4" />
+              {savingCompo ? "Enregistrement..." : "Enregistrer la composition"}
+            </button>
+          </div>
+        )}
+
+        {/* === Tab Composition === MODE EXTERNE === */}
+        {tab === "compo" && !match.isInternal && (
           <div className="grid lg:grid-cols-2 gap-6">
             {/* Terrain */}
             <div>
@@ -550,7 +724,7 @@ export default function AdminMatchDetailPage() {
           <div className="space-y-6">
             {playersOnSheet.length === 0 && (
               <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 text-yellow-300 text-sm">
-                ⚠️ Renseignez d'abord la composition pour pouvoir sélectionner les buteurs.
+                ⚠️ Renseignez d&apos;abord la composition pour pouvoir sélectionner les buteurs.
               </div>
             )}
 
@@ -561,7 +735,9 @@ export default function AdminMatchDetailPage() {
               </h2>
               <div className="flex items-center justify-center gap-6">
                 <div className="text-center">
-                  <div className="text-xs text-gray-400 mb-2 font-semibold">FCA</div>
+                  <div className="text-xs text-gray-400 mb-2 font-semibold">
+                    {match.isInternal ? "Équipe 1" : "FCA"}
+                  </div>
                   <input
                     type="number"
                     min={0}
@@ -573,7 +749,7 @@ export default function AdminMatchDetailPage() {
                 <div className="text-gray-500 text-3xl font-black">—</div>
                 <div className="text-center">
                   <div className="text-xs text-gray-400 mb-2 font-semibold truncate max-w-[120px]">
-                    {match.opponent}
+                    {match.isInternal ? "Équipe 2" : match.opponent}
                   </div>
                   <input
                     type="number"
@@ -586,84 +762,179 @@ export default function AdminMatchDetailPage() {
               </div>
             </div>
 
-            {/* Buteurs FCA */}
-            <div className="bg-gradient-to-br from-gray-800/40 to-gray-900/20 border border-gray-700/50 rounded-xl p-5">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-sm font-black text-gray-400 uppercase tracking-wider flex items-center gap-2">
-                  <GoalIcon className="w-4 h-4" />
-                  Buteurs FCA ({goals.length} / {goalsExpected})
-                </h2>
-                <button
-                  onClick={handleAddGoal}
-                  disabled={goals.length >= goalsExpected || playersOnSheet.length === 0}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  <Plus className="w-3.5 h-3.5" /> But
-                </button>
-              </div>
-
-              {goals.length === 0 ? (
-                <p className="text-gray-500 text-sm text-center py-6">
-                  {ourScoreNum === 0
-                    ? "Aucun but FCA — rien à saisir"
-                    : `Ajoutez ${goalsExpected} buteur(s)`}
-                </p>
-              ) : (
-                <div className="space-y-3">
-                  {goals.map((g, i) => (
-                    <div
-                      key={i}
-                      className="grid grid-cols-[auto_1fr_1fr_auto_auto] gap-2 items-center bg-gray-800/40 border border-gray-700/50 rounded-lg p-2.5"
-                    >
-                      <div className="w-7 h-7 rounded-full bg-cyan-500/20 border border-cyan-500/40 text-cyan-400 text-xs font-black flex items-center justify-center">
-                        {i + 1}
-                      </div>
-                      <select
-                        value={g.playerId}
-                        onChange={(e) => handleUpdateGoal(i, "playerId", e.target.value)}
-                        className="px-2 py-1.5 bg-gray-900 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:border-cyan-500/50"
+            {/* Buteurs — MODE INTERNE : deux sections par côté */}
+            {match.isInternal &&
+              (["HOME", "AWAY"] as Side[]).map((side) => {
+                const sideLabel = side === "HOME" ? "Équipe 1" : "Équipe 2";
+                const sideScore = side === "HOME" ? ourScoreNum : opponentScoreNum;
+                const sideCount = side === "HOME" ? homeGoalsCount : awayGoalsCount;
+                const sideGoals = goals
+                  .map((g, i) => ({ g, i }))
+                  .filter(({ g }) => g.side === side);
+                const eligible = playersForGoal(side);
+                return (
+                  <div
+                    key={side}
+                    className="bg-gradient-to-br from-gray-800/40 to-gray-900/20 border border-gray-700/50 rounded-xl p-5"
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-sm font-black text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                        <GoalIcon className="w-4 h-4" />
+                        Buteurs {sideLabel} ({sideCount} / {sideScore})
+                      </h2>
+                      <button
+                        onClick={() => handleAddGoal(side)}
+                        disabled={sideCount >= sideScore || eligible.length === 0}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                       >
-                        <option value="">Buteur...</option>
-                        {playersOnSheet.map((p) => (
-                          <option key={p.id} value={p.id}>
-                            {p.alias || p.fullName}
-                          </option>
+                        <Plus className="w-3.5 h-3.5" /> But
+                      </button>
+                    </div>
+                    {sideGoals.length === 0 ? (
+                      <p className="text-gray-500 text-sm text-center py-6">
+                        {sideScore === 0
+                          ? `Aucun but ${sideLabel} — rien à saisir`
+                          : `Ajoutez ${sideScore} buteur(s)`}
+                      </p>
+                    ) : (
+                      <div className="space-y-3">
+                        {sideGoals.map(({ g, i }) => (
+                          <div
+                            key={i}
+                            className="grid grid-cols-[auto_1fr_1fr_auto_auto] gap-2 items-center bg-gray-800/40 border border-gray-700/50 rounded-lg p-2.5"
+                          >
+                            <div className="w-7 h-7 rounded-full bg-cyan-500/20 border border-cyan-500/40 text-cyan-400 text-xs font-black flex items-center justify-center">
+                              {sideGoals.findIndex((x) => x.i === i) + 1}
+                            </div>
+                            <select
+                              value={g.playerId}
+                              onChange={(e) => handleUpdateGoal(i, "playerId", e.target.value)}
+                              className="px-2 py-1.5 bg-gray-900 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:border-cyan-500/50"
+                            >
+                              <option value="">Buteur...</option>
+                              {eligible.map((p) => (
+                                <option key={p.id} value={p.id}>
+                                  {p.fullName.split(" ")[0]}
+                                </option>
+                              ))}
+                            </select>
+                            <select
+                              value={g.assistPlayerId}
+                              onChange={(e) => handleUpdateGoal(i, "assistPlayerId", e.target.value)}
+                              className="px-2 py-1.5 bg-gray-900 border border-gray-700 rounded-lg text-sm text-gray-300 focus:outline-none focus:border-cyan-500/50"
+                            >
+                              <option value="">Passeur (opt.)</option>
+                              {eligible
+                                .filter((p) => p.id !== g.playerId)
+                                .map((p) => (
+                                  <option key={p.id} value={p.id}>
+                                    {p.fullName.split(" ")[0]}
+                                  </option>
+                                ))}
+                            </select>
+                            <input
+                              type="number"
+                              min={1}
+                              max={120}
+                              placeholder="min"
+                              value={g.minute}
+                              onChange={(e) => handleUpdateGoal(i, "minute", e.target.value)}
+                              className="w-14 px-2 py-1.5 bg-gray-900 border border-gray-700 rounded-lg text-sm text-center text-white focus:outline-none focus:border-cyan-500/50"
+                            />
+                            <button
+                              onClick={() => handleRemoveGoal(i)}
+                              className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 transition-all"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         ))}
-                      </select>
-                      <select
-                        value={g.assistPlayerId}
-                        onChange={(e) => handleUpdateGoal(i, "assistPlayerId", e.target.value)}
-                        className="px-2 py-1.5 bg-gray-900 border border-gray-700 rounded-lg text-sm text-gray-300 focus:outline-none focus:border-cyan-500/50"
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+
+            {/* Buteurs FCA — MODE EXTERNE */}
+            {!match.isInternal && (
+              <div className="bg-gradient-to-br from-gray-800/40 to-gray-900/20 border border-gray-700/50 rounded-xl p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-sm font-black text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                    <GoalIcon className="w-4 h-4" />
+                    Buteurs FCA ({goals.length} / {goalsExpected})
+                  </h2>
+                  <button
+                    onClick={() => handleAddGoal("HOME")}
+                    disabled={goals.length >= goalsExpected || playersOnSheet.length === 0}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> But
+                  </button>
+                </div>
+
+                {goals.length === 0 ? (
+                  <p className="text-gray-500 text-sm text-center py-6">
+                    {ourScoreNum === 0
+                      ? "Aucun but FCA — rien à saisir"
+                      : `Ajoutez ${goalsExpected} buteur(s)`}
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {goals.map((g, i) => (
+                      <div
+                        key={i}
+                        className="grid grid-cols-[auto_1fr_1fr_auto_auto] gap-2 items-center bg-gray-800/40 border border-gray-700/50 rounded-lg p-2.5"
                       >
-                        <option value="">Passeur (opt.)</option>
-                        {playersOnSheet
-                          .filter((p) => p.id !== g.playerId)
-                          .map((p) => (
+                        <div className="w-7 h-7 rounded-full bg-cyan-500/20 border border-cyan-500/40 text-cyan-400 text-xs font-black flex items-center justify-center">
+                          {i + 1}
+                        </div>
+                        <select
+                          value={g.playerId}
+                          onChange={(e) => handleUpdateGoal(i, "playerId", e.target.value)}
+                          className="px-2 py-1.5 bg-gray-900 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:border-cyan-500/50"
+                        >
+                          <option value="">Buteur...</option>
+                          {playersOnSheet.map((p) => (
                             <option key={p.id} value={p.id}>
                               {p.alias || p.fullName}
                             </option>
                           ))}
-                      </select>
-                      <input
-                        type="number"
-                        min={1}
-                        max={120}
-                        placeholder="min"
-                        value={g.minute}
-                        onChange={(e) => handleUpdateGoal(i, "minute", e.target.value)}
-                        className="w-14 px-2 py-1.5 bg-gray-900 border border-gray-700 rounded-lg text-sm text-center text-white focus:outline-none focus:border-cyan-500/50"
-                      />
-                      <button
-                        onClick={() => handleRemoveGoal(i)}
-                        className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 transition-all"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                        </select>
+                        <select
+                          value={g.assistPlayerId}
+                          onChange={(e) => handleUpdateGoal(i, "assistPlayerId", e.target.value)}
+                          className="px-2 py-1.5 bg-gray-900 border border-gray-700 rounded-lg text-sm text-gray-300 focus:outline-none focus:border-cyan-500/50"
+                        >
+                          <option value="">Passeur (opt.)</option>
+                          {playersOnSheet
+                            .filter((p) => p.id !== g.playerId)
+                            .map((p) => (
+                              <option key={p.id} value={p.id}>
+                                {p.alias || p.fullName}
+                              </option>
+                            ))}
+                        </select>
+                        <input
+                          type="number"
+                          min={1}
+                          max={120}
+                          placeholder="min"
+                          value={g.minute}
+                          onChange={(e) => handleUpdateGoal(i, "minute", e.target.value)}
+                          className="w-14 px-2 py-1.5 bg-gray-900 border border-gray-700 rounded-lg text-sm text-center text-white focus:outline-none focus:border-cyan-500/50"
+                        />
+                        <button
+                          onClick={() => handleRemoveGoal(i)}
+                          className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 transition-all"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Notes */}
             <div className="bg-gradient-to-br from-gray-800/40 to-gray-900/20 border border-gray-700/50 rounded-xl p-5">
@@ -710,6 +981,8 @@ export default function AdminMatchDetailPage() {
                 <h3 className="font-black text-white">
                   {picker.kind === "position"
                     ? `Choisir un ${POSITION_LABEL[picker.position]}`
+                    : picker.kind === "side"
+                    ? `Ajouter à ${picker.side === "HOME" ? "Équipe 1" : "Équipe 2"}`
                     : "Ajouter un remplaçant"}
                 </h3>
                 <button

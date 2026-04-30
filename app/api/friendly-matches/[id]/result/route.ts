@@ -6,6 +6,7 @@ type GoalEntry = {
   playerId: string;
   assistPlayerId?: string | null;
   minute?: number | null;
+  side?: "HOME" | "AWAY"; // requis si match interne
 };
 
 /**
@@ -48,13 +49,13 @@ export async function PUT(
     if (!Array.isArray(goals)) {
       return NextResponse.json({ error: "Liste de buts invalide" }, { status: 400 });
     }
-    // Cohérence : nb de buteurs FCA == ourScore
-    if (goals.length !== ourScore) {
-      return NextResponse.json(
-        { error: `Le nombre de buteurs (${goals.length}) doit correspondre au score FCA (${ourScore})` },
-        { status: 400 }
-      );
+
+    const match = await prisma.friendlyMatch.findUnique({ where: { id } });
+    if (!match) {
+      return NextResponse.json({ error: "Match introuvable" }, { status: 404 });
     }
+
+    // Validation buts
     for (const g of goals) {
       if (!g.playerId) {
         return NextResponse.json({ error: "Chaque but doit avoir un buteur" }, { status: 400 });
@@ -65,11 +66,35 @@ export async function PUT(
           { status: 400 }
         );
       }
+      if (match.isInternal && g.side !== "HOME" && g.side !== "AWAY") {
+        return NextResponse.json(
+          { error: "Chaque but doit être attribué à une équipe (HOME/AWAY) en mode interne" },
+          { status: 400 }
+        );
+      }
     }
 
-    const match = await prisma.friendlyMatch.findUnique({ where: { id } });
-    if (!match) {
-      return NextResponse.json({ error: "Match introuvable" }, { status: 404 });
+    // Cohérence buteurs ↔ scores
+    if (match.isInternal) {
+      const homeGoals = goals.filter((g) => g.side === "HOME").length;
+      const awayGoals = goals.filter((g) => g.side === "AWAY").length;
+      if (homeGoals !== ourScore) {
+        return NextResponse.json(
+          { error: `Buteurs Équipe 1 (${homeGoals}) ≠ score (${ourScore})` },
+          { status: 400 }
+        );
+      }
+      if (awayGoals !== opponentScore) {
+        return NextResponse.json(
+          { error: `Buteurs Équipe 2 (${awayGoals}) ≠ score (${opponentScore})` },
+          { status: 400 }
+        );
+      }
+    } else if (goals.length !== ourScore) {
+      return NextResponse.json(
+        { error: `Le nombre de buteurs (${goals.length}) doit correspondre au score FCA (${ourScore})` },
+        { status: 400 }
+      );
     }
 
     await prisma.$transaction([
@@ -80,6 +105,7 @@ export async function PUT(
           playerId: g.playerId,
           assistPlayerId: g.assistPlayerId || null,
           minute: g.minute ?? null,
+          side: match.isInternal ? g.side! : "HOME",
         })),
       }),
       prisma.friendlyMatch.update({

@@ -16,6 +16,7 @@ interface Match {
   location: string;
   place: string;
   opponent: string;
+  isInternal?: boolean;
   status?: string;
   ourScore?: number | null;
   opponentScore?: number | null;
@@ -36,6 +37,7 @@ export default function AdminMatchsPage() {
     location: "",
     place: "",
     opponent: "",
+    isInternal: false,
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -64,14 +66,18 @@ export default function AdminMatchsPage() {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target as HTMLInputElement;
+    setForm((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!form.date || !form.time || !form.location || !form.place || !form.opponent) {
+    if (!form.date || !form.time || !form.location) {
+      toast.error("Veuillez remplir tous les champs");
+      return;
+    }
+    if (!form.isInternal && (!form.place || !form.opponent)) {
       toast.error("Veuillez remplir tous les champs");
       return;
     }
@@ -110,6 +116,7 @@ export default function AdminMatchsPage() {
         location: "",
         place: "",
         opponent: "",
+        isInternal: false,
       });
       setEditingMatch(null);
       setFormModalOpen(false);
@@ -133,6 +140,7 @@ export default function AdminMatchsPage() {
       location: match.location,
       place: match.place,
       opponent: match.opponent,
+      isInternal: !!match.isInternal,
     });
     // Scroll vers le formulaire
     window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
@@ -147,6 +155,7 @@ export default function AdminMatchsPage() {
       location: "",
       place: "",
       opponent: "",
+      isInternal: false,
     });
   };
 
@@ -315,13 +324,21 @@ export default function AdminMatchsPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                   {/* Left: Type & Place */}
                   <div className="flex items-center gap-2 sm:w-32 flex-shrink-0">
-                    <span className={`px-2.5 py-1 rounded-lg text-xs font-bold ${match.type === "officiel" ? "bg-indigo-500/20 text-indigo-400 border border-indigo-500/30" : "bg-purple-500/20 text-purple-400 border border-purple-500/30"}`}>
-                      {match.type === "officiel" ? "Officiel" : "Amical"}
-                    </span>
-                    {match.place === "domicile" ? (
-                      <Home className="w-4 h-4 text-green-400" />
+                    {match.isInternal ? (
+                      <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                        Exhibition
+                      </span>
                     ) : (
-                      <Plane className="w-4 h-4 text-orange-400" />
+                      <>
+                        <span className={`px-2.5 py-1 rounded-lg text-xs font-bold ${match.type === "officiel" ? "bg-indigo-500/20 text-indigo-400 border border-indigo-500/30" : "bg-purple-500/20 text-purple-400 border border-purple-500/30"}`}>
+                          {match.type === "officiel" ? "Officiel" : "Amical"}
+                        </span>
+                        {match.place === "domicile" ? (
+                          <Home className="w-4 h-4 text-green-400" />
+                        ) : (
+                          <Plane className="w-4 h-4 text-orange-400" />
+                        )}
+                      </>
                     )}
                   </div>
 
@@ -329,7 +346,7 @@ export default function AdminMatchsPage() {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2 flex-wrap">
                       <h3 className="text-lg font-bold text-white group-hover:text-cyan-400 transition-colors">
-                        vs {match.opponent}
+                        {match.isInternal ? "Match interne" : `vs ${match.opponent}`}
                       </h3>
                       {match.status === "COMPLETED" && match.ourScore != null && match.opponentScore != null && (
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-green-500/15 border border-green-500/40 text-green-400 text-xs font-black">
@@ -419,28 +436,49 @@ export default function AdminMatchsPage() {
               </div>
 
               <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4">
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-300 mb-2">Type</label>
-                    <select name="type" value={form.type} onChange={handleChange} className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50">
-                      <option value="officiel">Match Officiel</option>
-                      <option value="amical">Match Amical</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-300 mb-2">Lieu</label>
-                    <select name="place" value={form.place} onChange={handleChange} required className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50">
-                      <option value="">Sélectionner</option>
-                      <option value="domicile">Domicile</option>
-                      <option value="extérieur">Extérieur</option>
-                    </select>
-                  </div>
-                </div>
+                {/* Toggle exhibition interne (création uniquement) */}
+                {!editingMatch && (
+                  <label className="flex items-start gap-3 p-3 bg-gray-800/60 border border-gray-700 rounded-xl cursor-pointer hover:bg-gray-800 transition-colors">
+                    <input
+                      type="checkbox"
+                      name="isInternal"
+                      checked={form.isInternal}
+                      onChange={handleChange}
+                      className="mt-1 w-4 h-4 accent-cyan-500"
+                    />
+                    <div>
+                      <div className="text-sm font-bold text-white">Exhibition interne</div>
+                      <div className="text-xs text-gray-400">Match entre deux équipes de joueurs FCA — pas d&apos;adversaire externe.</div>
+                    </div>
+                  </label>
+                )}
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-300 mb-2">Adversaire</label>
-                  <input type="text" name="opponent" value={form.opponent} onChange={handleChange} placeholder="Nom du club" required className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50" />
-                </div>
+                {!form.isInternal && (
+                  <>
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-300 mb-2">Type</label>
+                        <select name="type" value={form.type} onChange={handleChange} className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50">
+                          <option value="officiel">Match Officiel</option>
+                          <option value="amical">Match Amical</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-300 mb-2">Lieu</label>
+                        <select name="place" value={form.place} onChange={handleChange} required className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50">
+                          <option value="">Sélectionner</option>
+                          <option value="domicile">Domicile</option>
+                          <option value="extérieur">Extérieur</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-300 mb-2">Adversaire</label>
+                      <input type="text" name="opponent" value={form.opponent} onChange={handleChange} placeholder="Nom du club" required className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50" />
+                    </div>
+                  </>
+                )}
 
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>

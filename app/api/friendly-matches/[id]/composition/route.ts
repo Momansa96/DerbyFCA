@@ -6,9 +6,11 @@ type CompositionEntry = {
   playerId: string;
   role: "TITULAIRE" | "REMPLACANT";
   position?: "GK" | "DEF" | "ATT_L" | "ATT_C" | "ATT_R" | null;
+  side?: "HOME" | "AWAY";
 };
 
 const VALID_POSITIONS = ["GK", "DEF", "ATT_L", "ATT_C", "ATT_R"];
+const VALID_SIDES = ["HOME", "AWAY"];
 
 /**
  * PUT /api/friendly-matches/[id]/composition
@@ -36,24 +38,6 @@ export async function PUT(
       return NextResponse.json({ error: "Match introuvable" }, { status: 404 });
     }
 
-    // Validation : titulaires doivent avoir une position valide et unique
-    const titulaires = entries.filter((e) => e.role === "TITULAIRE");
-    const remplacants = entries.filter((e) => e.role === "REMPLACANT");
-
-    const positions = titulaires.map((t) => t.position);
-    if (positions.some((p) => !p || !VALID_POSITIONS.includes(p))) {
-      return NextResponse.json(
-        { error: "Chaque titulaire doit avoir une position valide" },
-        { status: 400 }
-      );
-    }
-    if (new Set(positions).size !== positions.length) {
-      return NextResponse.json(
-        { error: "Une position ne peut être attribuée qu'à un seul joueur" },
-        { status: 400 }
-      );
-    }
-
     // Validation : pas de doublon de joueur
     const playerIds = entries.map((e) => e.playerId);
     if (new Set(playerIds).size !== playerIds.length) {
@@ -63,26 +47,70 @@ export async function PUT(
       );
     }
 
-    // Transaction : purge + recréation
-    await prisma.$transaction([
-      prisma.friendlyMatchPlayer.deleteMany({ where: { friendlyMatchId: id } }),
-      prisma.friendlyMatchPlayer.createMany({
-        data: [
-          ...titulaires.map((t) => ({
+    if (match.isInternal) {
+      // === Mode interne : pas de positions, juste deux camps Équipe 1 / Équipe 2 ===
+      for (const e of entries) {
+        if (!e.side || !VALID_SIDES.includes(e.side)) {
+          return NextResponse.json(
+            { error: "Chaque joueur doit avoir un camp (HOME/AWAY)" },
+            { status: 400 }
+          );
+        }
+      }
+
+      await prisma.$transaction([
+        prisma.friendlyMatchPlayer.deleteMany({ where: { friendlyMatchId: id } }),
+        prisma.friendlyMatchPlayer.createMany({
+          data: entries.map((e) => ({
             friendlyMatchId: id,
-            playerId: t.playerId,
+            playerId: e.playerId,
             role: "TITULAIRE",
-            position: t.position!,
-          })),
-          ...remplacants.map((r) => ({
-            friendlyMatchId: id,
-            playerId: r.playerId,
-            role: "REMPLACANT",
             position: null,
+            side: e.side!,
           })),
-        ],
-      }),
-    ]);
+        }),
+      ]);
+    } else {
+      // === Mode externe (existant) : positions + titulaires/remplaçants ===
+      const titulaires = entries.filter((e) => e.role === "TITULAIRE");
+      const remplacants = entries.filter((e) => e.role === "REMPLACANT");
+
+      const positions = titulaires.map((t) => t.position);
+      if (positions.some((p) => !p || !VALID_POSITIONS.includes(p))) {
+        return NextResponse.json(
+          { error: "Chaque titulaire doit avoir une position valide" },
+          { status: 400 }
+        );
+      }
+      if (new Set(positions).size !== positions.length) {
+        return NextResponse.json(
+          { error: "Une position ne peut être attribuée qu'à un seul joueur" },
+          { status: 400 }
+        );
+      }
+
+      await prisma.$transaction([
+        prisma.friendlyMatchPlayer.deleteMany({ where: { friendlyMatchId: id } }),
+        prisma.friendlyMatchPlayer.createMany({
+          data: [
+            ...titulaires.map((t) => ({
+              friendlyMatchId: id,
+              playerId: t.playerId,
+              role: "TITULAIRE",
+              position: t.position!,
+              side: "HOME",
+            })),
+            ...remplacants.map((r) => ({
+              friendlyMatchId: id,
+              playerId: r.playerId,
+              role: "REMPLACANT",
+              position: null,
+              side: "HOME",
+            })),
+          ],
+        }),
+      ]);
+    }
 
     const updated = await prisma.friendlyMatch.findUnique({
       where: { id },

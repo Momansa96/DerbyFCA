@@ -33,11 +33,14 @@ type MatchPlayer = {
   number?: number | null;
 };
 
+type Side = "HOME" | "AWAY";
+
 type Composition = {
   id: string;
   playerId: string;
   role: "TITULAIRE" | "REMPLACANT";
   position: FormationPosition | null;
+  side: Side;
   player: MatchPlayer;
 };
 
@@ -46,6 +49,7 @@ type MatchGoal = {
   playerId: string;
   assistPlayerId: string | null;
   minute: number | null;
+  side: Side;
   player: MatchPlayer;
   assistPlayer: MatchPlayer | null;
 };
@@ -58,6 +62,7 @@ type Match = {
   location: string;
   place: string;
   opponent: string;
+  isInternal?: boolean;
   status?: string;
   ourScore?: number | null;
   opponentScore?: number | null;
@@ -366,13 +371,19 @@ function MatchCard({
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="text-base sm:text-lg font-bold text-secondary truncate">
-                  {config.label} &bull; vs {match.opponent}
+                  {match.isInternal
+                    ? "Exhibition interne FCA"
+                    : `${config.label} • vs ${match.opponent}`}
                 </h3>
                 <div className="flex items-center gap-2 mt-1 flex-wrap">
                   <span
-                    className={`text-xs font-semibold px-2 py-0.5 rounded-md border ${config.badge}`}
+                    className={`text-xs font-semibold px-2 py-0.5 rounded-md border ${
+                      match.isInternal
+                        ? "bg-amber-50 text-amber-700 border-amber-200"
+                        : config.badge
+                    }`}
                   >
-                    {match.type.toUpperCase()}
+                    {match.isInternal ? "EXHIBITION" : match.type.toUpperCase()}
                   </span>
                   {hasResult && (
                     <span className="text-xs font-black px-2 py-0.5 rounded-md bg-green-50 text-green-700 border border-green-200">
@@ -478,21 +489,28 @@ function MatchModal({ match, onClose }: { match: Match; onClose: () => void }) {
             </div>
             <div className="flex-1 min-w-0">
               <h2 className="text-xl sm:text-2xl font-heading text-secondary mb-1 truncate">
-                FCA vs {match.opponent}
+                {match.isInternal ? "Exhibition interne FCA" : `FCA vs ${match.opponent}`}
               </h2>
               <div className="flex items-center gap-2 flex-wrap">
-                <span className={`text-xs font-semibold px-2 py-0.5 rounded-md border ${config.badge}`}>
-                  {config.label}
+                <span
+                  className={`text-xs font-semibold px-2 py-0.5 rounded-md border ${
+                    match.isInternal
+                      ? "bg-amber-50 text-amber-700 border-amber-200"
+                      : config.badge
+                  }`}
+                >
+                  {match.isInternal ? "Exhibition interne" : config.label}
                 </span>
-                {match.place === "domicile" ? (
-                  <span className="inline-flex items-center gap-1 text-green-700 text-xs font-semibold">
-                    <Home className="w-3 h-3" /> Domicile
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1 text-orange-700 text-xs font-semibold">
-                    <Plane className="w-3 h-3" /> Extérieur
-                  </span>
-                )}
+                {!match.isInternal &&
+                  (match.place === "domicile" ? (
+                    <span className="inline-flex items-center gap-1 text-green-700 text-xs font-semibold">
+                      <Home className="w-3 h-3" /> Domicile
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-orange-700 text-xs font-semibold">
+                      <Plane className="w-3 h-3" /> Extérieur
+                    </span>
+                  ))}
               </div>
             </div>
           </div>
@@ -502,14 +520,14 @@ function MatchModal({ match, onClose }: { match: Match; onClose: () => void }) {
             <div className="flex items-center justify-center gap-4 mt-4 bg-white rounded-xl border border-gray-200 p-4">
               <div className="text-center flex-1">
                 <div className="text-[11px] text-gray-500 mb-1 font-semibold uppercase tracking-wide">
-                  FCA
+                  {match.isInternal ? "Équipe 1" : "FCA"}
                 </div>
                 <div className="text-4xl font-black text-secondary">{match.ourScore}</div>
               </div>
               <div className="text-gray-300 text-2xl font-black">—</div>
               <div className="text-center flex-1">
                 <div className="text-[11px] text-gray-500 mb-1 font-semibold uppercase tracking-wide truncate">
-                  {match.opponent}
+                  {match.isInternal ? "Équipe 2" : match.opponent}
                 </div>
                 <div className="text-4xl font-black text-secondary">{match.opponentScore}</div>
               </div>
@@ -556,93 +574,218 @@ function MatchModal({ match, onClose }: { match: Match; onClose: () => void }) {
             </div>
           </div>
 
-          {/* Composition */}
-          {titulaires.length > 0 && (
-            <div>
-              <h3 className="text-sm font-black text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-                <Users className="w-4 h-4" />
-                Composition
-              </h3>
-              <FormationField slots={slots} opponentLabel={match.opponent} />
+          {/* === MODE INTERNE === */}
+          {match.isInternal && (
+            <>
+              {/* Compositions deux camps */}
+              {titulaires.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-black text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <Users className="w-4 h-4" />
+                    Compositions
+                  </h3>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {(["HOME", "AWAY"] as Side[]).map((side) => {
+                      const sideLabel = side === "HOME" ? "Équipe 1" : "Équipe 2";
+                      const list = titulaires.filter((t) => t.side === side);
+                      const accent =
+                        side === "HOME"
+                          ? "border-primary/30 bg-primary/5"
+                          : "border-amber-300 bg-amber-50";
+                      return (
+                        <div key={side} className={`rounded-xl border ${accent} p-4`}>
+                          <h4 className="text-xs font-black text-secondary uppercase mb-3">
+                            {sideLabel} ({list.length})
+                          </h4>
+                          {list.length === 0 ? (
+                            <p className="text-xs text-gray-500 italic">Aucun joueur</p>
+                          ) : (
+                            <div className="space-y-2">
+                              {list.map((c) => (
+                                <div
+                                  key={c.id}
+                                  className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg p-2"
+                                >
+                                  <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 flex-shrink-0 flex items-center justify-center">
+                                    {c.player.profilePhoto ? (
+                                      // eslint-disable-next-line @next/next/no-img-element
+                                      <img src={c.player.profilePhoto} alt="" className="w-full h-full object-cover" />
+                                    ) : (
+                                      <UserIcon className="w-4 h-4 text-gray-400" />
+                                    )}
+                                  </div>
+                                  <span className="text-xs font-bold text-secondary truncate">
+                                    {c.player.fullName.split(" ")[0]}
+                                  </span>
+                                  {c.player.number != null && (
+                                    <span className="text-[10px] font-black bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded ml-auto">
+                                      #{c.player.number}
+                                    </span>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
-              {remplacants.length > 0 && (
-                <div className="mt-5">
-                  <h4 className="text-xs font-bold text-gray-500 uppercase mb-2">
-                    Remplaçants ({remplacants.length})
-                  </h4>
-                  <div className="flex flex-wrap gap-2">
-                    {remplacants.map((r) => (
+              {/* Buteurs groupés par équipe */}
+              {match.goals.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-black text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <GoalIcon className="w-4 h-4" />
+                    Buteurs
+                  </h3>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {(["HOME", "AWAY"] as Side[]).map((side) => {
+                      const sideLabel = side === "HOME" ? "Équipe 1" : "Équipe 2";
+                      const sideGoals = match.goals.filter((g) => g.side === side);
+                      return (
+                        <div key={side}>
+                          <h4 className="text-xs font-bold text-gray-500 uppercase mb-2">
+                            {sideLabel} ({sideGoals.length})
+                          </h4>
+                          {sideGoals.length === 0 ? (
+                            <p className="text-xs text-gray-400 italic">Aucun but</p>
+                          ) : (
+                            <div className="space-y-2">
+                              {sideGoals.map((g) => (
+                                <div
+                                  key={g.id}
+                                  className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg p-2.5"
+                                >
+                                  <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 flex-shrink-0 flex items-center justify-center">
+                                    {g.player.profilePhoto ? (
+                                      // eslint-disable-next-line @next/next/no-img-element
+                                      <img src={g.player.profilePhoto} alt="" className="w-full h-full object-cover" />
+                                    ) : (
+                                      <UserIcon className="w-4 h-4 text-gray-400" />
+                                    )}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-xs font-bold text-secondary truncate">
+                                      {g.player.fullName.split(" ")[0]}
+                                    </p>
+                                    {g.assistPlayer && (
+                                      <p className="text-[10px] text-gray-500 truncate">
+                                        Passe&nbsp;: {g.assistPlayer.fullName.split(" ")[0]}
+                                      </p>
+                                    )}
+                                  </div>
+                                  {g.minute != null && (
+                                    <span className="text-[10px] font-black bg-primary/10 text-primary px-1.5 py-0.5 rounded">
+                                      {g.minute}&apos;
+                                    </span>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* === MODE EXTERNE === */}
+          {!match.isInternal && (
+            <>
+              {/* Composition */}
+              {titulaires.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-black text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <Users className="w-4 h-4" />
+                    Composition
+                  </h3>
+                  <FormationField slots={slots} opponentLabel={match.opponent} />
+
+                  {remplacants.length > 0 && (
+                    <div className="mt-5">
+                      <h4 className="text-xs font-bold text-gray-500 uppercase mb-2">
+                        Remplaçants ({remplacants.length})
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        {remplacants.map((r) => (
+                          <div
+                            key={r.id}
+                            className="inline-flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-full pl-1 pr-3 py-1"
+                          >
+                            <div className="w-6 h-6 rounded-full overflow-hidden bg-gray-200 flex-shrink-0 flex items-center justify-center">
+                              {r.player.profilePhoto ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                  src={r.player.profilePhoto}
+                                  alt=""
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <UserIcon className="w-3 h-3 text-gray-400" />
+                              )}
+                            </div>
+                            <span className="text-xs font-semibold text-secondary">
+                              {r.player.alias || r.player.fullName}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Buteurs FCA */}
+              {match.goals.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-black text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <GoalIcon className="w-4 h-4" />
+                    Buteurs FCA
+                  </h3>
+                  <div className="space-y-2">
+                    {match.goals.map((g) => (
                       <div
-                        key={r.id}
-                        className="inline-flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-full pl-1 pr-3 py-1"
+                        key={g.id}
+                        className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-lg p-3"
                       >
-                        <div className="w-6 h-6 rounded-full overflow-hidden bg-gray-200 flex-shrink-0 flex items-center justify-center">
-                          {r.player.profilePhoto ? (
+                        <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex-shrink-0 flex items-center justify-center">
+                          {g.player.profilePhoto ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
-                              src={r.player.profilePhoto}
+                              src={g.player.profilePhoto}
                               alt=""
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <UserIcon className="w-3 h-3 text-gray-400" />
+                            <UserIcon className="w-5 h-5 text-gray-400" />
                           )}
                         </div>
-                        <span className="text-xs font-semibold text-secondary">
-                          {r.player.alias || r.player.fullName}
-                        </span>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-sm text-secondary truncate">
+                            {g.player.alias || g.player.fullName}
+                          </p>
+                          {g.assistPlayer && (
+                            <p className="text-xs text-gray-500 truncate">
+                              Passe&nbsp;: {g.assistPlayer.alias || g.assistPlayer.fullName}
+                            </p>
+                          )}
+                        </div>
+                        {g.minute != null && (
+                          <span className="text-xs font-black bg-primary/10 text-primary px-2 py-1 rounded-md">
+                            {g.minute}&apos;
+                          </span>
+                        )}
                       </div>
                     ))}
                   </div>
                 </div>
               )}
-            </div>
-          )}
-
-          {/* Buteurs */}
-          {match.goals.length > 0 && (
-            <div>
-              <h3 className="text-sm font-black text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-                <GoalIcon className="w-4 h-4" />
-                Buteurs FCA
-              </h3>
-              <div className="space-y-2">
-                {match.goals.map((g) => (
-                  <div
-                    key={g.id}
-                    className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-lg p-3"
-                  >
-                    <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex-shrink-0 flex items-center justify-center">
-                      {g.player.profilePhoto ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={g.player.profilePhoto}
-                          alt=""
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <UserIcon className="w-5 h-5 text-gray-400" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold text-sm text-secondary truncate">
-                        {g.player.alias || g.player.fullName}
-                      </p>
-                      {g.assistPlayer && (
-                        <p className="text-xs text-gray-500 truncate">
-                          Passe&nbsp;: {g.assistPlayer.alias || g.assistPlayer.fullName}
-                        </p>
-                      )}
-                    </div>
-                    {g.minute != null && (
-                      <span className="text-xs font-black bg-primary/10 text-primary px-2 py-1 rounded-md">
-                        {g.minute}&apos;
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
+            </>
           )}
 
           {/* Notes */}

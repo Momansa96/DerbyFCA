@@ -24,31 +24,44 @@ export async function GET(req: NextRequest) {
             },
           },
         },
-        goals: { select: { id: true } }, // Compter les buts
-        yellowCards: { select: { id: true } }, // Compter les cartons jaunes
-        redCards: { select: { id: true } }, // Compter les cartons rouges
+        goals: { select: { id: true } }, // Buts en derbys (Match)
+        // Buts en exhibition interne — comptent comme les derbys
+        friendlyGoals: {
+          where: { friendlyMatch: { isInternal: true } },
+          select: { id: true },
+        },
+        // Compositions d'exhibition interne où le joueur a participé (status COMPLETED)
+        friendlyCompositions: {
+          where: {
+            friendlyMatch: { isInternal: true, status: "COMPLETED" },
+          },
+          select: { friendlyMatchId: true },
+        },
+        yellowCards: { select: { id: true } },
+        redCards: { select: { id: true } },
       },
     });
 
     const formattedPlayers = players.map((player: any) => {
-      // matchesPlayed = nombre de matchs COMPLETED distincts où l'une des
-      // équipes du joueur a joué (team1 ou team2). Set pour dédupliquer si
-      // un joueur appartient à plusieurs équipes ayant joué le même match.
+      // matchesPlayed = matchs derby COMPLETED + exhibitions internes COMPLETED jouées
       const matchIdSet = new Set<string>();
       for (const team of player.teams) {
         for (const m of team.team1Matches) matchIdSet.add(m.id);
         for (const m of team.team2Matches) matchIdSet.add(m.id);
       }
+      const exhibitionPlayed = new Set<string>(
+        player.friendlyCompositions.map((fmp: any) => fmp.friendlyMatchId)
+      );
 
       return {
         ...player,
         joinDate: player.joinDate.toISOString(),
         createdAt: player.createdAt.toISOString(),
         updatedAt: player.updatedAt.toISOString(),
-        goalsCount: player.goals.length,
+        goalsCount: player.goals.length + player.friendlyGoals.length,
         yellowCount: player.yellowCards.length,
         redCount: player.redCards.length,
-        matchesPlayed: matchIdSet.size,
+        matchesPlayed: matchIdSet.size + exhibitionPlayed.size,
         teams: player.teams.map((team: any) => team.name),
       };
     });
