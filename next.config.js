@@ -23,6 +23,11 @@ const nextConfig = {
         port: "3000",
         pathname: "/api/**",
       },
+      {
+        protocol: "https",
+        hostname: "*.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
     ],
     unoptimized: true,
   },

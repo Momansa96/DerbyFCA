@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { uploadPlayerPhoto } from "@/lib/supabase-admin";
 
 // GET /api/players/[id]
 export async function GET(
@@ -34,27 +33,17 @@ export async function PUT(
     if (contentType.includes("multipart/form-data")) {
       const formData = await req.formData();
 
-      // Gestion de la photo
+      // Gestion de la photo (upload vers Supabase Storage)
       const file = formData.get("profilePhoto") as File;
       if (file?.size > 0) {
-        const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-        if (!allowedTypes.includes(file.type)) {
+        try {
+          profilePhotoUrl = await uploadPlayerPhoto(file);
+        } catch (e: any) {
           return NextResponse.json(
-            { error: "Format d'image non supporté" },
+            { error: e?.message || "Échec de l'upload de la photo" },
             { status: 400 }
           );
         }
-
-        const uploadDir = path.join(process.cwd(), "public", "uploads", "players");
-        await mkdir(uploadDir, { recursive: true });
-
-        const fileName = `${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
-        const filePath = path.join(uploadDir, fileName);
-
-        const arrayBuffer = await file.arrayBuffer();
-        await writeFile(filePath, new Uint8Array(arrayBuffer));
-
-        profilePhotoUrl = `/uploads/players/${fileName}`;
       }
 
       data = {
